@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/Prototype/3dTestScene.unity
+  isLoaded: 1
+  isActive: 1
