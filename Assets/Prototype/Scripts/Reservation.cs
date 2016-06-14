@@ -3,9 +3,15 @@ using System.Collections;
 
 public class Reservation : MonoBehaviour {
 
-	private bool ready = false;
-	private bool acknowledged = false;
-	private bool released = false;
+    private float lifetime = Mathf.Infinity;
+	private bool ready = false; //if the reserved asset is ready
+	private bool acknowledged = false; //i don't know what this is for
+	private bool released = false; //if the reservation has been released by the customer
+    private bool cancelled = false; //if the reservation has been cancelled by the vendor
+
+    public void SetTimeout(float timeout) {
+        lifetime = timeout;
+    }
 
 	public bool Ready {
 		get { return ready; }
@@ -22,9 +28,18 @@ public class Reservation : MonoBehaviour {
 		set { 
 			released = value; 
 			if (released) {
-
+                Destroy(this);
 			}
 		}
 	}
+
+    public bool Cancelled {
+        get { return cancelled;  }
+        set { cancelled = value; }
+    }
+
+    public void FixedUpdate() {
+        lifetime -= Time.fixedDeltaTime;
+    }
 }
 

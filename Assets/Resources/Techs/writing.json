@@ -1,0 +1,9 @@
+{
+	"name": "writing",
+	"displayName": "Writing",
+	"description": "Writing desc",
+	"requires": [
+		"specializedLabor"
+	],
+	"cost": 7.0
+}

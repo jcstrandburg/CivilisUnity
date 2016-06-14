@@ -34,25 +34,41 @@ public abstract class BaseOrder {
 /// </summary>
 public class SimpleMoveOrder : BaseOrder {
 	public Vector3 targetPosition;
+    float proximity;
 
-	public SimpleMoveOrder(ActorController a, Vector3 position) : base(a) {
+	public SimpleMoveOrder(ActorController a, Vector3 position, float proximity=0.0f) : base(a) {
 		a.GetComponent<NeolithicObject>().statusString = "Moving to position";
+        this.proximity = proximity;
 		targetPosition = position;
 	}
 
 	public override void DoStep() {
         this.completed = actor.MoveTowards(targetPosition);
-        
-        /*
-		Vector3 diff = targetPosition - actor.transform.position;
-		if (diff.magnitude <= actor.moveSpeed) {
-			actor.transform.position = targetPosition;
-			this.completed = true;
-		} else {
-			actor.transform.position += diff * (actor.moveSpeed/diff.magnitude);
-		}
-        */
-	}
+        Vector3 diff = targetPosition - actor.transform.position;
+        if (diff.magnitude < proximity) {
+            this.completed = true;
+        }
+    }
+}
+
+public class SimpleWithdrawOrder : BaseOrder {
+    public SimpleWithdrawOrder(ActorController a) : base(a) {
+    }
+
+    public override void DoStep() {
+        Warehouse w = actor.resourceReservation.source.GetComponent<Warehouse>();
+        try {
+            w.WithdrawReservation(actor.resourceReservation);
+            string tag = actor.resourceReservation.resourceTag;
+            GameObject r = GameController.instance.CreateResourcePile(tag);
+            actor.PickupResource(r);
+            this.completed = true;
+        } catch (Exception e) {
+            Debug.Log("SimpleWithdrawOrder failed to withdraw with exception");
+            Debug.Log(e);
+            this.failed = true;
+        }
+    }
 }
 
 public class IdleOrder : BaseOrder {
@@ -156,6 +172,32 @@ public class StatefulSuperOrder : BaseOrder {
 	}
 }
 
+public class TempFetchOrder : StatefulSuperOrder {
+    string resourceType;
+    float amount;
+
+    public TempFetchOrder(ActorController a, string resourceType, float amount): base(a) {
+        this.resourceType = resourceType;
+        this.amount = amount;
+        CreateState("getReservation", StartReserve, CompleteReserve, null);
+        CreateState("gotoWarehouse", StartApproachWarehouse, CompleteApproachWarehouse, null);
+        CreateState("withdraw", StartWithdraw, CompleteWithdraw, null);
+        GoToState("getReservation");
+    }
+
+    private BaseOrder StartReserve() { return new TempReserveResourceOrder(actor, resourceType, amount); }
+    private void CompleteReserve() { GoToState("gotoWarehouse"); }
+
+    private BaseOrder StartApproachWarehouse() {
+        ResourceReservation res = actor.resourceReservation;
+        return new SimpleMoveOrder(actor, res.source.transform.position, 2.0f);
+    }
+    private void CompleteApproachWarehouse() { GoToState("withdraw"); }
+
+    private BaseOrder StartWithdraw() { return new SimpleWithdrawOrder(actor); }
+    private void CompleteWithdraw() { this.completed = true; }
+}
+
 public class TempExtractOrder : BaseOrder {
 	int progress = 0;
 	NeolithicObject target;
@@ -170,38 +212,185 @@ public class TempExtractOrder : BaseOrder {
 		if (progress == 90) {
 			Reservoir reservoir = target.GetComponent<Reservoir>();
 			GameObject prefab = reservoir.prefab;
-			GameObject res = UnityEngine.Object.Instantiate(prefab);
-			res.transform.SetParent(actor.transform);
-			res.transform.localPosition = new Vector3(0, 4.0f, 0);
-			completed = true;
+			//GameObject res = UnityEngine.Object.Instantiate(prefab);
+
+            //this code is ugly and temporary, fix it later
+            Resource r = reservoir.prefab.GetComponent<Resource>();
+            GameObject res = GameController.instance.CreateResourcePile(r.typeTag);
+            actor.PickupResource(res);
+            completed = true;
 		}
 	}
 }
 
+public class TempReserveResourceOrder: BaseOrder {
+    string resourceType;
+    float amount;
+
+    public TempReserveResourceOrder(ActorController a, string resourceType, float amount) : base(a) {
+        this.resourceType = resourceType;
+        this.amount = amount;
+    }
+
+    public override void DoStep() {
+        if (GameController.instance.ReserveWarehouseResources(actor, resourceType, amount)) {
+            completed = true;
+        }
+    }
+}
+
+public class TempReserveStorageOrder : BaseOrder {
+    Resource resource;
+
+    public TempReserveStorageOrder(ActorController a) : base(a) {
+        resource = a.GetCarriedResource();
+        if (!resource) {
+            failed = true;
+        }
+    }
+
+    public override void DoStep() {
+        string type = resource.typeTag;
+        float amount = resource.amount;
+        if (GameController.instance.ReserveStorage(actor, type, amount)) {
+            Debug.Log("Reserved storage");
+            completed = true;
+        } else {
+            failed = true;
+        }
+    }
+}
+
+public class TempStoreReservationOrder : BaseOrder {
+    StorageReservation res;
+
+    public TempStoreReservationOrder(ActorController a, StorageReservation r) : base(a) {
+        res = r;
+    }
+
+    public override void DoStep() {
+        if (actor.MoveTowards(res.warehouse.transform.position)) {
+            res.warehouse.DepositReservation(res);
+            GameObject.Destroy(actor.GetCarriedResource(res.resourceTag).gameObject);
+            res.Released = true;
+            this.completed = true;
+        }
+    }
+}
+
+public class TempStoreOrder : StatefulSuperOrder {
+    public TempStoreOrder(ActorController a): base(a) {
+        CreateState("getReservation", StartReserve, CompleteReserve, FailReserve);
+        CreateState("dump", StartDump, CompleteDump, null);
+        CreateState("seekStorage", StartSeekStorage, CompleteSeekStorage, null);
+        CreateState("reservationWait", StartReservationWait, CompleteReservationWait, null);
+        CreateState("deposit", StartStore, CompleteStore, null);
+        GoToState("getReservation");
+    }
+
+    private BaseOrder StartReserve() { return new TempReserveStorageOrder(actor); }
+    private void CompleteReserve() { GoToState("seekStorage"); }
+    private void FailReserve() { Debug.Log("Couldn't get reservation, dumping!");  GoToState("dump"); }
+
+    private BaseOrder StartDump() { return new TempDumpOrder(actor); }
+    private void CompleteDump() { completed = true;  }
+
+    private BaseOrder StartSeekStorage() { return new SimpleMoveOrder(actor, actor.storageReservation.warehouse.transform.position, 2.0f); }
+    private void CompleteSeekStorage() { GoToState("reservationWait"); }
+
+    private BaseOrder StartReservationWait() { return new WaitForReservationOrder(actor, actor.storageReservation); }
+    private void CompleteReservationWait() { GoToState("deposit"); }
+
+    private BaseOrder StartStore() { return new TempStoreReservationOrder(actor, actor.storageReservation); }
+    private void CompleteStore() { completed = true; }
+
+    public override void Cancel() {
+        base.Cancel();
+    }
+}
+
 public class TempDumpOrder : BaseOrder {
+    GameObject dump;
+
 	public TempDumpOrder(ActorController a) : base(a) {
+        dump = GameObject.Find("DumpingGround");
 	}
 	
 	public override void DoStep() {
-		GameObject resource = null;
-		foreach (Transform t in actor.transform) {
-			if (t.tag == "Resource") { resource = t.gameObject; break; }
-		}
-
-		while (resource != null) {
-            resource.GetComponent<Resource>().preserved = false;
-			resource.transform.SetParent(actor.transform.parent);
-			float range = 3.0f;
-			Vector3 randomVector = new Vector3(UnityEngine.Random.Range(-range, range), .1f, UnityEngine.Random.Range(-range, range));
-			resource.transform.position = actor.transform.position + randomVector;
-			completed = true;
-
-			resource = null;
-			foreach (Transform t in actor.transform) {
-				if (t.tag == "Resource") { resource = t.gameObject; break; }
-			}
-		}
+        try {
+            if (actor.MoveTowards(dump.transform.position, 1.1f)) {
+                actor.DropCarriedResource();
+                this.completed = true;
+            }
+        } catch (Exception e) {
+            Debug.Log("Exception in TempDumpOrder");
+            Debug.Log(e);
+            this.failed = true;
+        }        
 	}
+}
+
+public class MeditateOrder : BaseOrder {
+    public MeditateOrder(ActorController a, NeolithicObject target) : base(a) {
+    }
+
+    public override void DoStep() {
+        GameController.instance.spirit += 0.01f;
+    }
+}
+
+public class TransmuteOrder : StatefulSuperOrder {
+    string fromTag;
+    string toTag;
+    NeolithicObject target;
+
+    public TransmuteOrder(ActorController a, NeolithicObject target, string fromTag, string toTag): base(a) {
+        this.fromTag = fromTag;
+        this.toTag = toTag;
+        this.target = target;
+        CreateState("getSourceMaterial", StartGetMaterial, CompleteSeekMaterial, null);
+        CreateState("gotoWorkspace", StartGotoWorkspace, CompleteGotoWorkspace, null);
+        CreateState("doTransmute", StartDoTransmute, CompleteDoTransmute, null);
+        CreateState("storeProduct", StartStoreProduct, CompleteStoreProduct, null);
+        GoToState("getSourceMaterial");
+    }
+
+    private BaseOrder StartGetMaterial() { return new TempFetchOrder(actor, fromTag, 1.0f); }
+    private void CompleteSeekMaterial() { GoToState("gotoWorkspace"); }
+
+    private BaseOrder StartGotoWorkspace() { return new SimpleMoveOrder(actor, target.transform.position, 2.0f); }
+    private void CompleteGotoWorkspace() { GoToState("doTransmute"); }
+
+    private BaseOrder StartDoTransmute() { return new TempConvertOrder(actor, fromTag, toTag); }
+    private void CompleteDoTransmute() { GoToState("storeProduct"); }
+
+    private BaseOrder StartStoreProduct() { return new TempStoreOrder(actor); }
+    private void CompleteStoreProduct() { GoToState("getSourceMaterial"); }
+}
+
+public class TempConvertOrder : BaseOrder {
+    Resource sourceResource;
+    string toTag;
+
+    public TempConvertOrder (ActorController a, string fromTag, string toTag) : base(a) {
+        Resource r = a.GetCarriedResource();
+        if (r.typeTag != fromTag) {
+            Debug.Log("Actor does not have resource " + fromTag + " to convert");
+            this.failed = true;
+        }
+        sourceResource = r;
+        this.toTag = toTag;
+    }
+
+    public override void DoStep() {
+        GameObject newResource = GameController.instance.CreateResourcePile(toTag);
+        Resource r = newResource.GetComponent<Resource>();
+        r.amount = sourceResource.amount;
+        actor.PickupResource(newResource);
+        sourceResource.transform.SetParent(null);
+        UnityEngine.Object.Destroy(sourceResource.gameObject);
+        this.completed = true;
+    }
 }
 
 public class TempHarvestOrder : StatefulSuperOrder {
@@ -217,8 +406,7 @@ public class TempHarvestOrder : StatefulSuperOrder {
 		CreateState("seekTarget",   StartSeek, CompleteSeek, null);
 		CreateState("reservationWait", StartReservationWait, CompleteReservationWait, null);
 		CreateState("getResource",  StartGet,  CompleteGet,  null);
-		CreateState("seekStorage",  StartSeekStore, CompleteSeekStore, null);
-		CreateState("dumpResource", StartDump, CompleteDump, null);
+		CreateState("storeContents", StartStore, CompleteStore, null);
 		GoToState("seekTarget");
 	}
 	
@@ -229,13 +417,13 @@ public class TempHarvestOrder : StatefulSuperOrder {
 	private void CompleteReservationWait()  	{ GoToState("getResource"); }
 
 	private BaseOrder StartGet() { return new TempExtractOrder(actor, targetObj); }	
-	private void CompleteGet() 	 { tempres.Released = true; GameObject.Destroy(tempres); tempres = null; GoToState("seekStorage"); }
+	private void CompleteGet() 	 { tempres.Released = true; GameObject.Destroy(tempres); tempres = null; GoToState("storeContents"); }
 
 	private BaseOrder StartSeekStore()	{ return new SimpleMoveOrder(actor, originPos); }	
 	private void CompleteSeekStore() 	{ GoToState("dumpResource"); }
 
-	private BaseOrder StartDump() 	{ return new TempDumpOrder(actor); }
-	private void CompleteDump() 	{ GoToState("seekTarget"); }
+	private BaseOrder StartStore() 	{ return new TempStoreOrder(actor); }
+	private void CompleteStore() 	{ GoToState("seekTarget"); }
 
 	public override void Cancel() {
 		base.Cancel();
@@ -261,9 +449,8 @@ public class TempSlaughterOrder : BaseOrder {
             if (herd.KillAnimal()) {
                 GameObject prefab = herd.resourcePrefab;
                 GameObject res = UnityEngine.Object.Instantiate(prefab);
-                res.transform.SetParent(actor.transform);
-                res.transform.localPosition = new Vector3(0, 4.0f, 0);
-                completed = true;
+                actor.PickupResource(res);
+                this.completed = true;
             } else {
                 progress /= 2;
             }
@@ -302,13 +489,5 @@ public class TempHuntOrder : StatefulSuperOrder {
 	
 	private BaseOrder StartDump() 	{ return new TempDumpOrder(actor); }
 	private void CompleteDump() 	{ GoToState("seekTarget"); }
-	
-//	public override void Cancel() {
-//		base.Cancel();
-//		if (tempres) {
-//			tempres.Released = true;
-//			GameObject.Destroy(tempres);
-//		}
-//	}
 }
 

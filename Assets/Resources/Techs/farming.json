@@ -1,0 +1,9 @@
+{
+	"name": "farming",
+	"displayName": "Basic Farming",
+	"description": "Basic Farming desc",
+	"requires": [
+		"advancedTools"
+	],
+	"cost": 7.0
+}

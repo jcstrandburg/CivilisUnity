@@ -1,0 +1,10 @@
+{
+	"name": "specializedLabor",
+	"displayName": "Specialized Labor",
+	"description": "Specialized Labor desc",
+	"requires": [
+		"patriarchy",
+		"advancedTools"
+	],
+	"cost": 7.0
+}

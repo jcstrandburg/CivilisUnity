@@ -1,0 +1,8 @@
+{
+	"name": "advancedTools",
+	"displayName": "Advanced Tools",
+	"description": "Advanced Tools desc",
+	"requires": [
+	],
+	"cost": 7.0
+}

@@ -1,0 +1,9 @@
+{
+	"name": "organizedReligion",
+	"displayName": "Organized Religion",
+	"description": "Organized Religion desc",
+	"requires": [
+		"writing"
+	],
+	"cost": 7.0
+}

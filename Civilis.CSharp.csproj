@@ -130,14 +130,19 @@
     <Compile Include="Assets\Prototype\Scripts\GameController.cs" />
     <Compile Include="Assets\Prototype\Scripts\GroundController.cs" />
     <Compile Include="Assets\Prototype\Scripts\Herd.cs" />
+    <Compile Include="Assets\Prototype\Scripts\IResourceStore.cs" />
     <Compile Include="Assets\Prototype\Scripts\NeolithicObject.cs" />
     <Compile Include="Assets\Prototype\Scripts\Orders.cs" />
     <Compile Include="Assets\Prototype\Scripts\Reservation.cs" />
     <Compile Include="Assets\Prototype\Scripts\Reservoir.cs" />
     <Compile Include="Assets\Prototype\Scripts\Resource.cs" />
+    <Compile Include="Assets\Prototype\Scripts\ResourceReservation.cs" />
     <Compile Include="Assets\Prototype\Scripts\SelectHalo.cs" />
     <Compile Include="Assets\Prototype\Scripts\SelectionHandle.cs" />
+    <Compile Include="Assets\Prototype\Scripts\StorageReservation.cs" />
     <Compile Include="Assets\Prototype\Scripts\SubMenuController.cs" />
+    <Compile Include="Assets\Prototype\Scripts\TechManager.cs" />
+    <Compile Include="Assets\Prototype\Scripts\Warehouse.cs" />
     <Compile Include="Assets\tuch.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,10 @@
+{
+	"name": "advancedFarming",
+	"displayName": "Advanced Farming",
+	"description": "Advanced Farming desc",
+	"requires": [
+		"farming",
+		"metalworking"
+	],
+	"cost": 5.0
+}

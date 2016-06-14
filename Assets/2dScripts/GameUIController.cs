@@ -2,14 +2,44 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Reflection;
+using System.Collections.Generic;
+using System;
+using System.Globalization;
 
-[assembly:AssemblyVersion("0.1.1.*")]
+[assembly: AssemblyVersion("0.1.3.*")]
+
+public abstract class DataBinding {
+    public abstract void Update();
+}
+
+public class OneWayBinding<T> : DataBinding {
+    Func<T> get;
+    Action<T> set;
+    T cachedValue;
+
+    public OneWayBinding(Func<T> get, Action<T> set) {
+        this.get = get;
+        this.set = set;
+        cachedValue = this.get();
+        this.set(cachedValue);
+    }
+
+    public override void Update() {
+        T val = get();
+        if (!Equals(val, cachedValue)) {
+            cachedValue = val;
+            this.set(val);
+        }
+    }
+}
+
 public class GameUIController : MonoBehaviour {
 
 	GameObject contextMenu;
 	InputManager inputManager;
 	public SelectionMenuController selectionMenu;
     public SubMenuController subMenu;
+    private List<DataBinding> dataBindings = new List<DataBinding>();
 
     private static GameUIController _instance = null;
 
@@ -23,18 +53,46 @@ public class GameUIController : MonoBehaviour {
         }
     }
 
+    private void MakeDataBindings() {
+        dataBindings = new List<DataBinding>();
+
+        NumberFormatInfo nfi = new NumberFormatInfo();
+        nfi.NumberDecimalDigits = 0;
+        Text spiritDataText = GameObject.Find("SpiritData").GetComponent<Text>();
+        if (spiritDataText) {
+            dataBindings.Add(new OneWayBinding<float>(() => {
+                return GameController.instance.spirit;
+            }, (f) => {
+                spiritDataText.text = f.ToString("n", nfi);
+            }));
+        }
+        Text foodbufferDataText = GameObject.Find("FoodbufferData").GetComponent<Text>();
+        if (foodbufferDataText) {
+            dataBindings.Add(new OneWayBinding<float>(() => {
+                return GameController.instance.foodbuffer;
+            }, (f) => {
+                foodbufferDataText.text = f.ToString("n", nfi);
+            }));
+        }
+    }
+
     // Use this for initialization
     void Start () {
 		contextMenu = transform.Find("ContextMenu").gameObject;
 		contextMenu.SetActive(false);
 		selectionMenu.Hide ();
-
+        
         Text t = transform.Find("VersionLabel").GetComponent<Text>();
         t.text = string.Format("v{0}", Assembly.GetExecutingAssembly().GetName().Version.ToString());
+
+        MakeDataBindings();
 	}
 	
 	// Update is called once per frame
-	void Update () {	
+	void Update () {
+        dataBindings.ForEach((db) => {
+            db.Update();
+        });
 	}
 
 	public void ShowContextMenu(string[] options, NeolithicObject target) {
@@ -71,7 +129,6 @@ public class GameUIController : MonoBehaviour {
 	/// selected units against the target, and then hides the context menu
 	/// </summary>
 	public void ExecuteContextAction(string action, NeolithicObject target) {
-		print ("Executing action: "+action);
 		GameController.instance.IssueOrder(action, target);
 		HideContextMenu();
 	}
@@ -94,6 +151,15 @@ public class GameUIController : MonoBehaviour {
         foreach (NeolithicObject obj in objects) {
             obj.SnapToGround();
             //obj.
+        }
+    }
+
+    public void ShowResearchMenu() {
+        Technology[] techs = GameController.instance.GetAvailableTechs();
+        subMenu.ClearMenu();
+        foreach (Technology t in techs) {
+            Technology tech = t;
+            subMenu.AddButton(t.displayName, () => GameController.instance.BuyTech(tech));
         }
     }
 

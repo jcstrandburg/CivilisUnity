@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class GameController : MonoBehaviour {
 	public List<NeolithicObject> selected = new List<NeolithicObject>();
@@ -13,6 +13,11 @@ public class GameController : MonoBehaviour {
 	public bool boxActive = false;
 	public bool additiveSelect = false;
     public BuildingBlueprint buildingPlacer;
+    public List<Resource> resourcePrefabs;
+    public TechManager techmanager;
+
+    private float _foodbuffer = 10.0f;
+    private float _spirit = 0.0f;
 
     private static GameController _instance = null;
 
@@ -27,9 +32,41 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
+    public float foodbuffer {
+        get {
+            return _foodbuffer;
+        }
+        set {
+            _foodbuffer = value;
+        }
+    }
+
+    public float spirit {
+        get {
+            return _spirit;
+        }
+        set {
+            _spirit = value;
+        }
+    }
+
 	// Use this for initialization
 	void Start () {
-	}
+        UnityEngine.Object[] objects = Resources.LoadAll("Techs", typeof(TextAsset));
+        string[] jsonText = Array.ConvertAll(objects, (x) => ((TextAsset)x).text);
+        techmanager = new TechManager();
+        techmanager.LoadTree(jsonText);
+    }
+
+    public Technology[] GetAvailableTechs() {
+        return techmanager.GetEligibleTechs();
+    }
+
+    public void BuyTech(Technology t) {
+        Debug.Log("Researching tech: " + t.name);
+        GameUIController.instance.subMenu.ClearMenu();
+        techmanager.Research(t);
+    }
 
     /// <summary>
     /// Takes a given world position and returns it after changing it's y component to reflect the y position of the terrain at those x and z coords
@@ -174,7 +211,7 @@ public class GameController : MonoBehaviour {
 	public void DoContextMenu(NeolithicObject clickee) {
 		string[] selectedActions = getSelectedAbilities();
 		string[] availableActions = selectedActions.Intersect(clickee.targetActions).ToArray();
-		Debug.Log(string.Join(", ", availableActions));
+		//Debug.Log(string.Join(", ", availableActions));
 		guiController.ShowContextMenu(availableActions, clickee);
 	}
 
@@ -185,15 +222,21 @@ public class GameController : MonoBehaviour {
 			if (a) {
 				BaseOrder newOrder = null;
 				switch (orderTag) {
-				case "ChopWood":
-				case "MineGold":
-				case "MineStone":
-				case "Forage":
-					newOrder = new TempHarvestOrder(a, target);
-					break;
-				case "Hunt":
-					newOrder = new TempHuntOrder(a, target.GetComponentInParent<Herd>());
-					break;
+				    case "ChopWood":
+				    case "MineGold":
+				    case "MineStone":
+				    case "Forage":
+					    newOrder = new TempHarvestOrder(a, target);
+					    break;
+                    case "ChuckWood":
+                        newOrder = new TransmuteOrder(a, target, "wood", "gold");
+                        break;
+                    case "Meditate":
+                        newOrder = new MeditateOrder(a, target);
+                        break;
+				    case "Hunt":
+					    newOrder = new TempHuntOrder(a, target.GetComponentInParent<Herd>());
+					    break;
 				}
 
 				if (newOrder != null) {
@@ -278,4 +321,34 @@ public class GameController : MonoBehaviour {
 			GUI.Box (new Rect (start.x, Screen.height-start.y, end.x-start.x, start.y-end.y), "");
 		}
 	}
+
+    public ResourceReservation ReserveWarehouseResources(ActorController a, string tag, float amount) {
+        Warehouse[] warehouses = FindObjectsOfType<Warehouse>();
+        foreach (Warehouse w in warehouses) {
+            if (w.ReserveContents(a.gameObject, tag, amount)) {
+                return a.resourceReservation;
+            }
+        }
+        return null;
+    }
+
+    public StorageReservation ReserveStorage(ActorController a, string tag, float amount) {
+        Warehouse[] warehouses = FindObjectsOfType<Warehouse>();
+        foreach (Warehouse w in warehouses) {
+            if (w.ReserveStorage(a.gameObject, tag, amount)) {
+                return a.GetComponent<StorageReservation>();
+            }
+        }
+        return null;
+    }
+
+    public GameObject CreateResourcePile(string typeTag) {
+        foreach (Resource g in resourcePrefabs) {
+            if (g.typeTag == typeTag) { 
+                GameObject pile = (GameObject)Instantiate(g.gameObject);
+                return pile;
+            }
+        }
+        return null;
+    }
 }

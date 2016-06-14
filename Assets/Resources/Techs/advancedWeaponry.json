@@ -1,0 +1,10 @@
+{
+	"name": "advancedWeaponry",
+	"displayName": "Advanced Weaponry",
+	"description": "Advanced Weaponry desc",
+	"requires": [
+		"metalworking",
+		"weaponry"
+	],
+	"cost": 7.0
+}

@@ -1,0 +1,8 @@
+{
+	"name": "weaponry",
+	"displayName": "Weaponry",
+	"description": "Weaponry desc",
+	"requires": [
+	],
+	"cost": 7.0
+}

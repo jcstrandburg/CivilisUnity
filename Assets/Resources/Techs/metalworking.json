@@ -1,0 +1,9 @@
+{
+	"name": "metalworking",
+	"displayName": "Metalworking",
+	"description": "Metalworking desc",
+	"requires": [
+		"advancedTools"
+	],
+	"cost": 7.0
+}

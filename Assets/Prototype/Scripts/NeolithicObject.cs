@@ -55,7 +55,9 @@ public class NeolithicObject : MonoBehaviour {
 
 	public void Update() {
 		SelectHalo halo = GetComponentInChildren<SelectHalo>();
-		halo.highlighted = selected || pointerHover;
+        if (halo) {
+            halo.highlighted = selected || pointerHover;
+        }
         SnapToGround();
 	}
 	

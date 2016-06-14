@@ -1,0 +1,8 @@
+{
+	"name": "domestication",
+	"displayName": "Animal Domestication",
+	"description": "Animal Domestication desc",
+	"requires": [
+	],
+	"cost": 7.0
+}

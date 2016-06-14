@@ -1,0 +1,9 @@
+{
+	"name": "trade",
+	"displayName": "Trade",
+	"description": "Trade desc",
+	"requires": [
+		"specializedLabor"
+	],
+	"cost": 7.0
+}
