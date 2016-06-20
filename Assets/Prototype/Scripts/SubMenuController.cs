@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
+using System;
 using System.Collections;
 
-public class SubMenuController : MonoBehaviour {
+public class SubMenuController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
     public GameObject buttonPrefab;
+	public bool pointerOver = false;
 
     void Awake() {
         ClearMenu();
@@ -17,7 +21,7 @@ public class SubMenuController : MonoBehaviour {
         gameObject.SetActive(false);
     }
 
-	public void AddButton(string label, UnityEngine.Events.UnityAction action) {
+	public Button AddButton(string label, UnityEngine.Events.UnityAction action) {
         gameObject.SetActive(true);
         GameObject newButton = Instantiate(buttonPrefab);
         newButton.transform.SetParent(transform);
@@ -25,5 +29,23 @@ public class SubMenuController : MonoBehaviour {
         newButton.GetComponent<Button>().onClick.AddListener(action);
         GameObject text = newButton.transform.Find("Text").gameObject;
         text.GetComponent<Text>().text = label;
+		return newButton.GetComponent<Button>();
     }
+
+	public void Update() {
+		if (Input.GetMouseButtonDown (0) || Input.GetMouseButtonDown (1)) {
+			if (!pointerOver) {
+				Debug.Log ("Clearing submenu due to mouse event!");
+				ClearMenu();
+			}
+		}
+	}
+
+	public void OnPointerEnter(PointerEventData ped) {
+		pointerOver = true;
+	}
+
+	public void OnPointerExit(PointerEventData ped) {
+		pointerOver = false;
+	}
 }

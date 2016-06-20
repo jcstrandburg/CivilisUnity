@@ -64,8 +64,11 @@ public class GameController : MonoBehaviour {
 
     public void BuyTech(Technology t) {
         Debug.Log("Researching tech: " + t.name);
+		if (t.cost <= this.spirit) {
+			this.spirit -= t.cost;
+			techmanager.Research(t);
+		}
         GameUIController.instance.subMenu.ClearMenu();
-        techmanager.Research(t);
     }
 
     /// <summary>
@@ -148,7 +151,7 @@ public class GameController : MonoBehaviour {
 
 	public void StartBoxSelect() {
 		guiController.HideContextMenu();
-		boxStart = Input.mousePosition;
+		boxEnd = boxStart = Input.mousePosition;
 		boxActive = true;
 	}
 

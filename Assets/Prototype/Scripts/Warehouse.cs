@@ -120,7 +120,7 @@ public class Warehouse : MonoBehaviour {
     }
 
     /// <summary>
-    /// 
+	/// Gets the total number of resources (with the given tag) with reservations on them
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
@@ -135,7 +135,7 @@ public class Warehouse : MonoBehaviour {
     }
 
     /// <summary>
-    /// 
+	/// Gets total contents without reservations on them (for the given tag)
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
@@ -144,7 +144,7 @@ public class Warehouse : MonoBehaviour {
     }
 
     /// <summary>
-    /// 
+    /// Gets the total amount of space allocated for the given type of resource (doesn't not deduct space currently used!
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
@@ -159,7 +159,7 @@ public class Warehouse : MonoBehaviour {
     }
 
     /// <summary>
-    /// 
+	/// Gets the total amount of space currently reserved (but not occupied) for the given resource tag
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
@@ -172,7 +172,7 @@ public class Warehouse : MonoBehaviour {
     }
 
     /// <summary>
-    /// 
+    /// Gets the total unreserved space currently available for the given resource tag
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
@@ -181,13 +181,19 @@ public class Warehouse : MonoBehaviour {
     }
 
     /// <summary>
-    /// 
+    /// Removes the resources for the given reservation from this warehouse and sets the reservation to released
     /// </summary>
     /// <param name="res"></param>
     public void WithdrawReservation(ResourceReservation res) {
         if (!res.Ready) {
             throw new Exception("Reservation is not ready");
         }
+		if (res.source != this.gameObject) {
+			throw new Exception ("Attempting to withdraw reservation for another warehouse!");
+		}
+		if (res.Released) {
+			throw new Exception ("Reservation already filled!");
+		}
 
         foreach (ResourceProfile rp in resourceContents) {
             if (rp.resourceTag == res.resourceTag && rp.amount >= res.amount) {
@@ -196,7 +202,6 @@ public class Warehouse : MonoBehaviour {
                 SendMessage("OnResourceWithdrawn", SendMessageOptions.DontRequireReceiver);
                 return;
             }
-            //TODO figure out why this isn't working
         }
         Debug.Log(res);
         throw new Exception("Unable to withdraw reservation");

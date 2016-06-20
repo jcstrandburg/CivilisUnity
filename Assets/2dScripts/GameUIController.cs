@@ -63,7 +63,7 @@ public class GameUIController : MonoBehaviour {
             dataBindings.Add(new OneWayBinding<float>(() => {
                 return GameController.instance.spirit;
             }, (f) => {
-                spiritDataText.text = f.ToString("n", nfi);
+				spiritDataText.text = Mathf.Floor(f).ToString("n", nfi);
             }));
         }
         Text foodbufferDataText = GameObject.Find("FoodbufferData").GetComponent<Text>();
@@ -71,7 +71,7 @@ public class GameUIController : MonoBehaviour {
             dataBindings.Add(new OneWayBinding<float>(() => {
                 return GameController.instance.foodbuffer;
             }, (f) => {
-                foodbufferDataText.text = f.ToString("n", nfi);
+				foodbufferDataText.text = Mathf.Floor(f).ToString("n", nfi);
             }));
         }
     }
@@ -159,7 +159,8 @@ public class GameUIController : MonoBehaviour {
         subMenu.ClearMenu();
         foreach (Technology t in techs) {
             Technology tech = t;
-            subMenu.AddButton(t.displayName, () => GameController.instance.BuyTech(tech));
+            Button b = subMenu.AddButton(t.displayName, () => GameController.instance.BuyTech(tech));
+			b.interactable = (GameController.instance.spirit >= t.cost);
         }
     }
 

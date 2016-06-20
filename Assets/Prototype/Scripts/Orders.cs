@@ -23,7 +23,14 @@ public abstract class BaseOrder {
 		completed = cancelled = failed = false;
 	}
 
+	/// <summary>
+	/// Does a single step for this order
+	/// </summary>
 	public abstract void DoStep();
+
+	/// <summary>
+	/// Cancels this order, freeing any resources as appropriate
+	/// </summary>
 	public virtual void Cancel() {
 		cancelled = true;
 	}
@@ -138,25 +145,32 @@ public class StatefulSuperOrder : BaseOrder {
 
 	public override void DoStep() {
 		if (currentOrder != null) {
-			currentOrder.DoStep();
+			currentOrder.DoStep ();
 
 			//check to see if order is done somehow
 			if (currentOrder.Done) {
-				OrderStateInfo info = states[currentState];
+				OrderStateInfo info = states [currentState];
 				if (currentOrder.completed) {
 					if (info.completeState != null) {
-						info.completeState();
+						info.completeState ();
 					} else {
-						Debug.Log("No complete transition available for state: "+currentState);
+						this.failed = true;
+						Debug.Log ("No complete transition available for state: " + currentState);
 					}
 				} else if (currentOrder.failed) {
 					if (info.failState != null) {
-						info.failState();
+						info.failState ();
 					} else {
-						Debug.Log("No failure transition available for state: "+currentState);
+						this.failed = true;
+						Debug.Log ("No failure transition available for state: " + currentState);
 					}
+				} else if (currentOrder.cancelled) {
+					throw new Exception ("Order exectution cannot continue when sub order is cancelled!");
 				}
 			}
+		} else {
+			Debug.Log ("currentOrder is null!");
+			this.failed = true;
 		}
 	}
 
@@ -172,6 +186,9 @@ public class StatefulSuperOrder : BaseOrder {
 	}
 }
 
+/// <summary>
+/// Order to fetch the given resource from any available warehouse
+/// </summary>
 public class TempFetchOrder : StatefulSuperOrder {
     string resourceType;
     float amount;
@@ -179,25 +196,25 @@ public class TempFetchOrder : StatefulSuperOrder {
     public TempFetchOrder(ActorController a, string resourceType, float amount): base(a) {
         this.resourceType = resourceType;
         this.amount = amount;
-        CreateState("getReservation", StartReserve, CompleteReserve, null);
-        CreateState("gotoWarehouse", StartApproachWarehouse, CompleteApproachWarehouse, null);
-        CreateState("withdraw", StartWithdraw, CompleteWithdraw, null);
+		CreateState("getReservation", 
+			()=>new TempReserveResourceOrder(actor, resourceType, amount), 
+			()=>GoToState("gotoWarehouse"), 
+			null);
+		CreateState("gotoWarehouse", 
+			()=>new SimpleMoveOrder(actor, actor.resourceReservation.source.transform.position, 2.0f), 
+			()=>GoToState("withdraw"), 
+			null);
+		CreateState("withdraw", 
+			()=>new SimpleWithdrawOrder(actor), 
+			()=>this.completed=true, 
+			null);
         GoToState("getReservation");
     }
-
-    private BaseOrder StartReserve() { return new TempReserveResourceOrder(actor, resourceType, amount); }
-    private void CompleteReserve() { GoToState("gotoWarehouse"); }
-
-    private BaseOrder StartApproachWarehouse() {
-        ResourceReservation res = actor.resourceReservation;
-        return new SimpleMoveOrder(actor, res.source.transform.position, 2.0f);
-    }
-    private void CompleteApproachWarehouse() { GoToState("withdraw"); }
-
-    private BaseOrder StartWithdraw() { return new SimpleWithdrawOrder(actor); }
-    private void CompleteWithdraw() { this.completed = true; }
 }
 
+/// <summary>
+/// Order to extract resources from the given target object
+/// </summary>
 public class TempExtractOrder : BaseOrder {
 	int progress = 0;
 	NeolithicObject target;
@@ -223,6 +240,9 @@ public class TempExtractOrder : BaseOrder {
 	}
 }
 
+/// <summary>
+/// Order to reserve the given resrouces from any available warehouse
+/// </summary>
 public class TempReserveResourceOrder: BaseOrder {
     string resourceType;
     float amount;
@@ -239,6 +259,9 @@ public class TempReserveResourceOrder: BaseOrder {
     }
 }
 
+/// <summary>
+/// Order to reserve storage for the current carried resource in any available warehouse
+/// </summary>
 public class TempReserveStorageOrder : BaseOrder {
     Resource resource;
 
@@ -261,6 +284,9 @@ public class TempReserveStorageOrder : BaseOrder {
     }
 }
 
+/// <summary>
+/// Order to store the resources for the given StorageReservation in any available warehouse
+/// </summary>
 public class TempStoreReservationOrder : BaseOrder {
     StorageReservation res;
 
@@ -278,37 +304,41 @@ public class TempStoreReservationOrder : BaseOrder {
     }
 }
 
+/// <summary>
+/// Super order to find, seek, and utilize storage for the currently carried resource
+/// </summary>
 public class TempStoreOrder : StatefulSuperOrder {
     public TempStoreOrder(ActorController a): base(a) {
-        CreateState("getReservation", StartReserve, CompleteReserve, FailReserve);
-        CreateState("dump", StartDump, CompleteDump, null);
-        CreateState("seekStorage", StartSeekStorage, CompleteSeekStorage, null);
-        CreateState("reservationWait", StartReservationWait, CompleteReservationWait, null);
-        CreateState("deposit", StartStore, CompleteStore, null);
+		CreateState ("getReservation", 
+			() => new TempReserveStorageOrder (actor),
+			() => GoToState ("seekStorage"),
+			() => {
+				Debug.Log("Couldn't get reservation, dumping!");
+				GoToState("dump");
+			});
+		CreateState ("dump",
+			() => new TempDumpOrder (actor),
+			() => this.completed = true,
+			null);
+		CreateState ("seekStorage", 
+			() => new SimpleMoveOrder (actor, actor.storageReservation.warehouse.transform.position, 2.0f),
+			() => GoToState ("reservationWait"),
+			null);
+		CreateState ("reservationWait", 
+			()=>new WaitForReservationOrder (actor, actor.storageReservation),
+			()=>GoToState ("deposit"),
+			null);
+		CreateState ("deposit", 
+			() => new TempStoreReservationOrder (actor, actor.storageReservation),
+			() => this.completed = true,
+			null);
         GoToState("getReservation");
-    }
-
-    private BaseOrder StartReserve() { return new TempReserveStorageOrder(actor); }
-    private void CompleteReserve() { GoToState("seekStorage"); }
-    private void FailReserve() { Debug.Log("Couldn't get reservation, dumping!");  GoToState("dump"); }
-
-    private BaseOrder StartDump() { return new TempDumpOrder(actor); }
-    private void CompleteDump() { completed = true;  }
-
-    private BaseOrder StartSeekStorage() { return new SimpleMoveOrder(actor, actor.storageReservation.warehouse.transform.position, 2.0f); }
-    private void CompleteSeekStorage() { GoToState("reservationWait"); }
-
-    private BaseOrder StartReservationWait() { return new WaitForReservationOrder(actor, actor.storageReservation); }
-    private void CompleteReservationWait() { GoToState("deposit"); }
-
-    private BaseOrder StartStore() { return new TempStoreReservationOrder(actor, actor.storageReservation); }
-    private void CompleteStore() { completed = true; }
-
-    public override void Cancel() {
-        base.Cancel();
     }
 }
 
+/// <summary>
+/// Order to dump the currently carried resource on the ground
+/// </summary>
 public class TempDumpOrder : BaseOrder {
     GameObject dump;
 
@@ -330,15 +360,23 @@ public class TempDumpOrder : BaseOrder {
 	}
 }
 
+
+/// <summary>
+/// Order to generate spirit
+/// </summary>
 public class MeditateOrder : BaseOrder {
     public MeditateOrder(ActorController a, NeolithicObject target) : base(a) {
     }
 
     public override void DoStep() {
-        GameController.instance.spirit += 0.01f;
+        GameController.instance.spirit += 0.03f;
     }
 }
 
+
+/// <summary>
+/// Testing order to transmute one resource to another
+/// </summary>
 public class TransmuteOrder : StatefulSuperOrder {
     string fromTag;
     string toTag;
@@ -348,26 +386,30 @@ public class TransmuteOrder : StatefulSuperOrder {
         this.fromTag = fromTag;
         this.toTag = toTag;
         this.target = target;
-        CreateState("getSourceMaterial", StartGetMaterial, CompleteSeekMaterial, null);
-        CreateState("gotoWorkspace", StartGotoWorkspace, CompleteGotoWorkspace, null);
-        CreateState("doTransmute", StartDoTransmute, CompleteDoTransmute, null);
-        CreateState("storeProduct", StartStoreProduct, CompleteStoreProduct, null);
+        CreateState("getSourceMaterial",
+			()=>new TempFetchOrder(actor, fromTag, 1.0f),
+			()=>GoToState("gotoWorkspace"),
+			null);
+        CreateState("gotoWorkspace",
+			()=>new SimpleMoveOrder(actor, target.transform.position, 2.0f),
+			()=>GoToState("doTransmute"),
+			null);
+        CreateState("doTransmute",
+			()=>new TempConvertOrder(actor, fromTag, toTag),
+			()=>GoToState("storeProduct"),
+			null);
+        CreateState("storeProduct",
+			()=>new TempStoreOrder(actor),
+			()=>GoToState("getSourceMaterial"),
+			null);
         GoToState("getSourceMaterial");
     }
-
-    private BaseOrder StartGetMaterial() { return new TempFetchOrder(actor, fromTag, 1.0f); }
-    private void CompleteSeekMaterial() { GoToState("gotoWorkspace"); }
-
-    private BaseOrder StartGotoWorkspace() { return new SimpleMoveOrder(actor, target.transform.position, 2.0f); }
-    private void CompleteGotoWorkspace() { GoToState("doTransmute"); }
-
-    private BaseOrder StartDoTransmute() { return new TempConvertOrder(actor, fromTag, toTag); }
-    private void CompleteDoTransmute() { GoToState("storeProduct"); }
-
-    private BaseOrder StartStoreProduct() { return new TempStoreOrder(actor); }
-    private void CompleteStoreProduct() { GoToState("getSourceMaterial"); }
 }
 
+
+/// <summary>
+/// Simple order to convert a carried resource of one type to another type
+/// </summary>
 public class TempConvertOrder : BaseOrder {
     Resource sourceResource;
     string toTag;
@@ -393,6 +435,9 @@ public class TempConvertOrder : BaseOrder {
     }
 }
 
+/// <summary>
+/// Simple order to seek, reserve, and extract resources from the given target
+/// </summary>
 public class TempHarvestOrder : StatefulSuperOrder {
 	Vector3 originPos;
 	NeolithicObject targetObj;
@@ -403,27 +448,32 @@ public class TempHarvestOrder : StatefulSuperOrder {
 		originPos = a.transform.position;
 		targetObj = target;
 		reservoir = target.GetComponent<Reservoir>();
-		CreateState("seekTarget",   StartSeek, CompleteSeek, null);
-		CreateState("reservationWait", StartReservationWait, CompleteReservationWait, null);
-		CreateState("getResource",  StartGet,  CompleteGet,  null);
-		CreateState("storeContents", StartStore, CompleteStore, null);
+		CreateState("seekTarget",
+			()=>new SimpleMoveOrder(actor, targetObj.transform.position),
+			()=>GoToState("reservationWait"),
+			null);
+		CreateState("reservationWait", 
+			()=>{ 
+				tempres = reservoir.NewReservation(actor); 
+				return new WaitForReservationOrder(actor, tempres); 
+			},
+			()=>GoToState("getResource"),
+			null);
+		CreateState("getResource",
+			()=>new TempExtractOrder(actor, targetObj),	
+			()=>{ 
+				tempres.Released = true; 
+				GameObject.Destroy(tempres); 
+				tempres = null; 
+				GoToState("storeContents"); 
+			},
+			null);
+		CreateState("storeContents",
+			()=>new TempStoreOrder(actor),
+			()=>GoToState("seekTarget"),
+			null);
 		GoToState("seekTarget");
 	}
-	
-	private BaseOrder StartSeek() 	{ return new SimpleMoveOrder(actor, targetObj.transform.position); }	
-	private void CompleteSeek() 	{ GoToState("reservationWait"); }	
-
-	private BaseOrder StartReservationWait() 	{ tempres = reservoir.NewReservation(actor); return new WaitForReservationOrder(actor, tempres); }
-	private void CompleteReservationWait()  	{ GoToState("getResource"); }
-
-	private BaseOrder StartGet() { return new TempExtractOrder(actor, targetObj); }	
-	private void CompleteGet() 	 { tempres.Released = true; GameObject.Destroy(tempres); tempres = null; GoToState("storeContents"); }
-
-	private BaseOrder StartSeekStore()	{ return new SimpleMoveOrder(actor, originPos); }	
-	private void CompleteSeekStore() 	{ GoToState("dumpResource"); }
-
-	private BaseOrder StartStore() 	{ return new TempStoreOrder(actor); }
-	private void CompleteStore() 	{ GoToState("seekTarget"); }
 
 	public override void Cancel() {
 		base.Cancel();
@@ -433,7 +483,7 @@ public class TempHarvestOrder : StatefulSuperOrder {
 		}
 	}
 }
-
+	
 public class TempSlaughterOrder : BaseOrder {
 	int progress = 0;
 	Herd herd;
@@ -467,27 +517,10 @@ public class TempHuntOrder : StatefulSuperOrder {
 	public TempHuntOrder(ActorController a, Herd herd): base(a) {
 		originPos = a.transform.position;
 		target = herd;
-		CreateState("seekTarget",   StartSeek, CompleteSeek, null);
-		//CreateState("reservationWait", StartReservationWait, CompleteReservationWait, null);
-		CreateState("getResource",  StartGet,  CompleteGet,  null);
-		CreateState("seekStorage",  StartSeekStore, CompleteSeekStore, null);
-		CreateState("dumpResource", StartDump, CompleteDump, null);
+		CreateState("seekTarget", () => new SimpleMoveOrder(actor, target.rabbit.transform.position), ()=>GoToState("getResource"), null);
+		CreateState("getResource",  ()=> new TempSlaughterOrder(actor, target), ()=>GoToState("storeResource"),  null);
+		CreateState("storeResource",  ()=> new TempStoreOrder(actor), ()=>GoToState("seekTarget"), null);
 		GoToState("seekTarget");
 	}
-	
-	private BaseOrder StartSeek() 	{ return new SimpleMoveOrder(actor, target.rabbit.transform.position); }	
-	private void CompleteSeek() 	{ GoToState("getResource"); }	
-	
-	//private BaseOrder StartReservationWait() 	{ tempres = reservoir.NewReservation(actor); return new WaitForReservationOrder(actor, tempres); }
-	//private void CompleteReservationWait()  	{ GoToState("getResource"); }
-	
-	private BaseOrder StartGet() { return new TempSlaughterOrder(actor, target); }	
-	private void CompleteGet() 	 { GoToState("seekStorage"); }
-	
-	private BaseOrder StartSeekStore()	{ return new SimpleMoveOrder(actor, originPos); }	
-	private void CompleteSeekStore() 	{ GoToState("dumpResource"); }
-	
-	private BaseOrder StartDump() 	{ return new TempDumpOrder(actor); }
-	private void CompleteDump() 	{ GoToState("seekTarget"); }
 }
 

@@ -26,10 +26,12 @@ public class InputManager : MonoBehaviour {
 	}
 
 	void DeselectAll() {
+		Debug.Log ("Desel all");
 		foreach (GameObject sel in selected) {
 			sel.GetComponent<CivilisObject>().Deselect();
 		}
-		selected.Clear ();
+		uiController.subMenu.ClearMenu();
+		selected.Clear();
 	}
 
 	void DoPointSelect() {
@@ -73,7 +75,6 @@ public class InputManager : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-
 		Vector3 gameMousePos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
 
 		//left click/selection
@@ -81,7 +82,10 @@ public class InputManager : MonoBehaviour {
 			if (Input.GetMouseButtonDown (0)) {
 				marqueeActive = true;
 				marqueeStart = gameMousePos;
+				marqueeEnd = gameMousePos;
 
+				Debug.Log("Wat");
+				uiController.subMenu.ClearMenu();
 				uiController.HideContextMenu();
 			}
 			marqueeEnd = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
