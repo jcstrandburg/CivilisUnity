@@ -7,7 +7,6 @@ using System;
 public class GameController : MonoBehaviour {
 	public List<NeolithicObject> selected = new List<NeolithicObject>();
 	public GameObject mainLight;
-	public GameUIController guiController;
 	Vector2 boxStart;
 	Vector2 boxEnd;
 	public bool boxActive = false;
@@ -18,15 +17,16 @@ public class GameController : MonoBehaviour {
 
     private float _foodbuffer = 10.0f;
     private float _spirit = 0.0f;
+    private GameUIController guiController;
 
+    private static GameObject _object = null;
     private static GameController _instance = null;
 
-	public static GameController instance
-	{
-		get { 
-			if (_instance == null) {
-				GameObject obj = GameObject.Find("_Scripts");
-				_instance = obj.GetComponent<GameController>();
+	public static GameController instance {
+		get {
+			if (_object == null || _instance == null) {
+				_object = GameObject.Find("_Scripts");
+				_instance = _object.GetComponent<GameController>();
 			}
 			return _instance;
 		}
@@ -53,9 +53,14 @@ public class GameController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         UnityEngine.Object[] objects = Resources.LoadAll("Techs", typeof(TextAsset));
+        guiController = GameObject.Find("GameUI").GetComponent<GameUIController>();
         string[] jsonText = Array.ConvertAll(objects, (x) => ((TextAsset)x).text);
         techmanager = new TechManager();
         techmanager.LoadTree(jsonText);
+    }
+
+    void OnDeserialize() {
+        selected.Clear();
     }
 
     public Technology[] GetAvailableTechs() {
@@ -77,10 +82,14 @@ public class GameController : MonoBehaviour {
     /// <param name="pos"></param>
     /// <returns></returns>
     public Vector3 SnapToGround(Vector3 pos) {
-        float y = Terrain.activeTerrain.transform.position.y + Terrain.activeTerrain.SampleHeight(pos);
-        Vector3 returnMe = pos;
-        returnMe.y = y;
-        return returnMe;
+        if (Terrain.activeTerrain) {
+            float y = Terrain.activeTerrain.transform.position.y + Terrain.activeTerrain.SampleHeight(pos);
+            Vector3 returnMe = pos;
+            returnMe.y = y;
+            return returnMe;
+        } else {
+            return pos;
+        }
     }
 
     /// <summary>
@@ -91,18 +100,15 @@ public class GameController : MonoBehaviour {
     public Vector3 GetGroundNormal(Vector3 pos) {
         Terrain t = Terrain.activeTerrain;
         TerrainData td = t.terrainData;
-        //Debug.Log(pos);
         Vector3 terrainLocal = pos - t.transform.position;
-        //Debug.Log(terrainLocal);
         Vector2 normalizedPos = new Vector2(Mathf.InverseLerp(0.0f, td.size.x, terrainLocal.x),
                                             Mathf.InverseLerp(0.0f, td.size.y, terrainLocal.z));
-        //Debug.Log(normalizedPos);
         Vector3 normal = td.GetInterpolatedNormal(normalizedPos.x, normalizedPos.y);
         return normal;
     }
 
 	void FixedUpdate() {
-		mainLight.transform.eulerAngles += new Vector3(0, 0.2f, 0);
+		//mainLight.transform.eulerAngles += new Vector3(0, 0.2f, 0);
 		additiveSelect = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 	}
 
@@ -353,5 +359,15 @@ public class GameController : MonoBehaviour {
             }
         }
         return null;
+    }
+
+    public void QuickSave() {
+        Debug.Log("QuickSave");
+        GetComponent<SaveLoadMenu>().SaveGame();
+    }
+
+    public void QuickLoad() {
+        Debug.Log("QuickLoad");
+        GetComponent<SaveLoadMenu>().LoadGame();
     }
 }

@@ -10,7 +10,7 @@ public class SelectHalo : MonoBehaviour {
 		set { haloRenderer.enabled = value;	}
 	}
 
-	void Start() {
+	void Awake() {
 		haloRenderer = GetComponent<SpriteRenderer>();
 		haloRenderer.enabled = false;
 	}

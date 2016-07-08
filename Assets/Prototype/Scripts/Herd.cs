@@ -33,6 +33,12 @@ public class Herd : MonoBehaviour {
     public Vector3 rabbitPos;//debugging variable
     public List<AnimalController> animals = new List<AnimalController>();
 
+    //public int pathLength {
+    //    get {
+    //        return path.Length;
+    //    }
+    //}
+
     void Awake() {
         RandomizePath();
         UpdateRabbitPosition();

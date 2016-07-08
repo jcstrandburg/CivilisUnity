@@ -2,12 +2,31 @@
 using System.Collections;
 using System.Collections.Generic;
 
+#if UNITY_EDITOR
+using UnityEditor;
+
+[CustomEditor(typeof(ActorController))]
+public class ActorControllerEditor : Editor {
+    public override void OnInspectorGUI() {
+        DrawDefaultInspector();
+        ActorController a = (ActorController)target;
+        if (GUILayout.Button("Do Stuff")) {
+            a.palzy.transform.position += new Vector3(1.0f, 0);
+        }
+    }
+}
+#endif
+
+
 public class ActorController : NeolithicObject {
 	public float moveSpeed;
-	public Queue<BaseOrder> orderQueue = new Queue<BaseOrder>();
+    public List<BaseOrder> orderQueue = new List<BaseOrder>();
 	public BaseOrder currentOrder = null;
 	public bool idle = false;
     public bool followContours = true;
+
+    public GameObject palzy;
+    public int queueLength = 0;
 
     public StorageReservation storageReservation { get { return GetComponentInChildren<StorageReservation>(); } }
     public ResourceReservation resourceReservation { get { return GetComponentInChildren<ResourceReservation>(); } }
@@ -38,15 +57,22 @@ public class ActorController : NeolithicObject {
 			//Debug.Log("Doing step on current");
 			currentOrder.DoStep();
 		}
+
+        queueLength = orderQueue.Count;
 	}
 
 	public BaseOrder DequeueOrder() {
-		return orderQueue.Dequeue();
+        //this is technically not safe, and should probably be changed back to a queue after i find a way to display the queue in the editor
+        BaseOrder o = orderQueue[0];
+        orderQueue.RemoveAt(0);
+        return o;
+        //return orderQueue.Dequeue();
 	}
 
 	/// <summary>Adds an order to the pending order queue</summary>
 	public void EnqueueOrder(BaseOrder o) {
-		orderQueue.Enqueue(o);
+        orderQueue.Add(o);
+		//orderQueue.Enqueue(o);
 	}
 
 	/// <summary>Clears the order queue and sets the current order</summary>
@@ -67,7 +93,7 @@ public class ActorController : NeolithicObject {
             return true;
         }
         else {
-            if (followContours) {
+            if (followContours && Terrain.activeTerrain) {
                 Vector3 normal = Terrain.activeTerrain.terrainData.GetInterpolatedNormal(transform.position.x, transform.position.y);
                 Vector3 movDir = diff - Vector3.Project(diff, normal);
 

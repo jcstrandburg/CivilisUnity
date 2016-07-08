@@ -22,8 +22,6 @@ public class GroundControllerEditor : Editor {
 #endif
 
 public class GroundController : MonoBehaviour, IPointerDownHandler {
-	GameController gameController = null;
-
     public string seed;
     public int seedLength = 10;
     public float snowThreshold = 0.75f, stoneThreshhold = 0.5f, grassThreshold = 0.25f, waterLevel=10.0f;
@@ -174,17 +172,16 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
     }
 
 	void Start() {
-		gameController = GameController.instance;
         RandomizeTerrain();
 	}
 
 	public void OnPointerDown(PointerEventData eventData) {
 		switch (eventData.button) {
 		case PointerEventData.InputButton.Left:
-			gameController.StartBoxSelect();
+			GameController.instance.StartBoxSelect();
 			break;
 		case PointerEventData.InputButton.Right:
-			gameController.IssueMoveOrder(eventData);
+            GameController.instance.IssueMoveOrder(eventData);
 			break;
 		}
 	}

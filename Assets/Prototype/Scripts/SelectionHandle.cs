@@ -14,10 +14,10 @@ public class SelectionHandle : MonoBehaviour, IPointerDownHandler, IPointerEnter
 	public void OnPointerDown(PointerEventData eventData) {
 		switch (eventData.button) {
 		case PointerEventData.InputButton.Left:
-			transform.parent.BroadcastMessage("SelectClick");
+			transform.parent.SendMessage("SelectClick");
 			break;
 		case PointerEventData.InputButton.Right:
-			transform.parent.BroadcastMessage("ContextClick");
+			transform.parent.SendMessage("ContextClick");
 			break;
 		}
 	}

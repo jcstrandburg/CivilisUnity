@@ -8,12 +8,16 @@ public class Resource : MonoBehaviour {
     public float amount = 0.0f;
     public bool preserved;
 
+    [DontSaveField]
     private NeolithicObject neolithicObject;
+
+    void Awake() {
+        neolithicObject = GetComponent<NeolithicObject>();
+    }
 
 	void Start() {
         timer = lifeTime;
         preserved = true;
-        neolithicObject = GetComponent<NeolithicObject>();
 	}
 
 	void FixedUpdate() {
@@ -29,6 +33,7 @@ public class Resource : MonoBehaviour {
 
     public void Pickup() {
         preserved = true;
+        GetComponent<NeolithicObject>().selectable = false;
         Warehouse w = GetComponent<Warehouse>();
         if (w) {
             Destroy(w);
@@ -37,6 +42,7 @@ public class Resource : MonoBehaviour {
 
     public void SetDown() {
         preserved = false;
+        GetComponent<NeolithicObject>().selectable = true;
         Warehouse w = gameObject.AddComponent<Warehouse>();
         ResourceProfile[] rp = new ResourceProfile[] {
             new ResourceProfile(typeTag, amount)

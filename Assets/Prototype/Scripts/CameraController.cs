@@ -12,10 +12,7 @@ public class CameraController : MonoBehaviour {
 	public float minScrollRatio;
     public bool edgeScrolling = false;
 
-	GameController gameController;
-
 	void Start() {
-		gameController = GameController.instance;
 	}
 
 	// Use this for initialization
@@ -32,7 +29,7 @@ public class CameraController : MonoBehaviour {
 		}
 
 		Vector3 mousePos = Input.mousePosition;
-		if ( edgeScrolling && !gameController.boxActive && mousePos.x >= 0.0f && mousePos.y >= 0.0 && mousePos.x < Screen.width && mousePos.y < Screen.width) {
+		if ( edgeScrolling && !GameController.instance.boxActive && mousePos.x >= 0.0f && mousePos.y >= 0.0 && mousePos.x < Screen.width && mousePos.y < Screen.width) {
 			float xScroll = 0.0f, yScroll = 0.0f;
 			if (mousePos.x < screenMargin && mousePos.x >= 0.0f) {
 				xScroll = -1.0f + Mathf.Min(mousePos.x/screenMargin, 1.0f-minScrollRatio);

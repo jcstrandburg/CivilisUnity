@@ -39,8 +39,10 @@ public class GameUIController : MonoBehaviour {
 	InputManager inputManager;
 	public SelectionMenuController selectionMenu;
     public SubMenuController subMenu;
-    private List<DataBinding> dataBindings = new List<DataBinding>();
+    public GameObject debugMenu;
+    public bool paused = false;
 
+    private List<DataBinding> dataBindings = new List<DataBinding>();
     private static GameUIController _instance = null;
 
     public static GameUIController instance {
@@ -93,7 +95,24 @@ public class GameUIController : MonoBehaviour {
         dataBindings.ForEach((db) => {
             db.Update();
         });
+
+        if (Input.GetKeyDown(KeyCode.Pause)) {
+            paused = !paused;
+            Time.timeScale = paused ? 0.0f : 1.0f;
+        }
+        if (Input.GetKeyDown(KeyCode.BackQuote)) {
+            Debug.Log("DEBUG");
+            if (debugMenu) {
+                debugMenu.SetActive(!debugMenu.activeSelf);
+            }
+        }
 	}
+
+    void OnGUI() {
+        if (paused) {
+            GUI.Label(new Rect(200, 200, 200, 200), "paused");
+        }
+    }
 
 	public void ShowContextMenu(string[] options, NeolithicObject target) {
 		contextMenu.SetActive(true);

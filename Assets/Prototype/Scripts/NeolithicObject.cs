@@ -5,7 +5,6 @@ public class NeolithicObject : MonoBehaviour {
 
 	public enum Selectability {Unselectable, Selectable, Multiselectable};
 
-	public GameController gameController;
 	public bool selectable = true;
 	public Selectability selectability = Selectability.Selectable;
 	public bool selected = false;
@@ -20,19 +19,22 @@ public class NeolithicObject : MonoBehaviour {
     }
 
 	public virtual void Start() {
-		gameController = GameController.instance;
         SnapToGround();
 	}
 
+    public void OnDeserialize() {
+        Deselect();
+    }
+
 	public void SelectClick() {
 		if ( !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift)) {
-			gameController.DeselectAll();
+            GameController.instance.DeselectAll();
 		}
 		Select();
 	}
 
 	public void ContextClick() {
-		gameController.DoContextMenu(this);
+        GameController.instance.DoContextMenu(this);
 	}
 
 	public void HoverStart() { pointerHover = true; }
@@ -41,7 +43,7 @@ public class NeolithicObject : MonoBehaviour {
 	public virtual void Select() {
 		selected = true;
 		BroadcastMessage("OnSelect", null, SendMessageOptions.DontRequireReceiver);
-		gameController.AddSelected(this);
+        GameController.instance.AddSelected(this);
 		//Debug.Log ("Broadcast OnSelect");
 		//transform.Find ("SelectionHandle").gameObject.GetComponent<SpriteRenderer>().enabled = true;
 	}

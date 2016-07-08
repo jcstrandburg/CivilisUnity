@@ -6,6 +6,7 @@ using System;
 /// <summary>
 /// The base for all actor orders
 /// </summary>
+[CustomSerialize]
 public abstract class BaseOrder {
 	public ActorController actor;
 	public bool completed;
@@ -39,6 +40,7 @@ public abstract class BaseOrder {
 /// <summary>
 /// A simple stateless move order
 /// </summary>
+[CustomSerialize]
 public class SimpleMoveOrder : BaseOrder {
 	public Vector3 targetPosition;
     float proximity;
@@ -91,6 +93,7 @@ public class IdleOrder : BaseOrder {
 		if (diff.magnitude <= actor.moveSpeed) {
 			float r = 5.0f;
 			targetPosition = center + new Vector3(UnityEngine.Random.Range(-r, r), 0, UnityEngine.Random.Range(-r, r));
+            targetPosition = GameController.instance.SnapToGround(targetPosition);
 			diff = targetPosition - actor.transform.position;
 		}
 		actor.transform.position += diff * 0.08f * (actor.moveSpeed/diff.magnitude);
@@ -190,12 +193,12 @@ public class StatefulSuperOrder : BaseOrder {
 /// Order to fetch the given resource from any available warehouse
 /// </summary>
 public class TempFetchOrder : StatefulSuperOrder {
-    string resourceType;
-    float amount;
+    //string resourceType;
+    //float amount;
 
     public TempFetchOrder(ActorController a, string resourceType, float amount): base(a) {
-        this.resourceType = resourceType;
-        this.amount = amount;
+        //this.resourceType = resourceType;
+        //this.amount = amount;
 		CreateState("getReservation", 
 			()=>new TempReserveResourceOrder(actor, resourceType, amount), 
 			()=>GoToState("gotoWarehouse"), 
@@ -228,8 +231,6 @@ public class TempExtractOrder : BaseOrder {
 		progress++;
 		if (progress == 90) {
 			Reservoir reservoir = target.GetComponent<Reservoir>();
-			GameObject prefab = reservoir.prefab;
-			//GameObject res = UnityEngine.Object.Instantiate(prefab);
 
             //this code is ugly and temporary, fix it later
             Resource r = reservoir.prefab.GetComponent<Resource>();
@@ -378,14 +379,14 @@ public class MeditateOrder : BaseOrder {
 /// Testing order to transmute one resource to another
 /// </summary>
 public class TransmuteOrder : StatefulSuperOrder {
-    string fromTag;
-    string toTag;
-    NeolithicObject target;
+    //string fromTag;
+    //string toTag;
+    //NeolithicObject target;
 
     public TransmuteOrder(ActorController a, NeolithicObject target, string fromTag, string toTag): base(a) {
-        this.fromTag = fromTag;
-        this.toTag = toTag;
-        this.target = target;
+        //this.fromTag = fromTag;
+        //this.toTag = toTag;
+        //this.target = target;
         CreateState("getSourceMaterial",
 			()=>new TempFetchOrder(actor, fromTag, 1.0f),
 			()=>GoToState("gotoWorkspace"),
@@ -439,13 +440,13 @@ public class TempConvertOrder : BaseOrder {
 /// Simple order to seek, reserve, and extract resources from the given target
 /// </summary>
 public class TempHarvestOrder : StatefulSuperOrder {
-	Vector3 originPos;
+	//Vector3 originPos;
 	NeolithicObject targetObj;
 	Reservoir reservoir;
 	Reservation tempres;
 
 	public TempHarvestOrder(ActorController a, NeolithicObject target): base(a) {
-		originPos = a.transform.position;
+		//originPos = a.transform.position;
 		targetObj = target;
 		reservoir = target.GetComponent<Reservoir>();
 		CreateState("seekTarget",
@@ -509,16 +510,9 @@ public class TempSlaughterOrder : BaseOrder {
 }
 
 public class TempHuntOrder : StatefulSuperOrder {
-	Vector3 originPos;
-	Herd target;
-	//Reservoir reservoir;
-	//Reservation tempres;
-	
 	public TempHuntOrder(ActorController a, Herd herd): base(a) {
-		originPos = a.transform.position;
-		target = herd;
-		CreateState("seekTarget", () => new SimpleMoveOrder(actor, target.rabbit.transform.position), ()=>GoToState("getResource"), null);
-		CreateState("getResource",  ()=> new TempSlaughterOrder(actor, target), ()=>GoToState("storeResource"),  null);
+		CreateState("seekTarget", () => new SimpleMoveOrder(actor, herd.rabbit.transform.position), ()=>GoToState("getResource"), null);
+		CreateState("getResource",  ()=> new TempSlaughterOrder(actor, herd), ()=>GoToState("storeResource"),  null);
 		CreateState("storeResource",  ()=> new TempStoreOrder(actor), ()=>GoToState("seekTarget"), null);
 		GoToState("seekTarget");
 	}

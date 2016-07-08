@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Prototype/3dTestScene.unity
+- path: Assets/Prototype/Saveable Test Scene.unity
   isLoaded: 1
   isActive: 1
