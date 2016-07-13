@@ -40,7 +40,6 @@ public abstract class BaseOrder {
 /// <summary>
 /// A simple stateless move order
 /// </summary>
-[CustomSerialize]
 public class SimpleMoveOrder : BaseOrder {
 	public Vector3 targetPosition;
     float proximity;
@@ -119,6 +118,7 @@ public class WaitForReservationOrder : IdleOrder {
 /// <summary>
 /// Utility struct for stateful super orders
 /// </summary>
+[Serializable]
 public struct OrderStateInfo {
 	public Func<BaseOrder> startState;
 	public Action completeState;
@@ -132,7 +132,6 @@ public struct OrderStateInfo {
 /// <summary>
 /// Base class for stateful orders with multiple steps
 /// </summary>
-[System.Serializable]
 public class StatefulSuperOrder : BaseOrder {
 	public BaseOrder currentOrder = null;
 	public string currentState;

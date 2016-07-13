@@ -362,12 +362,10 @@ public class GameController : MonoBehaviour {
     }
 
     public void QuickSave() {
-        Debug.Log("QuickSave");
-        GetComponent<SaveLoadMenu>().SaveGame();
+        GetComponent<SaverLoader>().SaveGame();
     }
 
     public void QuickLoad() {
-        Debug.Log("QuickLoad");
-        GetComponent<SaveLoadMenu>().LoadGame();
+        GetComponent<SaverLoader>().LoadGame();
     }
 }
