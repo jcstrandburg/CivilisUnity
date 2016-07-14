@@ -75,22 +75,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\2dScripts\ActorController2d.cs" />
-    <Compile Include="Assets\2dScripts\CameraController2d.cs" />
-    <Compile Include="Assets\2dScripts\CivilisObject.cs" />
-    <Compile Include="Assets\2dScripts\ContextController.cs" />
-    <Compile Include="Assets\2dScripts\GameUIController.cs" />
-    <Compile Include="Assets\2dScripts\HerdController.cs" />
-    <Compile Include="Assets\2dScripts\HerdFollowerController.cs" />
-    <Compile Include="Assets\2dScripts\InputManager.cs" />
-    <Compile Include="Assets\2dScripts\MainMapController.cs" />
-    <Compile Include="Assets\2dScripts\MainMapInspector.cs" />
-    <Compile Include="Assets\2dScripts\MapController2d.cs" />
-    <Compile Include="Assets\2dScripts\Orders.cs" />
-    <Compile Include="Assets\2dScripts\ParticleSortScript.cs" />
-    <Compile Include="Assets\2dScripts\SelectionMenuController.cs" />
-    <Compile Include="Assets\2dScripts\StructureController.cs" />
-    <Compile Include="Assets\2dScripts\TransitionMapController.cs" />
     <Compile Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ImageEffects\Scripts\Antialiasing.cs" />
     <Compile Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ImageEffects\Scripts\Bloom.cs" />
     <Compile Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ImageEffects\Scripts\BloomAndFlares.cs" />
@@ -135,6 +119,7 @@
     <Compile Include="Assets\Prototype\Scripts\CameraController.cs" />
     <Compile Include="Assets\Prototype\Scripts\DebugMenu.cs" />
     <Compile Include="Assets\Prototype\Scripts\GameController.cs" />
+    <Compile Include="Assets\Prototype\Scripts\GameUIController.cs" />
     <Compile Include="Assets\Prototype\Scripts\GroundController.cs" />
     <Compile Include="Assets\Prototype\Scripts\Herd.cs" />
     <Compile Include="Assets\Prototype\Scripts\IResourceStore.cs" />
@@ -146,6 +131,7 @@
     <Compile Include="Assets\Prototype\Scripts\ResourceReservation.cs" />
     <Compile Include="Assets\Prototype\Scripts\SelectHalo.cs" />
     <Compile Include="Assets\Prototype\Scripts\SelectionHandle.cs" />
+    <Compile Include="Assets\Prototype\Scripts\SelectionMenuController.cs" />
     <Compile Include="Assets\Prototype\Scripts\StorageReservation.cs" />
     <Compile Include="Assets\Prototype\Scripts\SubMenuController.cs" />
     <Compile Include="Assets\Prototype\Scripts\TechManager.cs" />
@@ -218,7 +204,7 @@
     <Compile Include="Assets\UnityTestTools\IntegrationTestsFramework\TestRunner\TestRunnerCallbackList.cs" />
     <Compile Include="Assets\UnityTestTools\IntegrationTestsFramework\TestRunner\TestRunnerConfigurator.cs" />
     <Compile Include="Assets\UnityTestTools\IntegrationTestsFramework\TestingAssets\CallTesting.cs" />
-    <Compile Include="Assets\tuch.cs" />
+    <Compile Include="Assets\tuch\tuch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\GlassRefraction\Shaders\GlassStainedBumpDistort.shader" />

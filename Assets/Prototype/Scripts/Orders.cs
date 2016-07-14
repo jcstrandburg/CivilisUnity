@@ -132,13 +132,26 @@ public struct OrderStateInfo {
 /// <summary>
 /// Base class for stateful orders with multiple steps
 /// </summary>
-public class StatefulSuperOrder : BaseOrder {
+public abstract class StatefulSuperOrder : BaseOrder {
 	public BaseOrder currentOrder = null;
 	public string currentState;
-	public IDictionary<string, OrderStateInfo> states = new Dictionary<string, OrderStateInfo>();
+    [DontSaveField]
+    private IDictionary<string, OrderStateInfo> states = null;
+
+    protected IDictionary<string, OrderStateInfo> States {
+        get {
+            if (states == null) {
+                states = new Dictionary<string, OrderStateInfo>();
+                CreateStates();
+            }
+            return states;
+        }
+    }
 
 	public StatefulSuperOrder(ActorController a): base(a) {
 	}
+
+    protected abstract void CreateStates();
 
 	public void CreateState(string stateName, Func<BaseOrder> startState, Action completeState, Action failState) {
 		OrderStateInfo info = new OrderStateInfo(startState, completeState, failState);
@@ -151,7 +164,7 @@ public class StatefulSuperOrder : BaseOrder {
 
 			//check to see if order is done somehow
 			if (currentOrder.Done) {
-				OrderStateInfo info = states [currentState];
+				OrderStateInfo info = States[currentState];
 				if (currentOrder.completed) {
 					if (info.completeState != null) {
 						info.completeState ();
@@ -178,12 +191,12 @@ public class StatefulSuperOrder : BaseOrder {
 
 	/// <summary>Changes to the given state</summary>
 	public void GoToState(string state) {
-		if (states.ContainsKey(state)) {
-			OrderStateInfo info = states[state];
+		if (States.ContainsKey(state)) {
+			OrderStateInfo info = States[state];
 			currentState = state;
 			currentOrder = info.startState();
 		} else {
-			throw new Exception("Nonexistant order state: "+state);
+			throw new ArgumentOutOfRangeException("Nonexistant order state: "+state);
 		}
 	}
 }
@@ -192,25 +205,28 @@ public class StatefulSuperOrder : BaseOrder {
 /// Order to fetch the given resource from any available warehouse
 /// </summary>
 public class TempFetchOrder : StatefulSuperOrder {
-    //string resourceType;
-    //float amount;
+    string resourceType;
+    float amount;
 
     public TempFetchOrder(ActorController a, string resourceType, float amount): base(a) {
-        //this.resourceType = resourceType;
-        //this.amount = amount;
-		CreateState("getReservation", 
-			()=>new TempReserveResourceOrder(actor, resourceType, amount), 
-			()=>GoToState("gotoWarehouse"), 
-			null);
-		CreateState("gotoWarehouse", 
-			()=>new SimpleMoveOrder(actor, actor.resourceReservation.source.transform.position, 2.0f), 
-			()=>GoToState("withdraw"), 
-			null);
-		CreateState("withdraw", 
-			()=>new SimpleWithdrawOrder(actor), 
-			()=>this.completed=true, 
-			null);
+        this.resourceType = resourceType;
+        this.amount = amount;
         GoToState("getReservation");
+    }
+
+    protected override void CreateStates() {
+        CreateState("getReservation",
+                    () => new TempReserveResourceOrder(actor, resourceType, amount),
+                    () => GoToState("gotoWarehouse"),
+                    null);
+        CreateState("gotoWarehouse",
+            () => new SimpleMoveOrder(actor, actor.resourceReservation.source.transform.position, 2.0f),
+            () => GoToState("withdraw"),
+            null);
+        CreateState("withdraw",
+            () => new SimpleWithdrawOrder(actor),
+            () => this.completed = true,
+            null);
     }
 }
 
@@ -309,7 +325,11 @@ public class TempStoreReservationOrder : BaseOrder {
 /// </summary>
 public class TempStoreOrder : StatefulSuperOrder {
     public TempStoreOrder(ActorController a): base(a) {
-		CreateState ("getReservation", 
+        GoToState("getReservation");
+    }
+
+    protected override void CreateStates() {
+        CreateState ("getReservation", 
 			() => new TempReserveStorageOrder (actor),
 			() => GoToState ("seekStorage"),
 			() => {
@@ -332,7 +352,6 @@ public class TempStoreOrder : StatefulSuperOrder {
 			() => new TempStoreReservationOrder (actor, actor.storageReservation),
 			() => this.completed = true,
 			null);
-        GoToState("getReservation");
     }
 }
 
@@ -378,14 +397,18 @@ public class MeditateOrder : BaseOrder {
 /// Testing order to transmute one resource to another
 /// </summary>
 public class TransmuteOrder : StatefulSuperOrder {
-    //string fromTag;
-    //string toTag;
-    //NeolithicObject target;
+    string fromTag;
+    string toTag;
+    NeolithicObject target;
 
-    public TransmuteOrder(ActorController a, NeolithicObject target, string fromTag, string toTag): base(a) {
-        //this.fromTag = fromTag;
-        //this.toTag = toTag;
-        //this.target = target;
+    public TransmuteOrder(ActorController a, NeolithicObject target, string fromTag, string toTag) : base(a) {
+        this.fromTag = fromTag;
+        this.toTag = toTag;
+        this.target = target;
+        GoToState("getSourceMaterial");
+    }
+
+    protected override void CreateStates() {
         CreateState("getSourceMaterial",
 			()=>new TempFetchOrder(actor, fromTag, 1.0f),
 			()=>GoToState("gotoWorkspace"),
@@ -402,7 +425,6 @@ public class TransmuteOrder : StatefulSuperOrder {
 			()=>new TempStoreOrder(actor),
 			()=>GoToState("getSourceMaterial"),
 			null);
-        GoToState("getSourceMaterial");
     }
 }
 
@@ -439,16 +461,18 @@ public class TempConvertOrder : BaseOrder {
 /// Simple order to seek, reserve, and extract resources from the given target
 /// </summary>
 public class TempHarvestOrder : StatefulSuperOrder {
-	//Vector3 originPos;
 	NeolithicObject targetObj;
 	Reservoir reservoir;
 	Reservation tempres;
 
-	public TempHarvestOrder(ActorController a, NeolithicObject target): base(a) {
-		//originPos = a.transform.position;
-		targetObj = target;
-		reservoir = target.GetComponent<Reservoir>();
-		CreateState("seekTarget",
+    public TempHarvestOrder(ActorController a, NeolithicObject target) : base(a) {
+        targetObj = target;
+        reservoir = target.GetComponent<Reservoir>();
+        GoToState("seekTarget");
+    }
+
+    protected override void CreateStates() {
+        CreateState("seekTarget",
 			()=>new SimpleMoveOrder(actor, targetObj.transform.position),
 			()=>GoToState("reservationWait"),
 			null);
@@ -472,7 +496,6 @@ public class TempHarvestOrder : StatefulSuperOrder {
 			()=>new TempStoreOrder(actor),
 			()=>GoToState("seekTarget"),
 			null);
-		GoToState("seekTarget");
 	}
 
 	public override void Cancel() {
@@ -509,11 +532,17 @@ public class TempSlaughterOrder : BaseOrder {
 }
 
 public class TempHuntOrder : StatefulSuperOrder {
-	public TempHuntOrder(ActorController a, Herd herd): base(a) {
-		CreateState("seekTarget", () => new SimpleMoveOrder(actor, herd.rabbit.transform.position), ()=>GoToState("getResource"), null);
+    Herd herd;
+
+    public TempHuntOrder(ActorController a, Herd herd) : base(a) {
+        this.herd = herd;
+        GoToState("seekTarget");
+    }
+
+    protected override void CreateStates() {
+        CreateState("seekTarget", () => new SimpleMoveOrder(actor, herd.rabbit.transform.position), ()=>GoToState("getResource"), null);
 		CreateState("getResource",  ()=> new TempSlaughterOrder(actor, herd), ()=>GoToState("storeResource"),  null);
 		CreateState("storeResource",  ()=> new TempStoreOrder(actor), ()=>GoToState("seekTarget"), null);
-		GoToState("seekTarget");
 	}
 }
 

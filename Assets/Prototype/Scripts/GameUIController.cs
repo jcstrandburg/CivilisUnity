@@ -36,7 +36,7 @@ public class OneWayBinding<T> : DataBinding {
 public class GameUIController : MonoBehaviour {
 
 	GameObject contextMenu;
-	InputManager inputManager;
+	//InputManager inputManager;
 	public SelectionMenuController selectionMenu;
     public SubMenuController subMenu;
     public GameObject debugMenu;
