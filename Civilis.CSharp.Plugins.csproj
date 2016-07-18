@@ -156,7 +156,7 @@
     <None Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ToonShading\Shaders\ToonBasicOutline.shader" />
     <None Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ToonShading\Shaders\ToonLit.shader" />
     <None Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ToonShading\Shaders\ToonLitOutline.shader" />
-    <None Include="Assets\Prototype\Resources\Buildings\Blueprint.shader" />
+    <None Include="Assets\Resources\Buildings\Blueprint.shader" />
     <None Include="Assets\Scripts\Serialization\Surrogates\SurrogatesReadMe.txt" />
     <None Include="Assets\Standard Assets\Environment\Water (Basic)\Shaders\FXWaterBasic.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water\Shaders\FXWaterPro.shader" />
@@ -179,6 +179,7 @@
     <None Include="Assets\UnityTestTools\Examples\IntegrationTestsFrameworkExamples\AngryBotsTests\Shaders\Fx\ParticleBlend.shader" />
     <None Include="Assets\UnityTestTools\LICENSE.txt" />
     <None Include="Assets\UnityTestTools\changelog.txt" />
+    <None Include="Assets\nnj3de_crucarp\README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>
