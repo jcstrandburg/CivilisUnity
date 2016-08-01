@@ -2,57 +2,61 @@
 using System.Collections;
 using UnityEngine.EventSystems;
 
-public class BuildingBlueprint : MonoBehaviour, IPointerDownHandler {
+public class BuildingBlueprint : MonoBehaviour { //, IPointerDownHandler {
 
-    public GameObject displayMe {
-        get {
-            return transform.Find("Sphere").gameObject;
-        }
-    }
+    ConstructionManager constructMe;
 
-    string buildingType;
+    GameObject prefab;
 
 	// Use this for initialization
 	void Start () {
-        //gameObject.SetActive(false);
-        displayMe.SetActive(false);
+        constructMe = null;
 	}
 
-    public void Activate(string type) {
-        buildingType = type;
-        displayMe.SetActive(true);
-        //gameObject.SetActive(true);
+    public void Activate(GameObject prefab) {
+        GameObject go = Instantiate(prefab);
+        constructMe = go.GetComponent<ConstructionManager>();
+        constructMe.transform.position = transform.position;
+        constructMe.StartPlacement();
+        go.transform.SetParent(transform);
     }
 
     public void Deactivate() {
-        //gameObject.SetActive(false);
-        displayMe.SetActive(false);
+        constructMe = null;
     }
 
 
     // Update is called once per frame
     void Update() {
+        if (constructMe == null) {
+            return;
+        }
+
+        if (Input.GetMouseButtonDown(1)) {
+            Destroy(constructMe.gameObject);
+            constructMe = null;
+            Deactivate();
+            return;
+        }
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.transform.position, ray.direction, out hit, Mathf.Infinity, 1 << LayerMask.NameToLayer("Terrain"))) {
             transform.position = hit.point;
+            bool elligible = constructMe.IsBuildable(transform.position);
+            if (elligible) {
+                constructMe.GhostGood();
+                if (Input.GetMouseButtonDown(0)) {
+                    constructMe.transform.SetParent(null);
+                    constructMe.StartConstruction();
+                    Deactivate();
+                }
+            } else {
+                constructMe.GhostBad();
+            }
         }
         else {
 
-        }
-    }
-
-    public void OnPointerDown(PointerEventData eventData) {
-        switch (eventData.button) {
-            case PointerEventData.InputButton.Left:
-                Debug.Log("I'mma build a thing: " + buildingType);
-                GameObject newBuilding = Instantiate(Resources.Load(buildingType) as GameObject);
-                newBuilding.transform.position = transform.position;
-                Deactivate();
-                break;
-            case PointerEventData.InputButton.Right:
-                Deactivate();
-                break;
         }
     }
 }

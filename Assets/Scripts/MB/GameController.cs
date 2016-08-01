@@ -4,6 +4,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
+#if UNITY_EDITOR
+using UnityEditor;
+
+[CustomEditor(typeof(GameController))]
+public class GameControllerEditor : Editor {
+    public override void OnInspectorGUI() {
+        DrawDefaultInspector();
+        GameController gc = (GameController)target;
+        if (GUILayout.Button("TestResources")) {
+            var x = gc.GetAllAvailableResources();
+            foreach (var y in x) {
+                Debug.Log(y.Key + " " + y.Value);
+            }
+        }
+    }
+}
+
+#endif
+
 public class GameController : MonoBehaviour {
 	public List<NeolithicObject> selected = new List<NeolithicObject>();
 	public GameObject mainLight;
@@ -12,22 +31,11 @@ public class GameController : MonoBehaviour {
 	public bool boxActive = false;
 	public bool additiveSelect = false;
     public BuildingBlueprint _buildingPlacer;
-    public BuildingBlueprint buildingPlacer {
-        get {
-            if (_buildingPlacer == null) {
-                BuildingBlueprint[] bbps = FindObjectsOfType<BuildingBlueprint>();
-                if (bbps.Length > 0) {
-                    _buildingPlacer = bbps[0];
-                }
-            }
-            return _buildingPlacer;
-        }
-    }
-
     public List<Resource> resourcePrefabs;
     public TechManager techmanager;
 
-    private float _foodbuffer = 10.0f;
+    [SerializeField]
+    private float _foodbuffer = 6.0f;
     private float _spirit = 0.0f;
     private GameUIController guiController;
 
@@ -43,6 +51,13 @@ public class GameController : MonoBehaviour {
 			return _instance;
 		}
 	}
+
+    private MenuManager menuManager {
+        get {
+            var go = GameObject.Find("MenuManager");
+            return go.GetComponent<MenuManager>();
+        }
+    }
 
     public float foodbuffer {
         get {
@@ -62,13 +77,40 @@ public class GameController : MonoBehaviour {
         }
     }
 
-	// Use this for initialization
-	void Start () {
+    private BuildingBlueprint buildingPlacer {
+        get {
+            if (_buildingPlacer == null) {
+                BuildingBlueprint[] bbps = FindObjectsOfType<BuildingBlueprint>();
+                if (bbps.Length > 0) {
+                    _buildingPlacer = bbps[0];
+                }
+            }
+            return _buildingPlacer;
+        }
+    }
+
+    public void EndGame() {
+        Application.Quit();
+    }
+
+    // Use this for initialization
+    void Start () {
         UnityEngine.Object[] objects = Resources.LoadAll("Techs", typeof(TextAsset));
         guiController = GameObject.Find("GameUI").GetComponent<GameUIController>();
         string[] jsonText = Array.ConvertAll(objects, (x) => ((TextAsset)x).text);
         techmanager = new TechManager();
         techmanager.LoadTree(jsonText);
+
+        resourcePrefabs = new List<Resource>();
+        var allFiles = Resources.LoadAll<UnityEngine.Object>("");
+        foreach (var obj in allFiles) {
+            if (obj is GameObject) {
+                if (((GameObject)obj).GetComponent<Resource>() != null) {
+                    resourcePrefabs.Add(((GameObject)obj).GetComponent<Resource>());
+                }
+            }
+        }
+        InvokeRepeating("KeepFoodBufferFilled", 1.0f, 0.5f);
     }
 
     void OnDeserialize() {
@@ -104,6 +146,15 @@ public class GameController : MonoBehaviour {
         }
     }
 
+    public void PauseGame() {
+        Time.timeScale = 0.0f;
+        menuManager.PushMenuName("PauseMenu");
+    }
+
+    public void UnpauseGame() {
+        Time.timeScale = 1.0f;
+    }
+
     /// <summary>
     /// This function appears to be broken atm, don't use until it gets debugged more betterer
     /// </summary>
@@ -119,10 +170,105 @@ public class GameController : MonoBehaviour {
         return normal;
     }
 
+    /// <summary>
+    /// Calculates the value of a given collection of food resources, 
+    /// with increasing value for greater variety of food types
+    /// </summary>
+    /// <param name="resources"></param>
+    /// <returns>Food value</returns>
+    public float CalcFoodValue(IEnumerable<ResourceProfile> resources) {
+        var p = resources.OrderBy((ResourceProfile rp) => -rp.amount).ToArray();
+        if (p.Count() == 0 || p.Count() > 3) {
+            throw new ArgumentException("Unexpected resource count " + resources.Count());
+        }
+
+        float returnMe = 0.0f;
+        for (int i = 0; i < p.Length; i++) {
+            returnMe += (i + 1) * p[i].amount;
+        }
+        return returnMe;
+    }
+
+    /// <summary>
+    /// Run in the background via InvokeRepeating, attempts to consume 
+    /// food from any source to keep the food buffer filled
+    /// </summary>
+    /// <todo>Rework to use a logistics system</todo>
+    void KeepFoodBufferFilled() {
+        if (foodbuffer < 3.0f) {
+            var warehouses = FindObjectsOfType<Warehouse>();
+            var tags = new List<string> { "meat", "vegetables", "fish" };
+            var tagsToRemove = new List<string>();
+            var resources = new List<ResourceProfile>();
+
+            foreach (var w in warehouses) {
+                foreach (var t in tags) {
+                    if (w.GetAvailableContents(t) >= 1.0f) {
+                        tagsToRemove.Add(t);
+                        w.WithdrawContents(t, 1.0f);
+                        resources.Add(new ResourceProfile(t, 1.0f));
+                    }
+                }
+                foreach (var t in tagsToRemove) {
+                    tags.Remove(t);
+                }
+                tagsToRemove.Clear();
+
+                if (tags.Count == 0) {
+                    break;
+                }
+            }
+
+            if (resources.Count > 0) {
+                foodbuffer += CalcFoodValue(resources);
+            }
+        }
+    }
+
+
+    public bool WithdrawFromAnyWarehouse(ResourceProfile rp) {
+        var warehouses = FindObjectsOfType<Warehouse>();
+        foreach (var w in warehouses) {
+            float amount = Mathf.Min(rp.amount, w.GetAvailableContents(rp.resourceTag));
+            if (amount > 0) {
+                w.WithdrawContents(rp.resourceTag, amount);
+                rp.amount -= amount;
+            }
+
+            if (rp.amount <= 0.0f) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /// <summary>
+    /// Gets all available contents in all warehouses in game total
+    /// </summary>
+    /// <returns></returns>
+    public Dictionary<string, float> GetAllAvailableResources() {
+        var d = new Dictionary<string, float>();
+        var warehouses = FindObjectsOfType<Warehouse>();
+        foreach (var w in warehouses) {
+            var x = w.GetAllAvailableContents();
+            foreach (var kvp in x) {
+                if (d.ContainsKey(kvp.Key)) {
+                    d[kvp.Key] += kvp.Value;
+                } else {
+                    d[kvp.Key] = kvp.Value;
+                }
+            }
+        }
+        return d;
+    }
+
 	void FixedUpdate() {
+        //remove destroyed objects from selection list
+        selected.RemoveAll((s) => (s == null));
+
 		//mainLight.transform.eulerAngles += new Vector3(0, 0.2f, 0);
 		additiveSelect = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-	}
+    }
 
 	public void AddSelected(NeolithicObject sel) {
 		guiController.HideContextMenu();
@@ -136,9 +282,9 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-    public void StartBuildingPlacement(string type) {
+    public void StartBuildingPlacement(GameObject prefab) {
         GameUIController.instance.subMenu.ClearMenu();
-        buildingPlacer.Activate(type);
+        buildingPlacer.Activate(prefab);
     }
 
     private GameObject singleMouseCast(int layerMask) {
@@ -166,6 +312,12 @@ public class GameController : MonoBehaviour {
 		}
 		return sharedAbilities.ToArray();
 	}
+
+    public GameObject[] GetBuildableBuildings() {
+        UnityEngine.Object[] objects = Resources.LoadAll("Buildings", typeof(ConstructionManager));
+        var c = from o in objects select ((ConstructionManager)o).gameObject;
+        return c.ToArray();
+    }
 
 	public void StartBoxSelect() {
 		guiController.HideContextMenu();
@@ -258,7 +410,16 @@ public class GameController : MonoBehaviour {
 				    case "Hunt":
 					    newOrder = new HuntOrder(a, target.GetComponentInParent<Herd>());
 					    break;
-				}
+                    case "Fish":
+                        newOrder = new FishOrder(a, target);
+                        break;
+                    case "Construct":
+                        newOrder = new ConstructOrder(a, target);
+                        break;
+                    case "TearDown":
+                        newOrder = new TearDownOrder(a, target);
+                        break;
+                }
 
 				if (newOrder != null) {
 					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
@@ -374,7 +535,8 @@ public class GameController : MonoBehaviour {
                 return pile;
             }
         }
-        return null;
+        throw new ArgumentException("Unable to location prefab for resource tag " + typeTag);
+        //return null;
     }
 
     public void QuickSave() {

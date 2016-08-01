@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 
 [TestFixture]
@@ -147,5 +148,32 @@ public class WarehouseTests {
         Assert.AreEqual(4.0f, w.GetTotalContents("stone"));
         Assert.False(w.ReserveContents(go2, "stone", 5.0f));
         Assert.IsNull(go2.GetComponent<ResourceReservation>());
+    }
+
+    [Test]
+    public void TestGetAllAvailableContents() {
+        var go = new GameObject();
+        var go2 = new GameObject();
+        var w = go.AddComponent<Warehouse>();
+
+        var resourceContents = new ResourceProfile[] {
+            new ResourceProfile("fish", 2.0f),
+            new ResourceProfile("gold", 2.0f),
+        };
+
+        w.SetContents(resourceContents);
+        var availables = w.GetAllAvailableContents();
+        CollectionAssert.AreEquivalent(
+            new Dictionary<string, float>() {
+                { "fish", 2.0f },
+                { "gold", 2.0f },
+            },
+            availables);
+
+        w.ReserveContents(go2, "fish", 2.0f);
+        w.ReserveContents(go2, "gold", 1.0f);
+        availables = w.GetAllAvailableContents();
+        Assert.AreEqual(0.0f, availables["fish"]);
+        Assert.AreEqual(1.0f, availables["gold"]);
     }
 }

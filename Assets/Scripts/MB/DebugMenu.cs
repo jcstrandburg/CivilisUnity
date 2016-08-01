@@ -26,6 +26,7 @@ public class DebugMenu : MonoBehaviour {
         GameObject prefab = Resources.Load("Units/Worker") as GameObject;
         GameObject newWorker = Instantiate(prefab);
         newWorker.transform.position = spawn.position;
+        newWorker.transform.position = Camera.main.transform.position;
     }
 
     public void GameSpeed() {
@@ -34,5 +35,17 @@ public class DebugMenu : MonoBehaviour {
             Time.timeScale = 0.25f;
         }
         Debug.Log("Timescale: " + Time.timeScale);
+    }
+
+    public void PauseGame() {
+        GameController.instance.PauseGame();
+    }
+
+    public void ShowSaveGames() {
+        string[] games = GameController.instance.GetComponent<SaverLoader>().GetSaveGames();
+        Debug.Log("Found " + games.Length + " save games");
+        foreach (string s in games) {
+            Debug.Log(s);
+        }
     }
 }

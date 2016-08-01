@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class IdleOrder : BaseOrder {
     private Vector3 center, targetPosition;

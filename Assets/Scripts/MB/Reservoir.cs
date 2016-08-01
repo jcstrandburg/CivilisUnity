@@ -9,6 +9,7 @@ public class Reservoir : MonoBehaviour {
     public float regenRate;
     public float max;
 	public List<Reservation> reservations = new List<Reservation>();
+    private NeolithicObject nobject;
 
     public void Regen(float time) {
         amount += time * regenRate;
@@ -59,8 +60,12 @@ public class Reservoir : MonoBehaviour {
 	void FixedUpdate() {
         Regen(Time.fixedDeltaTime);
         UpdateReservations();
-        GetComponent<NeolithicObject>().statusString = string.Format("{0} reservations, {1} {2}", reservations.Count, amount.ToString("F1"), resourceTag);
+        nobject.statusString = string.Format("{0} reservations, {1} {2}", reservations.Count, amount.ToString("F1"), resourceTag);
 	}
+
+    void Start() {
+        nobject = GetComponent<NeolithicObject>();
+    }
 
 	public ResourceReservation NewReservation(GameObject go, float amount) {
         ResourceReservation r = go.AddComponent<ResourceReservation>();

@@ -36,6 +36,10 @@ public class TechManager {
         }
     }
 
+    public bool TechResearched(string techname) {
+        return researchedTechs.Contains(techname);
+    }
+
     public float BuyTech(string techName) {
         if (researchedTechs.Contains(techName)) {
             return 0.0f;

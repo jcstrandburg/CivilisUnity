@@ -1,0 +1,17 @@
+[
+	{
+		"name": "testStat1",
+		"persist": false,
+		"monotonic": false,
+	},
+	{
+		"name": "testStat2",
+		"persist": true,
+		"monotonic": false,
+	},
+	{
+		"name": "testStat3",
+		"persist": false,
+		"monotonic": true,
+	},
+]

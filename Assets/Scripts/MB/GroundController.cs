@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.EventSystems;
 using System.Linq;
 using System.Collections.Generic;
+using System;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -12,15 +13,15 @@ public class GroundControllerEditor : Editor {
     public override void OnInspectorGUI() {
         DrawDefaultInspector();
         GroundController groundController = (GroundController)target;
-        if (GUILayout.Button("RandomizeSeed")) {
-            groundController.RandomizeSeed();
-        }
         if (GUILayout.Button("Randomize Terrain")) {
-            groundController.RandomizeTerrain();
+            groundController.GenerateMap();
         }
         if (GUILayout.Button("Clear Resources")) {
             groundController.ClearResources();
         }
+        //if (GUILayout.Button("Cluster trees")) {
+        //    groundController.ClusterTrees();
+        //}
     }
 }
 #endif
@@ -50,9 +51,35 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
     public float treeThinning = 150.0f;
     public float treeMultiplier = 1 / 100.0f;
     public float berryMultiplier = 1 / 150.0f;
+    public float stoneRate = 0.17f;
+    public float fishRate = 0.2f;
+    public float doodadRate = 0.35f;
 
+    private List<GameObject> trees = new List<GameObject>();
+    private List<GameObject> berries = new List<GameObject>();
+    private static GroundController _instance = null;
+
+    public static GroundController instance {
+        get {
+            if (_instance == null) {
+                _instance = FindObjectOfType<GroundController>();
+            }
+            return _instance;
+        }
+    }
+
+    public void ApplySettings(NewGameSettings settings) {
+        this.floatSeed = settings.seed;
+        this.treeMultiplier = settings.treeMultiplier;
+        this.berryMultiplier = settings.berryMultiplier;
+        this.stoneRate = settings.stoneRate;
+        this.fishRate = settings.fishRate;
+        this.doodadRate = settings.doodadRate;       
+    }
+
+    [Obsolete("This should come from new game settings now")]
     public void RandomizeSeed() {
-        floatSeed = Random.Range(0.0f, 100.0f);
+        floatSeed = UnityEngine.Random.Range(0.0f, 100.0f);
     }
 
     //get height in range 0..1, 0..1
@@ -72,7 +99,10 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
         return Mathf.Min(mHeight+hHeight, rHeight)+bHeight;
     }
 
-    public void RandomizeTerrain() {
+    /// <summary>
+    /// Generates terrain mesh, textures, and resource objects
+    /// </summary>
+    public void GenerateMap() {
         Terrain terrain = GetComponent<Terrain>();
         float[,] heights = new float[terrain.terrainData.heightmapWidth, terrain.terrainData.heightmapHeight];
 
@@ -88,7 +118,53 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
         terrain.terrainData.SetHeights(0, 0, heights);
         GenerateSplatMap();
         GenerateResources();
+
+        ClusterResources(trees, 200.0f, 3.0f);
+        ClusterResources(berries, 400.0f, 12.0f);
     }
+
+    /// <summary>
+    /// Clusters the given resources together but averaging the positions of nearby resources
+    /// </summary>
+    /// <param name="objects"></param>
+    /// <param name="maxDist">The maximum distance on the XZ plane to consider objects at</param>
+    /// <param name="bias"></param>
+    public void ClusterResources(IEnumerable<GameObject> objects, float maxDist, float bias) {
+
+        //put the XZ coordinates in a dictionary by InstanceID so that we
+        //can tell which object we are comparing with
+        float squareMaxDist = maxDist * maxDist;
+        var points = new Dictionary<int, Vector2>();
+        foreach (var o in objects) {
+            var v = new Vector2(o.transform.position.x, o.transform.position.z);
+            points[o.GetInstanceID()] = v;
+        }
+
+        foreach (var o in objects) {
+            float weight = 0.0f;
+            var position = new Vector2(o.transform.position.x, o.transform.position.z);
+            Vector2 offset = new Vector2(0.0f, 0.0f);
+
+            foreach (var kvp in points) {
+                //get the difference between the position of this object and the camparison object
+                var diff = kvp.Value - position;
+
+                //if within max distance and not this object
+                if (kvp.Key != o.GetInstanceID() 
+                    && diff.sqrMagnitude <= squareMaxDist) 
+                {
+                    float localWeight = 1.0f / diff.magnitude;
+                    weight += localWeight;
+                    offset += localWeight * diff;
+                }
+            }
+            o.transform.position += (new Vector3(offset.x, 0.0f, offset.y))*bias;
+            if (o.GetComponent<NeolithicObject>()) {
+                o.GetComponent<NeolithicObject>().SnapToGround(true);
+            }
+        }
+    }
+    
 
     public float interp(float a, float b, float c) {
         float t = (c - a) / (b - a);//linear interpolation
@@ -138,11 +214,12 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
 
     private GameObject AttemptPlaceStoneOrGold(float x, float y, GameObject[] prefabs, float waterLevel, TerrainData terrainData) {
         float noise = Mathf.PerlinNoise(floatSeed + 29.5f * x, floatSeed*2 + 29.5f * y);
+        float noise2 = Mathf.PerlinNoise(floatSeed*2 + 29.5f * x, floatSeed * 3 + 29.5f * y);
         float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth),
                                              Mathf.RoundToInt(y * terrainData.heightmapHeight));
-        if (height > waterLevel && noise > 0.83f) {
+        if (height > waterLevel && noise < stoneRate) {
             Vector3 newPosition = randomizePosition(x, y, terrainData);
-            int index = (int)(Random.value * prefabs.Length);
+            int index = (int)(noise2 * prefabs.Length)%prefabs.Length;
             GameObject newObject = Instantiate(prefabs[index]);
             newObject.transform.position = newPosition;
             newObject.GetComponent<NeolithicObject>().SnapToGround(true);
@@ -155,11 +232,11 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
         float noise = Mathf.PerlinNoise(floatSeed*2 + 25.5f * x, floatSeed + 25.5f * y);
         float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth),
                                              Mathf.RoundToInt(y * terrainData.heightmapHeight));
-        if (height < waterLevel && noise < 0.20f) {
+        if (height < waterLevel && noise < fishRate) {
             Vector3 newPosition = randomizePosition(x, y, terrainData);
             GameObject newObject = Instantiate(prefab);
-            newObject.transform.position = newPosition;
-            newObject.GetComponent<NeolithicObject>().SnapToGround(true);
+            newObject.transform.position = new Vector3(newPosition.x, waterLevel, newPosition.z);
+            //newObject.GetComponent<NeolithicObject>().SnapToGround(true);
             return newObject;
         }
         return null;
@@ -167,11 +244,12 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
 
     private GameObject AttemptPlaceDoodad(float x, float y, GameObject[] prefabs, float waterLevel, TerrainData terrainData) {
         float noise = Mathf.PerlinNoise(floatSeed * 5 + 70f * x, floatSeed * 4 + 70f * y);
+        float noise2 = Mathf.PerlinNoise(floatSeed * 6 + 70f * x, floatSeed * 7 + 70f * y);
         float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth),
                                              Mathf.RoundToInt(y * terrainData.heightmapHeight));
-        if (height > waterLevel && noise > 0.65f) {
+        if (height > waterLevel && noise < doodadRate) {
             Vector3 newPosition = randomizePosition(x, y, terrainData);
-            int index = (int)(Random.value * prefabs.Length);
+            int index = (int)(noise2 * prefabs.Length) % prefabs.Length;
             GameObject newObject = Instantiate(prefabs[index]);
             newObject.transform.position = newPosition;
             newObject.GetComponent<NeolithicObject>().SnapToGround(true);
@@ -200,6 +278,9 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
             Destroy(go);
 #endif
         }
+
+        trees.Clear();
+        berries.Clear();
     }
 
 
@@ -214,7 +295,7 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
         GameObject stoneRocks = (GameObject)Resources.Load("Buildings/StoneRocks");
         GameObject goldRocks = (GameObject)Resources.Load("Buildings/GoldRocks");
         GameObject fish = (GameObject)Resources.Load("Prefabs/FishingHole");
-        GameObject berries = (GameObject)Resources.Load("Prefabs/ForagingGround");
+        GameObject berriesPrefab = (GameObject)Resources.Load("Buildings/ForagingGround");
 
         GameObject[] doodadPrefabs = new GameObject[] {
             (GameObject)Resources.Load("Doodads/DeadTree6"),
@@ -225,7 +306,6 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
         };
 
         float waterLevel = water.transform.position.y;
-
         TerrainData terrainData = GetComponent<Terrain>().terrainData;
         int resolution = 45;
         for (int x = 0; x < resolution; ++x) {
@@ -236,8 +316,10 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
                 GameObject newObject;
                 if ((newObject = AttemptPlaceTrees(x1, y1, tree, waterLevel, terrainData)) != null) {
                     newObject.transform.SetParent(resources);
-                } else if ((newObject = AttemptPlaceBerries(x1, y1, berries, waterLevel, terrainData)) != null) {
+                    trees.Add(newObject);
+                } else if ((newObject = AttemptPlaceBerries(x1, y1, berriesPrefab, waterLevel, terrainData)) != null) {
                     newObject.transform.SetParent(resources);
+                    berries.Add(newObject);
                 } else if ((newObject = AttemptPlaceStoneOrGold(x1, y1, new GameObject[] {stoneRocks, goldRocks}, waterLevel, terrainData)) != null) {
                     newObject.transform.SetParent(resources);
                 } else if ((newObject = AttemptPlaceFish(x1, y1, fish, waterLevel, terrainData)) != null) {

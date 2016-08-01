@@ -6,12 +6,11 @@ using System.Collections.Generic;
 using System;
 using System.Globalization;
 
-[assembly: AssemblyVersion("0.1.3.*")]
+[assembly: AssemblyVersion("0.2.0.*")]
 
 public class GameUIController : MonoBehaviour {
 
 	GameObject contextMenu;
-	//InputManager inputManager;
 	public SelectionMenuController selectionMenu;
     public SubMenuController subMenu;
     public GameObject debugMenu;
@@ -33,14 +32,12 @@ public class GameUIController : MonoBehaviour {
     private void MakeDataBindings() {
         dataBindings = new List<DataBinding>();
 
-        NumberFormatInfo nfi = new NumberFormatInfo();
-        nfi.NumberDecimalDigits = 0;
         Text spiritDataText = GameObject.Find("SpiritData").GetComponent<Text>();
         if (spiritDataText) {
             dataBindings.Add(new OneWayBinding<float>(() => {
                 return GameController.instance.spirit;
             }, (f) => {
-				spiritDataText.text = Mathf.Floor(f).ToString("n", nfi);
+				spiritDataText.text = f.ToString("N1");
             }));
         }
         Text foodbufferDataText = GameObject.Find("FoodbufferData").GetComponent<Text>();
@@ -48,7 +45,7 @@ public class GameUIController : MonoBehaviour {
             dataBindings.Add(new OneWayBinding<float>(() => {
                 return GameController.instance.foodbuffer;
             }, (f) => {
-				foodbufferDataText.text = Mathf.Floor(f).ToString("n", nfi);
+                foodbufferDataText.text = f.ToString("N1");
             }));
         }
     }
@@ -139,7 +136,7 @@ public class GameUIController : MonoBehaviour {
         GameObject y = GameObject.Find("Terrain");
         GroundController gc = y.GetComponent<GroundController>();
         gc.floatSeed = f;
-        gc.RandomizeTerrain();
+        gc.GenerateMap();
 
         NeolithicObject[] objects = GameObject.FindObjectsOfType<NeolithicObject>();
         foreach (NeolithicObject obj in objects) {
@@ -159,10 +156,14 @@ public class GameUIController : MonoBehaviour {
     }
 
     public void ShowBuildMenu() {
+        var buildings = GameController.instance.GetBuildableBuildings();
+
         subMenu.ClearMenu();
-        subMenu.AddButton("Gold", ()=>GameController.instance.StartBuildingPlacement("Buildings/GoldRocks"));
-        subMenu.AddButton("Hut", () => GameController.instance.StartBuildingPlacement("Buildings/Hut"));
-        subMenu.AddButton("Stone", () => GameController.instance.StartBuildingPlacement("Buildings/StoneRocks"));
-        subMenu.AddButton("Wood", () => GameController.instance.StartBuildingPlacement("Buildings/WoodSource"));
+        foreach (var building in buildings) {
+            var gc = GameController.instance;
+            GameObject prefab = building;
+            subMenu.AddButton(building.name,
+                            () => gc.StartBuildingPlacement(prefab));
+        }
     }
 }

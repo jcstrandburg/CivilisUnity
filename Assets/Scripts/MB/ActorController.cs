@@ -29,6 +29,7 @@ public class ActorController : NeolithicObject {
 	public BaseOrder currentOrder = null;
 	public bool idle = false;
     public bool followContours = true;
+    public float health = 1.0f;
 
     public GameObject palzy;//temp debugging object
     public int queueLength = 0;
@@ -41,16 +42,37 @@ public class ActorController : NeolithicObject {
 		base.Start();
 	}
 
+    public void OnDestroy() {
+        Debug.Log("I'm dead jim");
+        if (currentOrder != null) {
+            currentOrder.Cancel();
+        }
+        Reservation[] res = GetComponents<Reservation>();
+        foreach (var r in res) {
+            r.Cancelled = true;
+        }
+    }
+
 	public virtual void FixedUpdate() {
+        float feedMe = Time.fixedDeltaTime * 0.025f;
+        if (GameController.instance.foodbuffer > feedMe) {
+            GameController.instance.foodbuffer -= feedMe;
+            health = Mathf.Min(1.0f, health + feedMe);
+        } else {
+            health -= feedMe;
+        }
+
+        if (health <= 0.0f) {
+            Destroy(gameObject);
+            return;
+        }
+
 		if (currentOrder != null && currentOrder.Done) {
-			//Debug.Log("Removing completed order");
 			currentOrder = null;
-			//Debug.Log(currentOrder);
 		}
 
 		if (currentOrder == null) {
 			if (orderQueue.Count > 0) {
-				//Debug.Log("Retrieving queued order");
 				currentOrder = DequeueOrder();
                 idle = false;
 			} else {

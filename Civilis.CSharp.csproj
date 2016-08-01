@@ -75,6 +75,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Campfire Pack\Script\SwitchView.cs" />
+    <Compile Include="Assets\Campfire\Script\FireLightScript.cs" />
     <Compile Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ImageEffects\Scripts\Antialiasing.cs" />
     <Compile Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ImageEffects\Scripts\Bloom.cs" />
     <Compile Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ImageEffects\Scripts\BloomAndFlares.cs" />
@@ -114,28 +116,38 @@
     <Compile Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ImageEffects\Scripts\VignetteAndChromaticAberration.cs" />
     <Compile Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ImageEffects\Scripts\Vortex.cs" />
     <Compile Include="Assets\Scripts\Interfaces\IResourceStore.cs" />
+    <Compile Include="Assets\Scripts\Interfaces\IStatPersister.cs" />
     <Compile Include="Assets\Scripts\MB\ActorController.cs" />
     <Compile Include="Assets\Scripts\MB\AnimalController.cs" />
     <Compile Include="Assets\Scripts\MB\BuildingBlueprint.cs" />
     <Compile Include="Assets\Scripts\MB\CameraController.cs" />
+    <Compile Include="Assets\Scripts\MB\ConstructionManager.cs" />
+    <Compile Include="Assets\Scripts\MB\ConstructionReservation.cs" />
     <Compile Include="Assets\Scripts\MB\DebugMenu.cs" />
+    <Compile Include="Assets\Scripts\MB\FishingHole.cs" />
     <Compile Include="Assets\Scripts\MB\GameController.cs" />
+    <Compile Include="Assets\Scripts\MB\GameSceneTransitioner.cs" />
     <Compile Include="Assets\Scripts\MB\GroundController.cs" />
     <Compile Include="Assets\Scripts\MB\Herd.cs" />
     <Compile Include="Assets\Scripts\MB\NeolithicObject.cs" />
     <Compile Include="Assets\Scripts\MB\Reservation.cs" />
     <Compile Include="Assets\Scripts\MB\Reservoir.cs" />
     <Compile Include="Assets\Scripts\MB\Resource.cs" />
+    <Compile Include="Assets\Scripts\MB\ResourceReservation.cs" />
     <Compile Include="Assets\Scripts\MB\SelectHalo.cs" />
     <Compile Include="Assets\Scripts\MB\SelectionHandle.cs" />
     <Compile Include="Assets\Scripts\MB\SelectionMenuController.cs" />
+    <Compile Include="Assets\Scripts\MB\StatManager.cs" />
+    <Compile Include="Assets\Scripts\MB\StorageReservation.cs" />
     <Compile Include="Assets\Scripts\MB\SubMenuController.cs" />
     <Compile Include="Assets\Scripts\MB\Warehouse.cs" />
+    <Compile Include="Assets\Scripts\NonMono\GameStat.cs" />
+    <Compile Include="Assets\Scripts\NonMono\NewGameSettings.cs" />
     <Compile Include="Assets\Scripts\NonMono\ResourceProfile.cs" />
-    <Compile Include="Assets\Scripts\NonMono\ResourceReservation.cs" />
-    <Compile Include="Assets\Scripts\NonMono\StorageReservation.cs" />
+    <Compile Include="Assets\Scripts\NonMono\StreamStatPersistor.cs" />
     <Compile Include="Assets\Scripts\NonMono\TechManager.cs" />
     <Compile Include="Assets\Scripts\Orders\Simple\BaseOrder.cs" />
+    <Compile Include="Assets\Scripts\Orders\Simple\CatchFishOrder.cs" />
     <Compile Include="Assets\Scripts\Orders\Simple\ConvertResourceOrder.cs" />
     <Compile Include="Assets\Scripts\Orders\Simple\DumpCarriedResourceOrder.cs" />
     <Compile Include="Assets\Scripts\Orders\Simple\ExtractFromReservoirOrder.cs" />
@@ -147,8 +159,11 @@
     <Compile Include="Assets\Scripts\Orders\Simple\SimpleWithdrawOrder.cs" />
     <Compile Include="Assets\Scripts\Orders\Simple\SlaughterHuntedAnimalOrder.cs" />
     <Compile Include="Assets\Scripts\Orders\Simple\StoreReservationOrder.cs" />
+    <Compile Include="Assets\Scripts\Orders\Simple\TearDownOrder.cs" />
     <Compile Include="Assets\Scripts\Orders\Simple\WaitForReservationOrder.cs" />
+    <Compile Include="Assets\Scripts\Orders\Super\ConstructOrder.cs" />
     <Compile Include="Assets\Scripts\Orders\Super\FetchAvailableResourceOrder.cs" />
+    <Compile Include="Assets\Scripts\Orders\Super\FishOrder.cs" />
     <Compile Include="Assets\Scripts\Orders\Super\HarvestFromReservoirOrder.cs" />
     <Compile Include="Assets\Scripts\Orders\Super\HuntOrder.cs" />
     <Compile Include="Assets\Scripts\Orders\Super\OrderStateInfo.cs" />
@@ -177,8 +192,23 @@
     <Compile Include="Assets\Scripts\Serialization\Surrogates\TransformSurrogate.cs" />
     <Compile Include="Assets\Scripts\Serialization\Surrogates\Vector3Surrogate.cs" />
     <Compile Include="Assets\Scripts\Serialization\Utilities\TypeSystem.cs" />
+    <Compile Include="Assets\Scripts\UI\DataBindingSource.cs" />
     <Compile Include="Assets\Scripts\UI\DataBindings.cs" />
+    <Compile Include="Assets\Scripts\UI\FrontScreenController.cs" />
     <Compile Include="Assets\Scripts\UI\GameUIController.cs" />
+    <Compile Include="Assets\Scripts\UI\InputFieldBinding.cs" />
+    <Compile Include="Assets\Scripts\UI\LoadGameMenu.cs" />
+    <Compile Include="Assets\Scripts\UI\MenuController.cs" />
+    <Compile Include="Assets\Scripts\UI\MenuManager.cs" />
+    <Compile Include="Assets\Scripts\UI\NewGameMenu.cs" />
+    <Compile Include="Assets\Scripts\UI\PauseMenu.cs" />
+    <Compile Include="Assets\Scripts\UI\PlayGameSceneController.cs" />
+    <Compile Include="Assets\Scripts\UI\SaveGameMenu.cs" />
+    <Compile Include="Assets\Scripts\UI\SelectList.cs" />
+    <Compile Include="Assets\Scripts\UI\SelectListItem.cs" />
+    <Compile Include="Assets\Scripts\UI\SettingsMenu.cs" />
+    <Compile Include="Assets\Scripts\UI\SliderBinding.cs" />
+    <Compile Include="Assets\Scripts\UI\TextBinding.cs" />
     <Compile Include="Assets\Test\Mono\TestSaveable.cs" />
     <Compile Include="Assets\Test\NonMono\TestContainer.cs" />
     <Compile Include="Assets\Test\tuch\tuch.cs" />
@@ -226,6 +256,7 @@
     <Compile Include="Assets\UnityTestTools\IntegrationTestsFramework\TestingAssets\CallTesting.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Campfire\License.txt" />
     <None Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\GlassRefraction\Shaders\GlassStainedBumpDistort.shader" />
     <None Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ImageEffects\Shaders\BlendModesOverlay.shader" />
     <None Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ImageEffects\Shaders\BlurEffectConeTaps.shader" />
@@ -303,6 +334,7 @@
     <None Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ToonShading\Shaders\ToonLit.shader" />
     <None Include="Assets\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ToonShading\Shaders\ToonLitOutline.shader" />
     <None Include="Assets\Resources\Buildings\Blueprint.shader" />
+    <None Include="Assets\Resources\Buildings\BuildingGhost.shader" />
     <None Include="Assets\Scripts\Serialization\Surrogates\SurrogatesReadMe.txt" />
     <None Include="Assets\Standard Assets\Environment\Water (Basic)\Shaders\FXWaterBasic.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water\Shaders\FXWaterPro.shader" />

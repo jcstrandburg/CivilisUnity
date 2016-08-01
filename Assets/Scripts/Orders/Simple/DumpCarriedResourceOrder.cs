@@ -10,6 +10,7 @@ public class DumpCarriedResourceOrder : BaseOrder {
 
     public DumpCarriedResourceOrder(ActorController a) : base(a) {
         dump = GameObject.Find("DumpingGround");
+        dump.GetComponent<NeolithicObject>().SnapToGround();
     }
 
     public override void DoStep() {

@@ -30,6 +30,8 @@ public class NeolithicObject : MonoBehaviour {
 	public string[] targetActions;
 	public string[] abilities;
 
+    private SelectHalo halo;
+
     public void SnapToGround(bool force=false) {
         if (snapToGround || force) {
             transform.position = GameController.instance.SnapToGround(transform.position);
@@ -38,6 +40,7 @@ public class NeolithicObject : MonoBehaviour {
 
 	public virtual void Start() {
         SnapToGround();
+        halo = GetComponentInChildren<SelectHalo>();
 	}
 
     public void OnDeserialize() {
@@ -45,10 +48,12 @@ public class NeolithicObject : MonoBehaviour {
     }
 
 	public void SelectClick() {
-		if ( !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift)) {
-            GameController.instance.DeselectAll();
-		}
-		Select();
+        if (selectability != Selectability.Unselectable) {
+            if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift)) {
+                GameController.instance.DeselectAll();
+            }
+            Select();
+        }
 	}
 
 	public void ContextClick() {
@@ -74,7 +79,6 @@ public class NeolithicObject : MonoBehaviour {
 	}
 
 	public void Update() {
-		SelectHalo halo = GetComponentInChildren<SelectHalo>();
         if (halo) {
             halo.highlighted = selected || pointerHover;
         }

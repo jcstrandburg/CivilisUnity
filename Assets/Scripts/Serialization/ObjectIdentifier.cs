@@ -39,6 +39,8 @@ public class ObjectIdentifier : MonoBehaviour {
 	public string idParent;
 	public bool dontSave = false;
 
+
+#if UNITY_EDITOR
     public void Reset() {
         FindPrefab();
     }
@@ -52,6 +54,7 @@ public class ObjectIdentifier : MonoBehaviour {
             Debug.Log(path);
         }
     }
+#endif
 
     public bool HasID {
         get {

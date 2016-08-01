@@ -7,10 +7,10 @@ public class SimpleWithdrawOrder : BaseOrder {
     }
 
     public override void DoStep() {
-        Debug.Log("Mercy me");
-        Debug.Log(actor.resourceReservation);
-        Debug.Log(actor.resourceReservation.source);
-        Debug.Log(actor.resourceReservation.source.GetComponent<Warehouse>());
+        //Debug.Log("Mercy me");
+        //Debug.Log(actor.resourceReservation);
+        //Debug.Log(actor.resourceReservation.source);
+        //Debug.Log(actor.resourceReservation.source.GetComponent<Warehouse>());
         Warehouse w = actor.resourceReservation.source.GetComponent<Warehouse>();
         try {
             string tag = actor.resourceReservation.resourceTag;

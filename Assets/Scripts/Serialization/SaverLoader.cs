@@ -7,12 +7,26 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters;
+using UnityEngine.SceneManagement;
 
 public class SaverLoader : MonoBehaviour {
     private SaveLoadContext saveLoadContext = new SaveLoadContext();
     private Dictionary<string, GameObject> prefabDictionary;
     private List<string> surrogateSerializeFields = null;
     private List<string> customSerializeFields = null;
+
+    public string loadIntoScene;
+
+    private static SaverLoader _instance = null;
+    public static SaverLoader instance {
+        get {
+            if (_instance == null) {
+                _instance = FindObjectOfType<SaverLoader>();
+            }
+            return _instance;
+        }
+    }
 
     /// <summary>
     /// Caches and returns a list of all prefabs existing in the project
@@ -194,6 +208,7 @@ public class SaverLoader : MonoBehaviour {
                 continue;
             }
 
+            Debug.Log(objectIdentifier.name);
             objectIdentifier.SetID();
             goList.Add(objectIdentifier.gameObject);
         }
@@ -362,7 +377,8 @@ public class SaverLoader : MonoBehaviour {
         try {
             StreamingContext ctx = new StreamingContext(StreamingContextStates.All, saveLoadContext);
             SurrogateSelector ss = getSurrogateSelector(ctx);
-            BinaryFormatter bf = new BinaryFormatter(ss, ctx);
+            IFormatter bf = new BinaryFormatter(ss, ctx);
+            //bf.AssemblyFormat = FormatterAssemblyStyle.Simple; //this isn't doing what I think it should
             var path = Application.persistentDataPath + "/Saved Games/" + name + ".sav";
             SaveGame game = PackSaveGame(name);
             using (Stream stream = File.Create(path)) {
@@ -374,20 +390,37 @@ public class SaverLoader : MonoBehaviour {
     }
 
     public void LoadGame(string name="Quick") {
-        try {
-            saveLoadContext = new SaveLoadContext();
-            StreamingContext ctx = new StreamingContext(StreamingContextStates.All, saveLoadContext);
-            SurrogateSelector ss = getSurrogateSelector(ctx);
-            BinaryFormatter bf = new BinaryFormatter(ss, ctx);
-            var path = Application.persistentDataPath + "/Saved Games/" + name + ".sav";
-            using (Stream stream = File.Open(path, FileMode.Open)) {
-                SaveGame game = DeserializeSaveGame(bf, stream);
-                var sw = System.Diagnostics.Stopwatch.StartNew();
-                UnpackSaveGame(game);
-                Debug.Log(sw.ElapsedMilliseconds);
+        if (string.IsNullOrEmpty(loadIntoScene)) {
+            try {
+                saveLoadContext = new SaveLoadContext();
+                StreamingContext ctx = new StreamingContext(StreamingContextStates.All, saveLoadContext);
+                SurrogateSelector ss = getSurrogateSelector(ctx);
+                IFormatter bf = new BinaryFormatter(ss, ctx);
+                //bf.AssemblyFormat = FormatterAssemblyStyle.Simple; //this isn't doing what I think it should
+                var path = Application.persistentDataPath + "/Saved Games/" + name + ".sav";
+                using (Stream stream = File.Open(path, FileMode.Open)) {
+                    SaveGame game = DeserializeSaveGame(bf, stream);
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
+                    UnpackSaveGame(game);
+                    Debug.Log(sw.ElapsedMilliseconds);
+                }
             }
-        } catch (Exception e) {
-            Debug.Log(e);
+            catch (Exception e) {
+                Debug.Log(e);
+            }
+        } else {
+            GameObject go = new GameObject();
+            var transition = go.AddComponent<GameSceneTransitioner>();
+            transition.InitLoadGame(name);
+            SceneManager.LoadScene(loadIntoScene);
         }
+    }
+
+    public string[] GetSaveGames() {
+        string path = Application.persistentDataPath + "/Saved Games/";
+        return Directory
+            .GetFiles(path)
+            .Select<string, string>(Path.GetFileNameWithoutExtension)
+            .ToArray();
     }
 }

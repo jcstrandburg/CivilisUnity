@@ -65,7 +65,7 @@ public class Herd : MonoBehaviour {
     }
 
     public void RandomizePath() {
-        Debug.Log("Randomizing path");
+        //Debug.Log("Randomizing path");
         int pathSize = (int)Random.Range(8, 11);
         path = new Vector3[pathSize];
         for (int i = 0; i < pathSize; i++) {
@@ -74,7 +74,7 @@ public class Herd : MonoBehaviour {
         }
         currentNode = 1;
         nodeProgress = 0.0f;
-        Debug.Log("Done Randomizing path");
+        //Debug.Log("Done Randomizing path");
     }
 
 	void FixedUpdate() {

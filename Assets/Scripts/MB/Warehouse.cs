@@ -4,9 +4,23 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 
+#if UNITY_EDITOR
+using UnityEditor;
+
+[CustomEditor(typeof (Warehouse))]
+class WarehouseEditor : Editor {
+    public override void OnInspectorGUI() {
+        DrawDefaultInspector();
+        Warehouse w = (Warehouse)target;
+        if (GUILayout.Button("Normalize Contents/Limits")) {
+            w.FillInContentsGaps();
+        }
+    }
+}
+#endif
+
 // TODO: Remove finished reservations
 // TODO: Check to make sure reservations are for this warehouse before fulfilling them
-
 public class Warehouse : MonoBehaviour {
     public float totalCapacity;
     [SerializeField]
@@ -42,7 +56,7 @@ public class Warehouse : MonoBehaviour {
     /// <summary>
     /// Creates ResourceProfiles for any resource tags that are present in limits but not in 
     /// </summary>
-    private void fillInContentsGaps() {
+    public void FillInContentsGaps() {
         var diff = (from rp in resourceLimits select rp.resourceTag)
                     .Except(from rp in resourceContents select rp.resourceTag);
         var toAdd = new List<ResourceProfile>();
@@ -62,7 +76,7 @@ public class Warehouse : MonoBehaviour {
             list.Add((ResourceProfile)r.Clone());
         }
         resourceLimits = list.ToArray();
-        fillInContentsGaps();
+        FillInContentsGaps();
     }
 
     /// <summary>
@@ -75,10 +89,11 @@ public class Warehouse : MonoBehaviour {
             list.Add((ResourceProfile)r.Clone());
         }
         resourceContents = list.ToArray();
-        fillInContentsGaps();
+        FillInContentsGaps();
     }
 
     public float GetTotalAnyContents() {
+        if (!enabled) { return 0; }
         float t = 0.0f;
         foreach (ResourceProfile rp in resourceContents) {
             t += rp.amount;
@@ -92,6 +107,7 @@ public class Warehouse : MonoBehaviour {
     /// <param name="resourceTag"></param>
     /// <returns>Total deposited resources for the given tag</returns>
     public float GetTotalContents(string resourceTag) {
+        if (!enabled) { return 0; }
         foreach (ResourceProfile rp in resourceContents) {
             if (rp.resourceTag == resourceTag) {
                 return rp.amount;
@@ -120,11 +136,25 @@ public class Warehouse : MonoBehaviour {
     }
 
     /// <summary>
+    /// Gets total available contents for this warehouse
+    /// </summary>
+    /// <returns>Available contents in a dictionary</returns>
+    public Dictionary<string, float> GetAllAvailableContents() {
+        var d = new Dictionary<string, float>();
+        if (!enabled) { return d; }
+        foreach (var r in resourceContents) {
+            d[r.resourceTag] = GetAvailableContents(r.resourceTag);
+        }
+        return d;
+    }
+
+    /// <summary>
     /// 
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
     public float GetAvailableContents(string resourceTag) {
+        if (!enabled) { return 0; }
         return GetTotalContents(resourceTag) - GetReservedContents(resourceTag);
     }
 
@@ -134,6 +164,7 @@ public class Warehouse : MonoBehaviour {
     /// <param name="resourceTag"></param>
     /// <returns></returns>
     public float GetClaimedContents(string resourceTag) {
+        if (!enabled) { return 0; }
         float amount = 0.0f;
         foreach (ResourceReservation r in resourceReservations) {
             if (r.resourceTag == resourceTag && r.Ready) {
@@ -149,6 +180,7 @@ public class Warehouse : MonoBehaviour {
     /// <param name="resourceTag"></param>
     /// <returns></returns>
     public float GetUnclaimedContents(string resourceTag) {
+        if (!enabled) { return 0; }
         return GetTotalContents(resourceTag) - GetClaimedContents(resourceTag);
     }
 
@@ -158,6 +190,7 @@ public class Warehouse : MonoBehaviour {
     /// <param name="resourceTag"></param>
     /// <returns></returns>
     public float GetTotalStorage(string resourceTag) {
+        if (!enabled) { return 0; }
         float amount = 0.0f;
         foreach (ResourceProfile p in resourceLimits) {
             if (p.resourceTag == resourceTag) {
@@ -173,6 +206,7 @@ public class Warehouse : MonoBehaviour {
     /// <param name="resourceTag"></param>
     /// <returns></returns>
     public float GetReservedStorage(string resourceTag) {
+        if (!enabled) { return 0; }
         float amount = 0.0f;
         foreach (StorageReservation r in storageReservations) {
             if (!r.Released) {
@@ -188,7 +222,24 @@ public class Warehouse : MonoBehaviour {
     /// <param name="resourceTag"></param>
     /// <returns></returns>
     public float GetAvailableStorage(string resourceTag) {
+        if (!enabled) { return 0; }
         return GetTotalStorage(resourceTag) - GetTotalContents(resourceTag) - GetReservedStorage(resourceTag);
+    }
+
+    /// <summary>
+    /// Directly withdraws the specified resource without a reservation
+    /// </summary>
+    /// <param name="resTag"></param>
+    /// <param name="amount"></param>
+    public void WithdrawContents(string resTag, float amount) {
+        foreach (ResourceProfile rp in resourceContents) {
+            if (rp.resourceTag == resTag && rp.amount >= amount) {
+                rp.amount -= amount;
+                SendMessage("OnResourceWithdrawn", SendMessageOptions.DontRequireReceiver);
+                return;
+            }
+        }
+        throw new InvalidOperationException("Unable to withdraw reservation");
     }
 
     /// <summary>
@@ -216,7 +267,7 @@ public class Warehouse : MonoBehaviour {
             }
         }
         //Debug.Log(res);
-        throw new Exception("Unable to withdraw reservation");
+        throw new InvalidOperationException("Unable to withdraw reservation");
     }
 
     /// <summary>
@@ -271,5 +322,17 @@ public class Warehouse : MonoBehaviour {
     public void OnDestroy() {
         storageReservations.ForEach((r) => { if (!r.Released) r.Cancelled = true; });
         resourceReservations.ForEach((r) => { if (!r.Released) r.Cancelled = true; });
+    }
+
+    public void OnTearDown() {
+        Debug.Log("Tearing down");
+        foreach (var rc in resourceContents) {
+            while (rc.amount > 0.0f) {
+                rc.amount -= 1.0f;
+                var resource = GameController.instance.CreateResourcePile(rc.resourceTag, Mathf.Min(rc.amount, 1.0f));
+                resource.transform.position = transform.position;
+                resource.GetComponent<Resource>().SetDown();
+            }
+        }
     }
 }
