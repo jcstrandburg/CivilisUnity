@@ -118,6 +118,7 @@
     <Compile Include="Assets\Scripts\Interfaces\IResourceStore.cs" />
     <Compile Include="Assets\Scripts\Interfaces\IStatPersister.cs" />
     <Compile Include="Assets\Scripts\MB\ActorController.cs" />
+    <Compile Include="Assets\Scripts\MB\AlignChildrenWithTerrain.cs" />
     <Compile Include="Assets\Scripts\MB\AnimalController.cs" />
     <Compile Include="Assets\Scripts\MB\BuildingBlueprint.cs" />
     <Compile Include="Assets\Scripts\MB\CameraController.cs" />
