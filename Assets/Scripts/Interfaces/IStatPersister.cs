@@ -3,4 +3,5 @@
     void SetValue(string name, decimal value);
     void ImportValues();
     void ExportValues();
+    void Destroy();
 }

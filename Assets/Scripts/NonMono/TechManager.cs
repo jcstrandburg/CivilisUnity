@@ -5,16 +5,9 @@ using System.Linq;
 using System.Collections.Generic;
 
 [Serializable]
-public class Technology {
-    public string name;
-    public string displayName;
-    public string description;
-    public string[] requires;
-    public float cost;
-}
-
-[Serializable]
 public class TechManager {
+    [DontSaveField]
+    [NonSerialized]
     public Technology[] techs;
     public List<string> researchedTechs = new List<String>();
 
@@ -45,7 +38,7 @@ public class TechManager {
             return 0.0f;
         }
         foreach (Technology t in techs) {
-            if (t.name == techName) {
+            if (t.techName == techName) {
                 researchedTechs.Add(techName);
                 return t.cost;
             }
@@ -65,7 +58,7 @@ public class TechManager {
     public Technology[] GetEligibleTechs() {
         List<Technology> elligibles = new List<Technology>();
         foreach (Technology t in techs) {
-            if (!researchedTechs.Contains(t.name) && PrereqsMet(t)) {
+            if (!researchedTechs.Contains(t.techName) && PrereqsMet(t)) {
                 elligibles.Add(t);
             }
         }
@@ -73,12 +66,12 @@ public class TechManager {
     }
 
     public void Research(Technology t) {
-        if (researchedTechs.Contains(t.name)) {
-            throw new Exception("Technology already researched: " + t.name);
+        if (researchedTechs.Contains(t.techName)) {
+            throw new Exception("Technology already researched: " + t.techName);
         }
         if (!techs.Contains<Technology>(t)) {
-            throw new Exception("Unable to research tech: " + t.name);
+            throw new Exception("Unable to research tech: " + t.techName);
         }
-        researchedTechs.Add(t.name);
+        researchedTechs.Add(t.techName);
     }
 }

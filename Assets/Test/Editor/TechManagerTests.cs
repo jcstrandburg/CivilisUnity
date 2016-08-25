@@ -13,20 +13,8 @@ public class TechManagerTests {
     /// <summary>
     /// Helper function to build techs for testing purposes
     /// </summary>
-    /// <param name="name"></param>
-    /// <param name="displayName"></param>
-    /// <param name="desc"></param>
-    /// <param name="requires"></param>
-    /// <param name="cost"></param>
-    /// <returns></returns>
     private Technology MakeTech(string name, string displayName, string desc, string[] requires, float cost) {
-        Technology t = new Technology();
-        t.name = name;
-        t.displayName = displayName;
-        t.description = desc;
-        t.requires = requires;
-        t.cost = cost;
-        return t;
+        return Technology.Make(name, displayName, desc, requires, cost);
     }
 
     /// <summary>

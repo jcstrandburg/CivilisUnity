@@ -44,4 +44,9 @@ public class StreamStatPersistor : IStatPersistor {
         }
         w.Flush();
     }
+
+    public void Destroy() {
+        sourceStream.Close();
+        sourceStream.Dispose();
+    }
 }

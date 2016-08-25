@@ -1,9 +1,0 @@
-{
-	"name": "kingship",
-	"displayName": "Kingship",
-	"description": "Kingship desc",
-	"requires": [
-		"organizedReligion"
-	],
-	"cost": 7.0
-}

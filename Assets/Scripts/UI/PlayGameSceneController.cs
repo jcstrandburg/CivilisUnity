@@ -3,10 +3,10 @@ using System.Collections;
 
 public class PlayGameSceneController : MonoBehaviour {
     public void Awake() {
-        GameController.instance.UnpauseGame();
+        GameController.Instance.UnpauseGame();
     }
 
     public void UnpauseGame() {
-        GameController.instance.UnpauseGame();
+        GameController.Instance.UnpauseGame();
     }
 }

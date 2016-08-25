@@ -6,22 +6,14 @@ using UnityEngine;
 [Category("Statistic Tests")]
 public class StatTests {
 
-    private StatManager.StatProfile MakeStat(string name, bool persist, bool monotonic) {
-        var s = new StatManager.StatProfile();
-        s.name = name;
-        s.persist = persist;
-        s.monotonic = monotonic;
-        return s;
-    }
-
     [Test]
     [ExpectedException("System.ArgumentException")]
     public void MonotonicTest() {
         GameObject go = new GameObject();
         StatManager sm = go.AddComponent<StatManager>();
 
-        var stats = new StatManager.StatProfile[] {
-            MakeStat("monotonicStats", false, true),
+        var stats = new StatProfile[] {
+            StatProfile.Make("monotonicStats", false, true),
         };
         sm.SetPersistor(StatManager.DummyPersistor);
         sm.SetStats(stats);
@@ -35,10 +27,10 @@ public class StatTests {
         GameObject go = new GameObject();
         StatManager sm = go.AddComponent<StatManager>();
 
-        var stats = new StatManager.StatProfile[] {
-            MakeStat("stat1", false, false),
-            MakeStat("stat2", false, true),
-            MakeStat("stat3", true, false),
+        var stats = new StatProfile[] {
+            StatProfile.Make("stat1", false, false),
+            StatProfile.Make("stat2", false, true),
+            StatProfile.Make("stat3", true, false),
         };
         sm.SetPersistor(StatManager.DummyPersistor);
         sm.SetStats(stats);
@@ -66,10 +58,10 @@ public class StatTests {
 
     [Test]
     public void TestManagerPersistence() {
-        var stats = new StatManager.StatProfile[] {
-            MakeStat("stat1", false, false),
-            MakeStat("stat2", true, true),
-            MakeStat("stat3", true, false),
+        var stats = new StatProfile[] {
+            StatProfile.Make("stat1", false, false),
+            StatProfile.Make("stat2", true, true),
+            StatProfile.Make("stat3", true, false),
         };
         var stream = new MemoryStream();
 

@@ -11,24 +11,42 @@ public class Resource : MonoBehaviour {
     [DontSaveField]
     private NeolithicObject neolithicObject;
 
+    private GameController _gameController;
+    [Inject]
+    public GameController gameController {
+        get {
+            if (_gameController == null) {
+                _gameController = GameController.Instance;
+            }
+            return _gameController;
+        }
+        set { _gameController = value; }
+    }
+
     void Awake() {
         neolithicObject = GetComponent<NeolithicObject>();
     }
 
 	void Start() {
-        timer = lifeTime;
-        preserved = true;
+        if (timer == 0.0) {
+            timer = lifeTime;
+        }
+        //not sure why i thought this was a good idea
+        //preserved = true;
 	}
 
 	void FixedUpdate() {
         if (!preserved) {
             timer -= Time.fixedDeltaTime;
-            if (timer < 0) {
+            if (timer <= 0) {
+                //Debug.Log("Shoop da woop");
                 Destroy(gameObject);
             }
         }
 
-        neolithicObject.statusString = string.Format("{0} {1} {2:0.0}", amount, typeTag, timer);
+        //if (neolithicObject) {
+        //    neolithicObject.statusString = string.Format("{0} {1} {2:0.0}", amount, typeTag, timer);
+        //}
 	}
 
     public void Pickup() {
@@ -49,12 +67,16 @@ public class Resource : MonoBehaviour {
         neoObject.selectable = true;
         neoObject.SnapToGround();
         //GetComponent<NeolithicObject>().selectable = true;
+
+        var node = gameObject.AddComponent<LogisticsNode>();
         Warehouse w = gameObject.AddComponent<Warehouse>();
         ResourceProfile[] rp = new ResourceProfile[] {
             new ResourceProfile(typeTag, amount)
         };
+
         w.SetLimits(rp);
         w.SetContents(rp);
+        gameController.factory.InjectObject(gameObject);
     }
 
     public void OnResourceWithdrawn() {

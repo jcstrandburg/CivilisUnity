@@ -17,7 +17,8 @@ public class ReserveStorageOrder : BaseOrder {
     public override void DoStep() {
         string type = resource.typeTag;
         float amount = resource.amount;
-        if (GameController.instance.ReserveStorage(actor, type, amount)) {
+
+        if (actor.gameController.ReserveStorage(actor, type, amount)) {
             Debug.Log("Reserved storage");
             completed = true;
         }

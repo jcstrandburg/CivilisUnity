@@ -6,7 +6,7 @@ public class SaveGameMenu : MonoBehaviour {
     public InputField saveNameField;
 
     void Start() {
-        SaverLoader saverLoader = SaverLoader.instance;
+        SaverLoader saverLoader = GameController.Instance.saverLoader;
         string[] saves = saverLoader.GetSaveGames();
         SelectList list = GetComponentInChildren<SelectList>();
         if (list) {
@@ -25,7 +25,7 @@ public class SaveGameMenu : MonoBehaviour {
         var gameName = saveNameField.text;
         if (gameName != null) {
             Debug.Log("Saving game: " + gameName);
-            SaverLoader.instance.SaveGame(gameName);
+            GameController.Instance.saverLoader.SaveGame(gameName);
             GetComponent<MenuController>().PopMenu();
         } else {
             Debug.Log("NULL");

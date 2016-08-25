@@ -15,18 +15,8 @@ public class SaverLoader : MonoBehaviour {
     private Dictionary<string, GameObject> prefabDictionary;
     private List<string> surrogateSerializeFields = null;
     private List<string> customSerializeFields = null;
-
     public string loadIntoScene;
 
-    private static SaverLoader _instance = null;
-    public static SaverLoader instance {
-        get {
-            if (_instance == null) {
-                _instance = FindObjectOfType<SaverLoader>();
-            }
-            return _instance;
-        }
-    }
 
     /// <summary>
     /// Caches and returns a list of all prefabs existing in the project
@@ -115,7 +105,7 @@ public class SaverLoader : MonoBehaviour {
                 if (   (g = field.GetValue(component) as GameObject) != null
                     && (oid = g.GetComponent<ObjectIdentifier>()) != null
                     && oid.HasID) {
-                    newObjectComponent.references.Add(field.Name, new UnityObjectReference(oid.id, field.FieldType.Name));
+                    newObjectComponent.references.Add(field.Name, new UnityObjectReference(oid.id, field.FieldType.Name, g.name));
                 }
                 continue;
             }
@@ -125,7 +115,7 @@ public class SaverLoader : MonoBehaviour {
                 if ((mb = field.GetValue(component) as MonoBehaviour) != null
                     && (oid = mb.GetComponent<ObjectIdentifier>()) != null
                     && oid.HasID) {
-                    newObjectComponent.references.Add(field.Name, new UnityObjectReference(oid.id, field.FieldType.Name));
+                    newObjectComponent.references.Add(field.Name, new UnityObjectReference(oid.id, field.FieldType.Name, mb.name));
                 }
                 continue;
             }
@@ -208,7 +198,9 @@ public class SaverLoader : MonoBehaviour {
                 continue;
             }
 
-            Debug.Log(objectIdentifier.name);
+            if (string.IsNullOrEmpty(objectIdentifier.name)) {
+                Debug.Log("No identifier on GameObject " + objectIdentifier.gameObject.name);
+            }
             objectIdentifier.SetID();
             goList.Add(objectIdentifier.gameObject);
         }
@@ -271,9 +263,13 @@ public class SaverLoader : MonoBehaviour {
             //create a reference resolver to be called upon once all objects have been deserialized
             foreach (string fieldName in obc.references.Keys) {
                 UnityObjectReference r = obc.references[fieldName];
-                FieldInfo f = type.GetField(fieldName);
-                UnityObjectReferenceResolver resolver = new UnityObjectReferenceResolver(f, component, r, saveLoadContext);
-                saveLoadContext.refResolvers.Add(resolver);
+                FieldInfo f = type.GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (f == null) {
+                    Debug.Log("Unable to resolve fieldinfo for " + fieldName + " on "+obc.componentName);
+                } else {
+                    var resolver = new UnityObjectReferenceResolver(f, component, r, saveLoadContext);
+                    saveLoadContext.refResolvers.Add(resolver);
+                }
             }
         }
     }

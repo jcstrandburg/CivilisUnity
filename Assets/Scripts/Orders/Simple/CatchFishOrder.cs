@@ -11,7 +11,7 @@ public class CatchFishOrder : BaseOrder {
         progress += Time.fixedDeltaTime;
         if (progress >= 1.25f) {
             string rtag = "fish";
-            GameObject res = GameController.instance.CreateResourcePile(rtag, 1.0f);
+            GameObject res = actor.gameController.CreateResourcePile(rtag, 1.0f);
             actor.PickupResource(res);
             this.completed = true;
         }

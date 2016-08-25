@@ -15,7 +15,7 @@ public class SimpleWithdrawOrder : BaseOrder {
         try {
             string tag = actor.resourceReservation.resourceTag;
             w.WithdrawReservation(actor.resourceReservation);            
-            GameObject r = GameController.instance.CreateResourcePile(tag, 1.0f);
+            GameObject r = actor.gameController.CreateResourcePile(tag, 1.0f);
             actor.PickupResource(r);
             this.completed = true;
         }

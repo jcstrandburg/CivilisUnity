@@ -5,8 +5,19 @@ public class DebugMenu : MonoBehaviour {
 
     public bool test = false;
 
-	// Use this for initialization
-	void Start () {	
+    private GameController _gameController;
+    public GameController gameController {
+        get {
+            if (_gameController == null) {
+                _gameController = GameController.Instance;
+            }
+            return _gameController;
+        }
+        set { _gameController = value; }
+    }
+
+    // Use this for initialization
+    void Start () {	
 	}
 	
 	// Update is called once per frame
@@ -14,18 +25,16 @@ public class DebugMenu : MonoBehaviour {
 	}
 
     public void QuickSave() {
-        GameController.instance.QuickSave();
+        gameController.QuickSave();
     }
 
     public void QuickLoad() {
-        GameController.instance.QuickLoad();
+        gameController.QuickLoad();
     }
 
     public void AddWorker() {
-        Transform spawn = GameObject.Find("DumpingGround").transform;
         GameObject prefab = Resources.Load("Units/Worker") as GameObject;
-        GameObject newWorker = Instantiate(prefab);
-        newWorker.transform.position = spawn.position;
+        GameObject newWorker = gameController.factory.Instantiate(prefab);
         newWorker.transform.position = Camera.main.transform.position;
     }
 
@@ -38,11 +47,11 @@ public class DebugMenu : MonoBehaviour {
     }
 
     public void PauseGame() {
-        GameController.instance.PauseGame();
+        gameController.PauseGame();
     }
 
     public void ShowSaveGames() {
-        string[] games = GameController.instance.GetComponent<SaverLoader>().GetSaveGames();
+        string[] games = gameController.GetComponent<SaverLoader>().GetSaveGames();
         Debug.Log("Found " + games.Length + " save games");
         foreach (string s in games) {
             Debug.Log(s);

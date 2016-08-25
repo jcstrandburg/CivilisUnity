@@ -57,15 +57,16 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
 
     private List<GameObject> trees = new List<GameObject>();
     private List<GameObject> berries = new List<GameObject>();
-    private static GroundController _instance = null;
 
-    public static GroundController instance {
+    private GameController _gameController;
+    public GameController gameController {
         get {
-            if (_instance == null) {
-                _instance = FindObjectOfType<GroundController>();
+            if (_gameController == null) {
+                _gameController = GameController.Instance;
             }
-            return _instance;
+            return _gameController;
         }
+        set { _gameController = value; }
     }
 
     public void ApplySettings(NewGameSettings settings) {
@@ -190,7 +191,7 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
                                              Mathf.RoundToInt(y * terrainData.heightmapHeight));
         if (height > waterLevel && noise > height*treeMultiplier) {
             Vector3 newPosition = randomizePosition(x, y, terrainData);
-            GameObject newTree = Instantiate(prefab);
+            GameObject newTree = gameController.factory.Instantiate(prefab);
             newTree.transform.position = newPosition;
             newTree.GetComponent<NeolithicObject>().SnapToGround(true);
             return newTree;
@@ -204,7 +205,7 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
                                              Mathf.RoundToInt(y * terrainData.heightmapHeight));
         if (height > waterLevel && noise > height * berryMultiplier) {
             Vector3 newPosition = randomizePosition(x, y, terrainData);
-            GameObject newObject = Instantiate(prefab);
+            GameObject newObject = gameController.factory.Instantiate(prefab);
             newObject.transform.position = newPosition;
             newObject.GetComponent<NeolithicObject>().SnapToGround(true);
             return newObject;
@@ -220,7 +221,7 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
         if (height > waterLevel && noise < stoneRate) {
             Vector3 newPosition = randomizePosition(x, y, terrainData);
             int index = (int)(noise2 * prefabs.Length)%prefabs.Length;
-            GameObject newObject = Instantiate(prefabs[index]);
+            GameObject newObject = gameController.factory.Instantiate(prefabs[index]);
             newObject.transform.position = newPosition;
             newObject.GetComponent<NeolithicObject>().SnapToGround(true);
             return newObject;
@@ -234,7 +235,7 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
                                              Mathf.RoundToInt(y * terrainData.heightmapHeight));
         if (height < waterLevel && noise < fishRate) {
             Vector3 newPosition = randomizePosition(x, y, terrainData);
-            GameObject newObject = Instantiate(prefab);
+            GameObject newObject = gameController.factory.Instantiate(prefab);
             newObject.transform.position = new Vector3(newPosition.x, waterLevel, newPosition.z);
             //newObject.GetComponent<NeolithicObject>().SnapToGround(true);
             return newObject;
@@ -250,7 +251,7 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
         if (height > waterLevel && noise < doodadRate) {
             Vector3 newPosition = randomizePosition(x, y, terrainData);
             int index = (int)(noise2 * prefabs.Length) % prefabs.Length;
-            GameObject newObject = Instantiate(prefabs[index]);
+            GameObject newObject = gameController.factory.Instantiate(prefabs[index]);
             newObject.transform.position = newPosition;
             newObject.GetComponent<NeolithicObject>().SnapToGround(true);
             return newObject;
@@ -409,10 +410,10 @@ public class GroundController : MonoBehaviour, IPointerDownHandler {
 	public void OnPointerDown(PointerEventData eventData) {
 		switch (eventData.button) {
 		case PointerEventData.InputButton.Left:
-			GameController.instance.StartBoxSelect();
+            gameController.StartBoxSelect();
 			break;
 		case PointerEventData.InputButton.Right:
-            GameController.instance.IssueMoveOrder(eventData);
+            gameController.IssueMoveOrder(eventData);
 			break;
 		}
 	}

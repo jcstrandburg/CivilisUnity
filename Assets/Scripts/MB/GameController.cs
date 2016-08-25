@@ -30,44 +30,101 @@ public class GameController : MonoBehaviour {
 	Vector2 boxEnd;
 	public bool boxActive = false;
 	public bool additiveSelect = false;
-    public BuildingBlueprint _buildingPlacer;
     public List<Resource> resourcePrefabs;
     public TechManager techmanager;
 
-    [SerializeField]
-    private float _foodbuffer = 6.0f;
-    private float _spirit = 0.0f;
-    private GameUIController guiController;
+    public GameFactory factory = new GameFactory();
 
-    private static GameObject _object = null;
     private static GameController _instance = null;
-
-	public static GameController instance {
-		get {
-			if (_object == null || _instance == null) {
-				_object = GameObject.Find("_Scripts");
-				_instance = _object.GetComponent<GameController>();
-			}
-			return _instance;
-		}
-	}
-
-    private MenuManager menuManager {
+    public static GameController Instance {
         get {
-            var go = GameObject.Find("MenuManager");
-            return go.GetComponent<MenuManager>();
+            if (_instance == null) {
+                _instance = FindObjectOfType<GameController>();
+            }
+            return _instance;
         }
     }
 
-    public float foodbuffer {
+    private GameUIController _guiController;
+    public GameUIController guiController {
         get {
-            return _foodbuffer;
+            if (_guiController == null) {
+                _guiController = FindObjectOfType<GameUIController>();
+            }
+            return _guiController;
         }
         set {
-            _foodbuffer = value;
+            _guiController = value;
         }
     }
 
+    private GroundController _groundController;
+    public GroundController groundController {
+        get {
+            if (_groundController == null) {
+                _groundController = FindObjectOfType<GroundController>();
+            }
+            return _groundController;
+        }
+        set {
+            _groundController = value;
+        }
+    }
+
+    private StatManager _statManager;
+    public StatManager statManager {
+        get {
+            if (_statManager == null) {
+                _statManager = FindObjectOfType<StatManager>();
+            }
+            return _statManager;
+        }
+        set {
+            _statManager = value;
+        }
+    }
+
+    private SaverLoader _saverLoader;
+    public SaverLoader saverLoader {
+        get {
+            if (_saverLoader == null) {
+                _saverLoader = FindObjectOfType<SaverLoader>();
+            }
+            return _saverLoader;
+        }
+        set {
+            _saverLoader = value;
+        }
+    }
+
+    private MenuManager _menuManager;
+    public MenuManager menuManager {
+        get {
+            if (_menuManager == null) {
+                _menuManager = FindObjectOfType<MenuManager>();
+            }
+            return _menuManager;
+        }
+        set {
+            _menuManager = value;
+        }
+    }
+
+    private LogisticsManager _logisticsManager;
+    public LogisticsManager logisticsManager {
+        get {
+            if (_logisticsManager == null) {
+                _logisticsManager = FindObjectOfType<LogisticsManager>();
+            }
+            return _logisticsManager;
+        }
+        set {
+            _logisticsManager = value;
+        }
+    }
+
+    [SerializeField]
+    private float _spirit = 0.0f;
     public float spirit {
         get {
             return _spirit;
@@ -77,6 +134,7 @@ public class GameController : MonoBehaviour {
         }
     }
 
+    public BuildingBlueprint _buildingPlacer;
     private BuildingBlueprint buildingPlacer {
         get {
             if (_buildingPlacer == null) {
@@ -95,11 +153,11 @@ public class GameController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        UnityEngine.Object[] objects = Resources.LoadAll("Techs", typeof(TextAsset));
         guiController = GameObject.Find("GameUI").GetComponent<GameUIController>();
-        string[] jsonText = Array.ConvertAll(objects, (x) => ((TextAsset)x).text);
+        var techs = from t in Resources.LoadAll("Techs", typeof(Technology))
+                    select (Technology)t;
         techmanager = new TechManager();
-        techmanager.LoadTree(jsonText);
+        techmanager.LoadArray(techs.ToArray());
 
         resourcePrefabs = new List<Resource>();
         var allFiles = Resources.LoadAll<UnityEngine.Object>("");
@@ -109,8 +167,7 @@ public class GameController : MonoBehaviour {
                     resourcePrefabs.Add(((GameObject)obj).GetComponent<Resource>());
                 }
             }
-        }
-        InvokeRepeating("KeepFoodBufferFilled", 1.0f, 0.5f);
+        }        
     }
 
     void OnDeserialize() {
@@ -122,12 +179,12 @@ public class GameController : MonoBehaviour {
     }
 
     public void BuyTech(Technology t) {
-        Debug.Log("Researching tech: " + t.name);
+        Debug.Log("Researching tech: " + t.techName);
 		if (t.cost <= this.spirit) {
 			this.spirit -= t.cost;
 			techmanager.Research(t);
 		}
-        GameUIController.instance.subMenu.ClearMenu();
+        guiController.subMenu.ClearMenu();
     }
 
     /// <summary>
@@ -169,62 +226,6 @@ public class GameController : MonoBehaviour {
         Vector3 normal = td.GetInterpolatedNormal(normalizedPos.x, normalizedPos.y);
         return normal;
     }
-
-    /// <summary>
-    /// Calculates the value of a given collection of food resources, 
-    /// with increasing value for greater variety of food types
-    /// </summary>
-    /// <param name="resources"></param>
-    /// <returns>Food value</returns>
-    public float CalcFoodValue(IEnumerable<ResourceProfile> resources) {
-        var p = resources.OrderBy((ResourceProfile rp) => -rp.amount).ToArray();
-        if (p.Count() == 0 || p.Count() > 3) {
-            throw new ArgumentException("Unexpected resource count " + resources.Count());
-        }
-
-        float returnMe = 0.0f;
-        for (int i = 0; i < p.Length; i++) {
-            returnMe += (i + 1) * p[i].amount;
-        }
-        return returnMe;
-    }
-
-    /// <summary>
-    /// Run in the background via InvokeRepeating, attempts to consume 
-    /// food from any source to keep the food buffer filled
-    /// </summary>
-    /// <todo>Rework to use a logistics system</todo>
-    void KeepFoodBufferFilled() {
-        if (foodbuffer < 3.0f) {
-            var warehouses = FindObjectsOfType<Warehouse>();
-            var tags = new List<string> { "meat", "vegetables", "fish" };
-            var tagsToRemove = new List<string>();
-            var resources = new List<ResourceProfile>();
-
-            foreach (var w in warehouses) {
-                foreach (var t in tags) {
-                    if (w.GetAvailableContents(t) >= 1.0f) {
-                        tagsToRemove.Add(t);
-                        w.WithdrawContents(t, 1.0f);
-                        resources.Add(new ResourceProfile(t, 1.0f));
-                    }
-                }
-                foreach (var t in tagsToRemove) {
-                    tags.Remove(t);
-                }
-                tagsToRemove.Clear();
-
-                if (tags.Count == 0) {
-                    break;
-                }
-            }
-
-            if (resources.Count > 0) {
-                foodbuffer += CalcFoodValue(resources);
-            }
-        }
-    }
-
 
     public bool WithdrawFromAnyWarehouse(ResourceProfile rp) {
         var warehouses = FindObjectsOfType<Warehouse>();
@@ -283,7 +284,7 @@ public class GameController : MonoBehaviour {
 	}
 
     public void StartBuildingPlacement(GameObject prefab) {
-        GameUIController.instance.subMenu.ClearMenu();
+        guiController.subMenu.ClearMenu();
         buildingPlacer.Activate(prefab);
     }
 
@@ -305,9 +306,9 @@ public class GameController : MonoBehaviour {
 		}
 		foreach (NeolithicObject s in selected) {
 			if (sharedAbilities == null) {
-				sharedAbilities = s.abilities;
+				sharedAbilities = s.actionProfile.abilities;
 			} else {
-				sharedAbilities = s.abilities.Intersect(sharedAbilities);
+				sharedAbilities = s.actionProfile.abilities.Intersect(sharedAbilities);
 			}
 		}
 		return sharedAbilities.ToArray();
@@ -383,7 +384,7 @@ public class GameController : MonoBehaviour {
 
 	public void DoContextMenu(NeolithicObject clickee) {
 		string[] selectedActions = getSelectedAbilities();
-		string[] availableActions = selectedActions.Intersect(clickee.targetActions).ToArray();
+		string[] availableActions = selectedActions.Intersect(clickee.actionProfile.targetActions).ToArray();
 		//Debug.Log(string.Join(", ", availableActions));
 		guiController.ShowContextMenu(availableActions, clickee);
 	}
@@ -507,7 +508,10 @@ public class GameController : MonoBehaviour {
 	}
 
     public ResourceReservation ReserveWarehouseResources(ActorController a, string tag, float amount) {
-        Warehouse[] warehouses = FindObjectsOfType<Warehouse>();
+        var la = a.GetComponent<LogisticsActor>();
+        var network = la.logisticsManager.FindNearestNetwork(a.transform.position);
+
+        Warehouse[] warehouses = network.FindComponents<Warehouse>();
         foreach (Warehouse w in warehouses) {
             if (w.ReserveContents(a.gameObject, tag, amount)) {
                 return a.resourceReservation;
@@ -517,7 +521,9 @@ public class GameController : MonoBehaviour {
     }
 
     public StorageReservation ReserveStorage(ActorController a, string tag, float amount) {
-        Warehouse[] warehouses = FindObjectsOfType<Warehouse>();
+        var la = a.GetComponent<LogisticsActor>();
+        var network = la.logisticsManager.FindNearestNetwork(a.transform.position);
+        Warehouse[] warehouses = network.FindComponents<Warehouse>();
         foreach (Warehouse w in warehouses) {
             if (w.ReserveStorage(a.gameObject, tag, amount)) {
                 return a.GetComponent<StorageReservation>();
@@ -528,8 +534,8 @@ public class GameController : MonoBehaviour {
 
     public GameObject CreateResourcePile(string typeTag, float amount) {
         foreach (Resource g in resourcePrefabs) {
-            if (g.typeTag == typeTag) { 
-                GameObject pile = (GameObject)Instantiate(g.gameObject);
+            if (g.typeTag == typeTag) {
+                GameObject pile = factory.Instantiate(g.gameObject);
                 Resource r = pile.GetComponent<Resource>();
                 r.amount = amount;
                 return pile;

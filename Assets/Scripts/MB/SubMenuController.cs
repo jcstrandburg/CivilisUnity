@@ -23,7 +23,7 @@ public class SubMenuController : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
 	public Button AddButton(string label, UnityEngine.Events.UnityAction action) {
         gameObject.SetActive(true);
-        GameObject newButton = Instantiate(buttonPrefab);
+        GameObject newButton = GameController.Instance.factory.Instantiate(buttonPrefab);
         newButton.transform.SetParent(transform);
 
         newButton.GetComponent<Button>().onClick.AddListener(action);
@@ -33,7 +33,7 @@ public class SubMenuController : MonoBehaviour, IPointerEnterHandler, IPointerEx
     }
 
 	public void Update() {
-		if (Input.GetMouseButtonDown (0) || Input.GetMouseButtonDown (1)) {
+		if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) {
 			if (!pointerOver) {
 				Debug.Log ("Clearing submenu due to mouse event!");
 				ClearMenu();

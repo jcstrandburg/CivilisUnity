@@ -50,7 +50,8 @@ public class ObjectIdentifier : MonoBehaviour {
         if (obj != null) {
             string path = AssetDatabase.GetAssetPath(obj);
             string name = obj.name;
-            prefabName = name;
+            this.prefabName = name;
+            this.name = name;
             Debug.Log(path);
         }
     }

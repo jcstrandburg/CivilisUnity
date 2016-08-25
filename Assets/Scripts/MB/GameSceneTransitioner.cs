@@ -22,11 +22,12 @@ public class GameSceneTransitioner : MonoBehaviour {
         Debug.Log("Level was loaded");
         if (loadGameName != null) {
             Debug.Log("I wanna load " + loadGameName);
-            SaverLoader.instance.LoadGame(loadGameName);
+            GameController.Instance.saverLoader.LoadGame(loadGameName);
         } else {
             Debug.Log("I don't know what to do here");
-            GroundController.instance.ApplySettings(newGameSettings);
-            GroundController.instance.GenerateMap();
+            var groundController = GameController.Instance.groundController;
+            groundController.ApplySettings(newGameSettings);
+            groundController.GenerateMap();
         }
         Destroy(gameObject);
     }

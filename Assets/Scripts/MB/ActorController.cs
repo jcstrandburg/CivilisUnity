@@ -36,14 +36,15 @@ public class ActorController : NeolithicObject {
 
     public StorageReservation storageReservation { get { return GetComponentInChildren<StorageReservation>(); } }
     public ResourceReservation resourceReservation { get { return GetComponentInChildren<ResourceReservation>(); } }
+    public LogisticsActor logisticsActor;
 
 	// Use this for initialization
 	public override void Start () {
 		base.Start();
+        logisticsActor = GetComponent<LogisticsActor>();
 	}
 
     public void OnDestroy() {
-        Debug.Log("I'm dead jim");
         if (currentOrder != null) {
             currentOrder.Cancel();
         }
@@ -55,8 +56,10 @@ public class ActorController : NeolithicObject {
 
 	public virtual void FixedUpdate() {
         float feedMe = Time.fixedDeltaTime * 0.025f;
-        if (GameController.instance.foodbuffer > feedMe) {
-            GameController.instance.foodbuffer -= feedMe;
+        LogisticsNetwork network = logisticsActor.logisticsManager.FindNearestNetwork(transform.position);
+
+        if (network != null && network.foodbuffer > feedMe) {
+            network.foodbuffer -= feedMe;
             health = Mathf.Min(1.0f, health + feedMe);
         } else {
             health -= feedMe;
@@ -159,7 +162,6 @@ public class ActorController : NeolithicObject {
             Debug.Log("No carried resource to drop");
             return;
         }
-        r.transform.SetParent(transform.parent);
         float range = 3.5f;
         Vector3 randomVector = new Vector3(UnityEngine.Random.Range(-range, range), .1f, UnityEngine.Random.Range(-range, range));
         r.transform.position = transform.position + randomVector;

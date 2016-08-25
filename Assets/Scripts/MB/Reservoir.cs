@@ -25,7 +25,7 @@ public class Reservoir : MonoBehaviour {
     }
 
     public void UpdateReservations() {
-        reservations.RemoveAll((r) => { return r.Released || r.Cancelled; });
+        //reservations.RemoveAll((r) => { return r.Released || r.Cancelled; });
         float availAmount = amount;
         foreach (ResourceReservation res in reservations) {
             if (availAmount > res.amount) {

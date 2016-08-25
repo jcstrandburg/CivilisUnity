@@ -2,27 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System;
 
 public class StatManager : MonoBehaviour {
 
-    public struct StatProfile {
-        public string name;
-        public bool persist;
-        public bool monotonic;
-    }
-
+    [SerializeField]
     private Dictionary<string, GameStat> stats = new Dictionary<string, GameStat>();
+    [DontSaveField]
+    [NonSerialized]
     private IStatPersistor persistor;
-    private static StatManager instance;
 
-    public static StatManager Instance {
-        get {
-            if (instance == null) {
-                instance = FindObjectOfType<StatManager>();
-            }
-            return instance;
-        }
-    }
 
     public static IStatPersistor DummyPersistor {
         get {
@@ -61,15 +51,20 @@ public class StatManager : MonoBehaviour {
     public void SetStats(IEnumerable<StatProfile> statProfiles) {
         stats.Clear();
         foreach (var profile in statProfiles) {
-            var s = new GameStat(profile.name, profile.persist, profile.monotonic);
+            var s = new GameStat(profile.statname, profile.persist, profile.monotonic);
             s.SetPersistor(Persistor);
-            stats[profile.name] = s;
+            stats[profile.statname] = s;
         }
     }
 
     void Start() {
-        TextAsset statsAsset = (TextAsset)Resources.Load("stats", typeof(TextAsset));
-        var profiles = JsonUtility.FromJson<StatProfile[]>(statsAsset.text);
+        UnityEngine.Object[] allstats = Resources.LoadAll("Stats", typeof(StatProfile));
+        StatProfile[] profiles = (from r in allstats select (StatProfile)r).ToArray();
         SetStats(profiles);
+    }
+
+    //this is kinda hacky, probably need to rewrite the interface for persistor
+    public void OnDisable() {
+        persistor.Destroy();
     }
 }

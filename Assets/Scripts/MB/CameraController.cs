@@ -37,9 +37,30 @@ public class CameraController : MonoBehaviour {
     Vector3 targetPos;
     //target x rotation being lerped to
     Vector3 targetRot;
-
     //helper variables to serialize camera settings
     private Quaternion cameraRotation;
+
+    private GameController _gameController;
+    public GameController gameController {
+        get {
+            if (_gameController == null) {
+                _gameController = GameController.Instance;
+            }
+            return _gameController;
+        }
+        set { _gameController = value; }
+    }
+
+    private GroundController _groundController;
+    public GroundController groundController {
+        get {
+            if (_groundController == null) {
+                _groundController = gameController.groundController;
+            }
+            return _groundController;
+        }
+        set { _groundController = value; }
+    }
 
     public void Start() {
         targetPos = transform.position;
@@ -74,7 +95,7 @@ public class CameraController : MonoBehaviour {
 
         //screen edge scrolling
         Vector3 mousePos = Input.mousePosition;
-        if (edgeScrolling && !GameController.instance.boxActive && mousePos.x >= 0.0f && mousePos.y >= 0.0 && mousePos.x < Screen.width && mousePos.y < Screen.width) {
+        if (edgeScrolling && !gameController.boxActive && mousePos.x >= 0.0f && mousePos.y >= 0.0 && mousePos.x < Screen.width && mousePos.y < Screen.width) {
             float xScroll = 0.0f, yScroll = 0.0f;
             if (mousePos.x < screenMargin && mousePos.x >= 0.0f) {
                 xScroll = tranSpeed * (-1.0f + Mathf.Min(mousePos.x / screenMargin, 1.0f - minScrollRatio));
@@ -128,19 +149,18 @@ public class CameraController : MonoBehaviour {
                                     cam.transform.eulerAngles.z);
             //hover off the ground, hover a little higher when pointing towards the ground
             float hoverBias = 1.0f + (cam.transform.eulerAngles.x / 90.0f);
-            Vector3 intermediate = GameController.instance.SnapToGround(targetPos);
-            intermediate += new Vector3(0.0f, Mathf.Max(0.0f, GroundController.instance.waterLevel - intermediate.y), 0.0f);
+            Vector3 intermediate = gameController.SnapToGround(targetPos);
+            intermediate += new Vector3(0.0f, Mathf.Max(0.0f, groundController.waterLevel - intermediate.y), 0.0f);
             targetPos = intermediate + new Vector3(0.0f, hoverBias * hover, 0.0f);
-        }
-        else {
+        } else {
             float z = -zoomLevel/2.0f;
             cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, maxFov, lerpSpeed);
             float xRot = Mathf.Lerp(7.0f, 85.0f, xRotateLevel);
             targetRot = new Vector3(Mathf.Lerp(xRot, 90.0f, Mathf.Min(z * strategicRotation, 1.0f)),
-                                                cam.transform.eulerAngles.y,
-                                                cam.transform.eulerAngles.z);
+                                    cam.transform.eulerAngles.y,
+                                    cam.transform.eulerAngles.z);
             Vector3 tempPos = new Vector3(targetPos.x, Mathf.Lerp(hover * 2, strategicZoomMaxHeight, z), targetPos.z);
-            Vector3 tempPos2 = GameController.instance.SnapToGround(tempPos);
+            Vector3 tempPos2 = gameController.SnapToGround(tempPos);
             targetPos = new Vector3(tempPos.x, Mathf.Max(tempPos.y, tempPos2.y + hover * 2), tempPos.z);
         }
 

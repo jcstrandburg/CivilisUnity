@@ -34,11 +34,16 @@ public class Herd : MonoBehaviour {
     public Vector3 rabbitPos;//debugging variable
     public List<AnimalController> animals = new List<AnimalController>();
 
-    //public int pathLength {
-    //    get {
-    //        return path.Length;
-    //    }
-    //}
+    private GameController _gameController;
+    public GameController gameController {
+        get {
+            if (_gameController == null) {
+                _gameController = GameController.Instance;
+            }
+            return _gameController;
+        }
+        set { _gameController = value; }
+    }
 
     void Awake() {
         RandomizePath();
@@ -70,7 +75,7 @@ public class Herd : MonoBehaviour {
         path = new Vector3[pathSize];
         for (int i = 0; i < pathSize; i++) {
             path[i] = transform.position + Quaternion.Euler(0, (float)i / pathSize * 360.0f + Random.Range(-10, 10), 0) * transform.forward * Random.Range(25.0f, 50.0f);
-            path[i] = GameController.instance.SnapToGround(path[i]);
+            path[i] = gameController.SnapToGround(path[i]);
         }
         currentNode = 1;
         nodeProgress = 0.0f;
@@ -90,7 +95,7 @@ public class Herd : MonoBehaviour {
 	}
 
     public void SpawnNewAnimal() {
-        GameObject child = Instantiate(animalPrefab);
+        GameObject child = gameController.factory.Instantiate(animalPrefab);
         child.transform.position = GetRabbitLocation();
         child.transform.parent = transform;
         AnimalController newAnimal = child.GetComponent<AnimalController>();
@@ -108,7 +113,7 @@ public class Herd : MonoBehaviour {
         }
         else {
             rabbit.transform.position = Vector3.Lerp(path[prevNode], path[currentNode], nodeProgress / diff.magnitude);
-            rabbit.transform.position = GameController.instance.SnapToGround(rabbit.transform.position);
+            rabbit.transform.position = gameController.SnapToGround(rabbit.transform.position);
             rabbitPos = rabbit.transform.position;
         }
     }

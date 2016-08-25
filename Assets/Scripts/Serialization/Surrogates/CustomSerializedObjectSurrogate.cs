@@ -29,7 +29,7 @@ public class CustomSerializedObjectSurrogate : ISerializationSurrogate {
                 if ((g = f.GetValue(obj) as GameObject) != null
                     && (oid = g.GetComponent<ObjectIdentifier>()) != null
                     && oid.HasID) {
-                    r = new UnityObjectReference(oid.id, f.FieldType.Name);
+                    r = new UnityObjectReference(oid.id, f.FieldType.Name, g.name);
                     info.AddValue(f.Name, r);
                 }
             } else if (f.FieldType.IsSubclassOf(typeof(MonoBehaviour))) {
@@ -42,7 +42,7 @@ public class CustomSerializedObjectSurrogate : ISerializationSurrogate {
                 if (  (mb = f.GetValue(obj) as MonoBehaviour) != null
                    && (oid = mb.GetComponent<ObjectIdentifier>()) != null
                    && oid.HasID) {
-                    r = new UnityObjectReference(oid.id, f.FieldType.Name);
+                    r = new UnityObjectReference(oid.id, f.FieldType.Name, mb.name);
                     info.AddValue(f.Name, r);
                 }
             } else if (sContext.FieldSerializeable(f)) {

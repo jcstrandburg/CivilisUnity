@@ -9,6 +9,12 @@ public class UnityObjectReferenceResolver : IReferenceResolver {
     Dictionary<string, ObjectIdentifier> source;
 
     public UnityObjectReferenceResolver(FieldInfo f, object o, UnityObjectReference r, SaveLoadContext context) {
+        if (f == null) {
+            Debug.Log("FieldInfo is null");
+            Debug.Log(r.typeName);
+            Debug.Log(r.refName);
+            Debug.Log(r.refID);
+        }
         field = f;
         owner = o;
         reference = r;
@@ -25,7 +31,12 @@ public class UnityObjectReferenceResolver : IReferenceResolver {
                 field.SetValue(owner, go);
             }
             else {
-                field.SetValue(owner, oid.GetComponent(reference.typeName));
+                var component = oid.GetComponent(reference.typeName);
+                if (component != null) {
+                    field.SetValue(owner, component);
+                } else {
+                    Debug.Log("Unable to resolve reference to " + reference.typeName + " from " + reference.refName);
+                }
             }
         }
         else {

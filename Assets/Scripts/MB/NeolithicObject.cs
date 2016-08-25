@@ -27,20 +27,35 @@ public class NeolithicObject : MonoBehaviour {
 	public bool pointerHover = false;
 	public bool orderable = false;
 	public string statusString;
-	public string[] targetActions;
-	public string[] abilities;
+
+    //[DontSaveField]
+    public ActionProfile actionProfile;
 
     private SelectHalo halo;
 
+    private GameController _gameController;
+    public GameController gameController {
+        get {
+            if (_gameController == null) {
+                _gameController = GameController.Instance;
+            }
+            return _gameController;
+        }
+        set { _gameController = value; }
+    }
+
     public void SnapToGround(bool force=false) {
         if (snapToGround || force) {
-            transform.position = GameController.instance.SnapToGround(transform.position);
+            transform.position = gameController.SnapToGround(transform.position);
         }
     }
 
 	public virtual void Start() {
         SnapToGround();
         halo = GetComponentInChildren<SelectHalo>();
+        if (actionProfile == null) {
+            //Debug.Log(name);
+        }
 	}
 
     public void OnDeserialize() {
@@ -50,14 +65,14 @@ public class NeolithicObject : MonoBehaviour {
 	public void SelectClick() {
         if (selectability != Selectability.Unselectable) {
             if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift)) {
-                GameController.instance.DeselectAll();
+                gameController.DeselectAll();
             }
             Select();
         }
 	}
 
 	public void ContextClick() {
-        GameController.instance.DoContextMenu(this);
+        gameController.DoContextMenu(this);
 	}
 
 	public void HoverStart() { pointerHover = true; }
@@ -66,23 +81,18 @@ public class NeolithicObject : MonoBehaviour {
 	public virtual void Select() {
 		selected = true;
 		BroadcastMessage("OnSelect", null, SendMessageOptions.DontRequireReceiver);
-        GameController.instance.AddSelected(this);
-		//Debug.Log ("Broadcast OnSelect");
-		//transform.Find ("SelectionHandle").gameObject.GetComponent<SpriteRenderer>().enabled = true;
+        gameController.AddSelected(this);
 	}
 	
 	public virtual void Deselect() {
 		selected = false;
 		BroadcastMessage("OnDeselect", null, SendMessageOptions.DontRequireReceiver);
-		//Debug.Log ("Broadcast OnDeselect");
-		//transform.Find ("SelectionHandle").gameObject.GetComponent<SpriteRenderer>().enabled = false;
 	}
 
 	public void Update() {
         if (halo) {
             halo.highlighted = selected || pointerHover;
         }
-        //SnapToGround(); //if we do this at all it should be in FixedUpdate
 	}
 	
 	public virtual string[] GetPrimativeSelectionDialog() {

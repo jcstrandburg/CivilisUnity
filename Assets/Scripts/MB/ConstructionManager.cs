@@ -53,9 +53,34 @@ public class ConstructionManager : MonoBehaviour {
     private BuildingRequirement[] unfilledResourceReqs;
 
     [SerializeField]
-    private string[] cachedActions;//cache of targetActions
+    [DontSaveField]
+    private ActionProfile cachedActionProfile;
+
     [SerializeField]
     private List<MonoBehaviour> cachedComponents;
+
+    private GameController _gameController;
+    public GameController gameController {
+        get {
+            if (_gameController == null) {
+                _gameController = GameController.Instance;
+            }
+            return _gameController;
+        }
+        set { _gameController = value; }
+    }
+
+    private GroundController _groundController;
+    public GroundController groundController {
+        get {
+            if (_groundController == null) {
+                _groundController = gameController.groundController;
+            }
+            return _groundController;
+        }
+        set { _groundController = value; }
+    }
+
 
     public void Start() {
         var cloneList = new List<BuildingRequirement>();
@@ -110,14 +135,15 @@ public class ConstructionManager : MonoBehaviour {
     }
 
 	public bool ElligibleToBuild() {
-        TechManager tm = GameController.instance.techmanager;
+        TechManager tm = gameController.techmanager;
         foreach (var r in techRequirements) {
             if (!tm.TechResearched(r)) {
                 return false;
             }
         }
         foreach (var r in statRequirements) {
-            if (StatManager.Instance.Stat(r.name).Value < (decimal)r.amount) {
+            var statManager = gameController.statManager;
+            if (statManager.Stat(r.name).Value < (decimal)r.amount) {
                 return false;
             }
         }
@@ -125,11 +151,11 @@ public class ConstructionManager : MonoBehaviour {
     }
 
     public bool IsBuildable(Vector3 position) {
-        if (position.y <= GroundController.instance.waterLevel) {
+        if (position.y <= groundController.waterLevel) {
             return false;
         }
         if (instabuild) {
-            var availResources = GameController.instance.GetAllAvailableResources();
+            var availResources = gameController.GetAllAvailableResources();
             foreach (var r in resourceRequirements) {
                 if (  !availResources.ContainsKey(r.name) 
                     || availResources[r.name] < r.amount) 
@@ -144,8 +170,9 @@ public class ConstructionManager : MonoBehaviour {
     public void StartPlacement() {
         NeolithicObject no = GetComponent<NeolithicObject>();
         no.selectable = false;
-        cachedActions = no.targetActions;
-        no.targetActions = new string[] {};
+
+        cachedActionProfile = no.actionProfile;
+        no.actionProfile = (ActionProfile)Resources.Load("ActionProfiles/Empty");
 
         cachedComponents = new List<MonoBehaviour>();
         foreach (var r in GetComponents<Reservoir>()) {
@@ -164,7 +191,7 @@ public class ConstructionManager : MonoBehaviour {
         if (instabuild) {
             foreach (var r in resourceRequirements) {
                 var rp = new ResourceProfile(r.name, r.amount);
-                if (!GameController.instance.WithdrawFromAnyWarehouse(rp)) {
+                if (!gameController.WithdrawFromAnyWarehouse(rp)) {
                     throw new Exception("Failed to build building, unable to withdraw "+r.name);
                 }
             }
@@ -172,7 +199,7 @@ public class ConstructionManager : MonoBehaviour {
             FinishContruction();
         } else {
             NeolithicObject no = GetComponent<NeolithicObject>();
-            no.targetActions = new string[] { "Construct" };
+            no.actionProfile = (ActionProfile)Resources.Load("ActionProfiles/Constructable");
             GhostBuilding();
         }
     }
@@ -180,7 +207,7 @@ public class ConstructionManager : MonoBehaviour {
     public void FinishContruction() {
         NeolithicObject no = GetComponent<NeolithicObject>();
         no.selectable = true;
-        no.targetActions = cachedActions;
+        no.actionProfile = cachedActionProfile;
         foreach (var r in cachedComponents) {
             r.enabled = true;
         }
@@ -189,7 +216,7 @@ public class ConstructionManager : MonoBehaviour {
     }
 
     public bool GetJobReservation(ActorController actor) {
-        var avails = GameController.instance.GetAllAvailableResources();
+        var avails = gameController.GetAllAvailableResources();
         foreach (var kvp in avails) {
             string resourceTag = kvp.Key;
             float amount = kvp.Value;

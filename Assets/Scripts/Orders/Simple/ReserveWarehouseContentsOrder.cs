@@ -14,7 +14,7 @@ public class ReserveWarehouseContentsOrder : BaseOrder {
     }
 
     public override void DoStep() {
-        if (GameController.instance.ReserveWarehouseResources(actor, resourceType, amount)) {
+        if (actor.gameController.ReserveWarehouseResources(actor, resourceType, amount)) {
             completed = true;
         }
     }

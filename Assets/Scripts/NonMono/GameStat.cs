@@ -1,5 +1,6 @@
 ﻿using System;
 
+[Serializable]
 public class GameStat {
     /// <summary>
     /// The internal name
@@ -16,6 +17,8 @@ public class GameStat {
 
     private decimal value;
     private decimal persistantValue;
+    [DontSaveField]
+    [NonSerialized]
     private IStatPersistor persistor;
 
     public GameStat(string name, bool persist, bool monotonic) {

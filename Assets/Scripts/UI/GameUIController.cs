@@ -16,38 +16,26 @@ public class GameUIController : MonoBehaviour {
     public GameObject debugMenu;
     public bool paused = false;
 
-    private List<DataBinding> dataBindings = new List<DataBinding>();
-    private static GameUIController _instance = null;
-
-    public static GameUIController instance {
+    private GameController _gameController;
+    public GameController gameController {
         get {
-            if (_instance == null) {
-                GameObject obj = GameObject.Find("GameUI");
-                _instance = obj.GetComponent<GameUIController>();
+            if (_gameController == null) {
+                _gameController = GameController.Instance;
             }
-            return _instance;
+            return _gameController;
         }
+        set { _gameController = value; }
     }
 
     private void MakeDataBindings() {
-        dataBindings = new List<DataBinding>();
+        var dbs = GetComponent<DataBindingSource>();
 
-        Text spiritDataText = GameObject.Find("SpiritData").GetComponent<Text>();
-        if (spiritDataText) {
-            dataBindings.Add(new OneWayBinding<float>(() => {
-                return GameController.instance.spirit;
-            }, (f) => {
-				spiritDataText.text = f.ToString("N1");
-            }));
-        }
-        Text foodbufferDataText = GameObject.Find("FoodbufferData").GetComponent<Text>();
-        if (foodbufferDataText) {
-            dataBindings.Add(new OneWayBinding<float>(() => {
-                return GameController.instance.foodbuffer;
-            }, (f) => {
-                foodbufferDataText.text = f.ToString("N1");
-            }));
-        }
+        //dbs.AddBinding("foodbuffer",
+        //    () => gameController.foodbuffer,
+        //    (object val) => gameController.foodbuffer = Convert.ToSingle(val));
+        dbs.AddBinding("spirit",
+            () => gameController.spirit,
+            (object val) => gameController.spirit = Convert.ToSingle(val));
     }
 
     // Use this for initialization
@@ -64,10 +52,6 @@ public class GameUIController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        dataBindings.ForEach((db) => {
-            db.Update();
-        });
-
         if (Input.GetKeyDown(KeyCode.Pause)) {
             paused = !paused;
             Time.timeScale = paused ? 0.0f : 1.0f;
@@ -93,7 +77,8 @@ public class GameUIController : MonoBehaviour {
 		}
 
 		foreach (string o in options) {
-			GameObject temp = Instantiate (Resources.Load ("ContextTextButton")) as GameObject;
+            var prefab = Resources.Load("ContextTextButton") as GameObject;
+            var temp = gameController.factory.Instantiate(prefab);
 			Button button = temp.GetComponent<Button>();
 			string capture = o;
 			button.onClick.AddListener( () => ExecuteContextAction(capture, target));
@@ -120,7 +105,7 @@ public class GameUIController : MonoBehaviour {
 	/// selected units against the target, and then hides the context menu
 	/// </summary>
 	public void ExecuteContextAction(string action, NeolithicObject target) {
-		GameController.instance.IssueOrder(action, target);
+        gameController.IssueOrder(action, target);
 		HideContextMenu();
 	}
 
@@ -146,24 +131,22 @@ public class GameUIController : MonoBehaviour {
     }
 
     public void ShowResearchMenu() {
-        Technology[] techs = GameController.instance.GetAvailableTechs();
+        Technology[] techs = gameController.GetAvailableTechs();
         subMenu.ClearMenu();
         foreach (Technology t in techs) {
             Technology tech = t;
-            Button b = subMenu.AddButton(t.displayName, () => GameController.instance.BuyTech(tech));
-			b.interactable = (GameController.instance.spirit >= t.cost);
+            Button b = subMenu.AddButton(t.displayName, () => gameController.BuyTech(tech));
+			b.interactable = (gameController.spirit >= t.cost);
         }
     }
 
     public void ShowBuildMenu() {
-        var buildings = GameController.instance.GetBuildableBuildings();
-
+        var buildings = gameController.GetBuildableBuildings();
         subMenu.ClearMenu();
         foreach (var building in buildings) {
-            var gc = GameController.instance;
             GameObject prefab = building;
             subMenu.AddButton(building.name,
-                            () => gc.StartBuildingPlacement(prefab));
+                            () => gameController.StartBuildingPlacement(prefab));
         }
     }
 }
