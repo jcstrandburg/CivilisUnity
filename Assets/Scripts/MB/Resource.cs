@@ -5,11 +5,11 @@ public class Resource : MonoBehaviour {
     public const float lifeTime = 60.0f;
 	public float timer;
     public string typeTag;
-    public decimal amount = 0;
+    public double amount = 0;
     public bool preserved;
 
-    [DontSaveField]
-    private NeolithicObject neolithicObject;
+    //[DontSaveField]
+    //private NeolithicObject neolithicObject;
 
     private GameController _gameController;
     [Inject]
@@ -24,7 +24,7 @@ public class Resource : MonoBehaviour {
     }
 
     void Awake() {
-        neolithicObject = GetComponent<NeolithicObject>();
+        //neolithicObject = GetComponent<NeolithicObject>();
     }
 
 	void Start() {

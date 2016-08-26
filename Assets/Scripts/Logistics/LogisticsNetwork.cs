@@ -17,8 +17,8 @@ public class LogisticsNetwork : MonoBehaviour {
     }
 
     [SerializeField]
-    private decimal _foodbuffer = 6.0m;
-    public decimal foodbuffer {
+    private double _foodbuffer = 6.0;
+    public double foodbuffer {
         get {
             return _foodbuffer;
         }
@@ -90,7 +90,7 @@ public class LogisticsNetwork : MonoBehaviour {
     /// </summary>
     /// <todo>Rework to use a logistics system</todo>
     void KeepFoodBufferFilled() {
-        if (foodbuffer < 3.0m) {
+        if (foodbuffer < 3.0) {
             var warehouses = FindComponents<Warehouse>();
             var tags = new List<string> { "meat", "vegetables", "fish" };
             var tagsToRemove = new List<string>();
@@ -126,13 +126,13 @@ public class LogisticsNetwork : MonoBehaviour {
     /// </summary>
     /// <param name="resources"></param>
     /// <returns>Food value</returns>
-    public decimal CalcFoodValue(IEnumerable<ResourceProfile> resources) {
+    public double CalcFoodValue(IEnumerable<ResourceProfile> resources) {
         var p = resources.OrderBy((ResourceProfile rp) => -rp.amount).ToArray();
         if (p.Count() == 0 || p.Count() > 3) {
             throw new ArgumentException("Unexpected resource count " + resources.Count());
         }
 
-        decimal returnMe = 0;
+        double returnMe = 0;
         for (int i = 0; i < p.Length; i++) {
             returnMe += (i + 1) * p[i].amount;
         }

@@ -4,5 +4,5 @@ using System.Collections;
 public class ResourceReservation : Reservation {
     public GameObject source;
     public string resourceTag;
-    public decimal amount;
+    public double amount;
 }

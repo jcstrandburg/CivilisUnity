@@ -22,7 +22,7 @@ class WarehouseEditor : Editor {
 // TODO: Remove finished reservations
 // TODO: Check to make sure reservations are for this warehouse before fulfilling them
 public class Warehouse : MonoBehaviour {
-    public decimal totalCapacity;
+    public double totalCapacity;
     [SerializeField]
     public ResourceProfile[] resourceLimits = new ResourceProfile[] { };
     [SerializeField]
@@ -103,9 +103,9 @@ public class Warehouse : MonoBehaviour {
         FillInContentsGaps();
     }
 
-    public decimal GetTotalAnyContents() {
+    public double GetTotalAnyContents() {
         if (!enabled) { return 0; }
-        decimal t = 0;
+        double t = 0;
         foreach (ResourceProfile rp in resourceContents) {
             t += rp.amount;
         }
@@ -117,7 +117,7 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns>Total deposited resources for the given tag</returns>
-    public decimal GetTotalContents(string resourceTag) {
+    public double GetTotalContents(string resourceTag) {
         if (!enabled) { return 0; }
         foreach (ResourceProfile rp in resourceContents) {
             if (rp.resourceTag == resourceTag) {
@@ -132,8 +132,8 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
-    public decimal GetReservedContents(string resourceTag) {
-        decimal amount = 0 ;
+    public double GetReservedContents(string resourceTag) {
+        double amount = 0 ;
 
         foreach (ResourceReservation r in resourceReservations) {
             if (r.resourceTag == resourceTag) {
@@ -147,8 +147,8 @@ public class Warehouse : MonoBehaviour {
     /// Gets total available contents for this warehouse
     /// </summary>
     /// <returns>Available contents in a dictionary</returns>
-    public Dictionary<string, decimal> GetAllAvailableContents() {
-        var d = new Dictionary<string, decimal>();
+    public Dictionary<string, double> GetAllAvailableContents() {
+        var d = new Dictionary<string, double>();
         if (!enabled) { return d; }
         foreach (var r in resourceContents) {
             d[r.resourceTag] = GetAvailableContents(r.resourceTag);
@@ -161,7 +161,7 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
-    public decimal GetAvailableContents(string resourceTag) {
+    public double GetAvailableContents(string resourceTag) {
         if (!enabled) { return 0; }
         return GetTotalContents(resourceTag) - GetReservedContents(resourceTag);
     }
@@ -171,9 +171,9 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
-    public decimal GetClaimedContents(string resourceTag) {
+    public double GetClaimedContents(string resourceTag) {
         if (!enabled) { return 0; }
-        decimal amount = 0;
+        double amount = 0;
         foreach (ResourceReservation r in resourceReservations) {
             if (r.resourceTag == resourceTag && r.Ready) {
                 amount += r.amount;
@@ -187,7 +187,7 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
-    public decimal GetUnclaimedContents(string resourceTag) {
+    public double GetUnclaimedContents(string resourceTag) {
         if (!enabled) { return 0; }
         return GetTotalContents(resourceTag) - GetClaimedContents(resourceTag);
     }
@@ -197,9 +197,9 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
-    public decimal GetTotalStorage(string resourceTag) {
+    public double GetTotalStorage(string resourceTag) {
         if (!enabled) { return 0; }
-        decimal amount = 0;
+        double amount = 0;
         foreach (ResourceProfile p in resourceLimits) {
             if (p.resourceTag == resourceTag) {
                 amount += p.amount;
@@ -213,9 +213,9 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
-    public decimal GetReservedStorage(string resourceTag) {
+    public double GetReservedStorage(string resourceTag) {
         if (!enabled) { return 0; }
-        decimal amount = 0;
+        double amount = 0;
         foreach (StorageReservation r in storageReservations) {
             if (!r.Released) {
                 amount += r.amount;
@@ -229,7 +229,7 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
-    public decimal GetAvailableStorage(string resourceTag) {
+    public double GetAvailableStorage(string resourceTag) {
         if (!enabled) { return 0; }
         return GetTotalStorage(resourceTag) - GetTotalContents(resourceTag) - GetReservedStorage(resourceTag);
     }
@@ -239,7 +239,7 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resTag"></param>
     /// <param name="amount"></param>
-    public void WithdrawContents(string resTag, decimal amount) {
+    public void WithdrawContents(string resTag, double amount) {
         foreach (ResourceProfile rp in resourceContents) {
             if (rp.resourceTag == resTag && rp.amount >= amount) {
                 rp.amount -= amount;
@@ -285,8 +285,8 @@ public class Warehouse : MonoBehaviour {
     /// <param name="resourceTag">Resource type tag</param>
     /// <param name="amount">Amount to reserve</param>
     /// <returns>true on success, false on failure</returns>
-    public bool ReserveContents(GameObject reserver, string resourceTag, decimal amount) {
-        decimal avail = GetAvailableContents(resourceTag);
+    public bool ReserveContents(GameObject reserver, string resourceTag, double amount) {
+        double avail = GetAvailableContents(resourceTag);
         if (avail < amount) {
             return false;
         }
@@ -309,7 +309,7 @@ public class Warehouse : MonoBehaviour {
     /// <param name="resourceTag">Resource type tag</param>
     /// <param name="amount">Amount to reserve</param>
     /// <returns>true on success, false on failure</returns>
-    public bool ReserveStorage(GameObject reserver, string resourceTag, decimal amount) {
+    public bool ReserveStorage(GameObject reserver, string resourceTag, double amount) {
         if (GetAvailableStorage(resourceTag) < amount) {
             return false;
         }
@@ -338,7 +338,7 @@ public class Warehouse : MonoBehaviour {
             while (rc.amount > 0) {
                 rc.amount -= 1;
 
-                var resource = gameController.CreateResourcePile(rc.resourceTag, Math.Min(rc.amount, 1.0m));
+                var resource = gameController.CreateResourcePile(rc.resourceTag, Math.Min(rc.amount, 1.0));
                 resource.transform.position = transform.position;
                 resource.GetComponent<Resource>().SetDown();
             }

@@ -6,5 +6,5 @@ using System;
 public class StorageReservation : Reservation {
     public Warehouse warehouse;
     public string resourceTag;
-    public decimal amount;
+    public double amount;
 }

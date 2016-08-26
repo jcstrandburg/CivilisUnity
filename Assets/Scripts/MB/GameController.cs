@@ -230,8 +230,8 @@ public class GameController : MonoBehaviour {
     public bool WithdrawFromAnyWarehouse(ResourceProfile rp) {
         var warehouses = FindObjectsOfType<Warehouse>();
         foreach (var w in warehouses) {
-            decimal avail = w.GetAvailableContents(rp.resourceTag);
-            decimal amount = (rp.amount < avail ? rp.amount : avail);
+            double avail = w.GetAvailableContents(rp.resourceTag);
+            double amount = (rp.amount < avail ? rp.amount : avail);
             if (amount > 0) {
                 w.WithdrawContents(rp.resourceTag, amount);
                 rp.amount -= amount;
@@ -248,8 +248,8 @@ public class GameController : MonoBehaviour {
     /// Gets all available contents in all warehouses in game total
     /// </summary>
     /// <returns></returns>
-    public Dictionary<string, decimal> GetAllAvailableResources() {
-        var d = new Dictionary<string, decimal>();
+    public Dictionary<string, double> GetAllAvailableResources() {
+        var d = new Dictionary<string, double>();
         var warehouses = FindObjectsOfType<Warehouse>();
         foreach (var w in warehouses) {
             var x = w.GetAllAvailableContents();
@@ -508,7 +508,7 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-    public ResourceReservation ReserveWarehouseResources(ActorController a, string tag, decimal amount) {
+    public ResourceReservation ReserveWarehouseResources(ActorController a, string tag, double amount) {
         var la = a.GetComponent<LogisticsActor>();
         var network = la.logisticsManager.FindNearestNetwork(a.transform.position);
 
@@ -521,7 +521,7 @@ public class GameController : MonoBehaviour {
         return null;
     }
 
-    public StorageReservation ReserveStorage(ActorController a, string tag, decimal amount) {
+    public StorageReservation ReserveStorage(ActorController a, string tag, double amount) {
         var la = a.GetComponent<LogisticsActor>();
         var network = la.logisticsManager.FindNearestNetwork(a.transform.position);
         Warehouse[] warehouses = network.FindComponents<Warehouse>();
@@ -533,7 +533,7 @@ public class GameController : MonoBehaviour {
         return null;
     }
 
-    public GameObject CreateResourcePile(string typeTag, decimal amount) {
+    public GameObject CreateResourcePile(string typeTag, double amount) {
         foreach (Resource g in resourcePrefabs) {
             if (g.typeTag == typeTag) {
                 GameObject pile = factory.Instantiate(g.gameObject);

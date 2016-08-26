@@ -6,9 +6,9 @@ using System.Collections;
 /// </summary>
 public class ReserveWarehouseContentsOrder : BaseOrder {
     string resourceType;
-    decimal amount;
+    double amount;
 
-    public ReserveWarehouseContentsOrder(ActorController a, string resourceType, decimal amount) : base(a) {
+    public ReserveWarehouseContentsOrder(ActorController a, string resourceType, double amount) : base(a) {
         this.resourceType = resourceType;
         this.amount = amount;
     }

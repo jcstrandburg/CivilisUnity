@@ -6,9 +6,9 @@ using System.Collections;
 /// </summary>
 public class FetchAvailableResourceOrder : StatefulSuperOrder {
     string resourceType;
-    decimal amount;
+    double amount;
 
-    public FetchAvailableResourceOrder(ActorController a, string resourceType, decimal amount) : base(a) {
+    public FetchAvailableResourceOrder(ActorController a, string resourceType, double amount) : base(a) {
         this.resourceType = resourceType;
         this.amount = amount;
         GoToState("getReservation");

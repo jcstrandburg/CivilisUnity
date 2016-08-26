@@ -3,7 +3,7 @@
 [Serializable]
 public class ResourceProfile : ICloneable {
 
-    public ResourceProfile(string rt, decimal a) {
+    public ResourceProfile(string rt, double a) {
         resourceTag = rt;
         amount = a;
     }
@@ -13,5 +13,5 @@ public class ResourceProfile : ICloneable {
     }
 
     public string resourceTag;
-    public decimal amount;
+    public double amount;
 }

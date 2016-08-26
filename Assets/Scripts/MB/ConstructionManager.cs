@@ -28,7 +28,7 @@ public class ConstructionManagerEditor : Editor {
 [Serializable]
 public class BuildingRequirement: ICloneable {
     public string name;
-    public decimal amount;
+    public double amount;
 
     public object Clone() {
         var br = new BuildingRequirement();
@@ -127,7 +127,7 @@ public class ConstructionManager : MonoBehaviour {
     }
 
     public bool ConstructionFinished() {
-        decimal neededResources = 0;
+        double neededResources = 0;
         foreach (BuildingRequirement req in unfilledResourceReqs) {
             neededResources += req.amount;
         }
@@ -219,9 +219,9 @@ public class ConstructionManager : MonoBehaviour {
         var avails = gameController.GetAllAvailableResources();
         foreach (var kvp in avails) {
             string resourceTag = kvp.Key;
-            decimal amount = kvp.Value;
+            double amount = kvp.Value;
             Debug.Log("Checking if I need " + amount + " " + resourceTag);
-            decimal needed = GetNeededResource(resourceTag);
+            double needed = GetNeededResource(resourceTag);
             Debug.Log("I need " + needed + " " + resourceTag);
             if (needed > 0) {
                 Debug.Log("Making a ConstructionReservation");
@@ -235,8 +235,8 @@ public class ConstructionManager : MonoBehaviour {
         return false;
     }
 
-    public decimal GetNeededResource(string resourceTag) {
-        decimal needed = 0;
+    public double GetNeededResource(string resourceTag) {
+        double needed = 0;
         foreach (var requirement in unfilledResourceReqs) {
             if (requirement.name == resourceTag) {
                 needed += requirement.amount;
