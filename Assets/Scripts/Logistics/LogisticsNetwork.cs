@@ -17,8 +17,8 @@ public class LogisticsNetwork : MonoBehaviour {
     }
 
     [SerializeField]
-    private float _foodbuffer = 6.0f;
-    public float foodbuffer {
+    private decimal _foodbuffer = 6.0m;
+    public decimal foodbuffer {
         get {
             return _foodbuffer;
         }
@@ -90,7 +90,7 @@ public class LogisticsNetwork : MonoBehaviour {
     /// </summary>
     /// <todo>Rework to use a logistics system</todo>
     void KeepFoodBufferFilled() {
-        if (foodbuffer < 3.0f) {
+        if (foodbuffer < 3.0m) {
             var warehouses = FindComponents<Warehouse>();
             var tags = new List<string> { "meat", "vegetables", "fish" };
             var tagsToRemove = new List<string>();
@@ -98,10 +98,10 @@ public class LogisticsNetwork : MonoBehaviour {
 
             foreach (var w in warehouses) {
                 foreach (var t in tags) {
-                    if (w.GetAvailableContents(t) >= 1.0f) {
+                    if (w.GetAvailableContents(t) >= 1) {
                         tagsToRemove.Add(t);
-                        w.WithdrawContents(t, 1.0f);
-                        resources.Add(new ResourceProfile(t, 1.0f));
+                        w.WithdrawContents(t, 1);
+                        resources.Add(new ResourceProfile(t, 1));
                     }
                 }
                 foreach (var t in tagsToRemove) {
@@ -126,13 +126,13 @@ public class LogisticsNetwork : MonoBehaviour {
     /// </summary>
     /// <param name="resources"></param>
     /// <returns>Food value</returns>
-    public float CalcFoodValue(IEnumerable<ResourceProfile> resources) {
+    public decimal CalcFoodValue(IEnumerable<ResourceProfile> resources) {
         var p = resources.OrderBy((ResourceProfile rp) => -rp.amount).ToArray();
         if (p.Count() == 0 || p.Count() > 3) {
             throw new ArgumentException("Unexpected resource count " + resources.Count());
         }
 
-        float returnMe = 0.0f;
+        decimal returnMe = 0;
         for (int i = 0; i < p.Length; i++) {
             returnMe += (i + 1) * p[i].amount;
         }

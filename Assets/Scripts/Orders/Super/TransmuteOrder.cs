@@ -33,7 +33,7 @@ public class TransmuteOrder : StatefulSuperOrder {
 
     protected override void CreateStates() {
         CreateState("getSourceMaterial",
-            () => new FetchAvailableResourceOrder(actor, fromTag, 1.0f),
+            () => new FetchAvailableResourceOrder(actor, fromTag, 1),
             () => GoToState("gotoWorkspace"),
             null);
         CreateState("gotoWorkspace",

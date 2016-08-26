@@ -34,7 +34,7 @@ public class SpamLogisticNodes : MonoBehaviour {
 	
 	// Update is called once per frame
 	void FixedUpdate () {
-        var x = network.FindComponents<Warehouse>();
+        //var x = network.FindComponents<Warehouse>();
         //Debug.Log(x.Length);
 	}
 }

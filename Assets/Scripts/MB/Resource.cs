@@ -5,7 +5,7 @@ public class Resource : MonoBehaviour {
     public const float lifeTime = 60.0f;
 	public float timer;
     public string typeTag;
-    public float amount = 0.0f;
+    public decimal amount = 0;
     public bool preserved;
 
     [DontSaveField]
@@ -68,7 +68,7 @@ public class Resource : MonoBehaviour {
         neoObject.SnapToGround();
         //GetComponent<NeolithicObject>().selectable = true;
 
-        var node = gameObject.AddComponent<LogisticsNode>();
+        gameObject.AddComponent<LogisticsNode>();
         Warehouse w = gameObject.AddComponent<Warehouse>();
         ResourceProfile[] rp = new ResourceProfile[] {
             new ResourceProfile(typeTag, amount)
@@ -81,7 +81,7 @@ public class Resource : MonoBehaviour {
 
     public void OnResourceWithdrawn() {
         Warehouse w = GetComponent<Warehouse>();
-        if (w.GetTotalAnyContents() <= 0.01f) {
+        if (w.GetTotalAnyContents() <= 0) {
             Destroy(gameObject);
         }
     }

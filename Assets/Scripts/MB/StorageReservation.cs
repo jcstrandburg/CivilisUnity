@@ -6,5 +6,5 @@ using System;
 public class StorageReservation : Reservation {
     public Warehouse warehouse;
     public string resourceTag;
-    public float amount;
+    public decimal amount;
 }

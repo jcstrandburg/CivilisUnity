@@ -5,28 +5,29 @@ using System;
 
 public class Reservoir : MonoBehaviour {
     public string resourceTag;
-    public float amount;
+    public decimal amount;
     public float regenRate;
-    public float max;
+    public decimal max;
 	public List<Reservation> reservations = new List<Reservation>();
     private NeolithicObject nobject;
 
     public void Regen(float time) {
-        amount += time * regenRate;
-        amount = Mathf.Clamp(amount, 0.0f, max);
+        amount += (decimal)(time * regenRate);
+        //clamp
+        amount = (amount < 0 ? 0 : (amount > max ? max : amount));
     }
 
-    public float GetAvailableContents() {
-        float avail = amount;
+    public decimal GetAvailableContents() {
+        decimal avail = amount;
         foreach (ResourceReservation r in reservations) {
             avail -= r.amount;
         }
-        return Mathf.Max(avail, 0.0f);
+        return avail >= 0 ? avail : 0;
     }
 
     public void UpdateReservations() {
         //reservations.RemoveAll((r) => { return r.Released || r.Cancelled; });
-        float availAmount = amount;
+        decimal availAmount = amount;
         foreach (ResourceReservation res in reservations) {
             if (availAmount > res.amount) {
                 availAmount -= res.amount;
@@ -67,7 +68,7 @@ public class Reservoir : MonoBehaviour {
         nobject = GetComponent<NeolithicObject>();
     }
 
-	public ResourceReservation NewReservation(GameObject go, float amount) {
+	public ResourceReservation NewReservation(GameObject go, decimal amount) {
         ResourceReservation r = go.AddComponent<ResourceReservation>();
         r.resourceTag = this.resourceTag;
         r.amount = amount;

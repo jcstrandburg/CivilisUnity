@@ -29,7 +29,7 @@ public class ActorController : NeolithicObject {
 	public BaseOrder currentOrder = null;
 	public bool idle = false;
     public bool followContours = true;
-    public float health = 1.0f;
+    public decimal health = 1.0m;
 
     public GameObject palzy;//temp debugging object
     public int queueLength = 0;
@@ -55,17 +55,17 @@ public class ActorController : NeolithicObject {
     }
 
 	public virtual void FixedUpdate() {
-        float feedMe = Time.fixedDeltaTime * 0.025f;
+        decimal feedMe = (decimal)(Time.fixedDeltaTime * 0.025f);
         LogisticsNetwork network = logisticsActor.logisticsManager.FindNearestNetwork(transform.position);
 
         if (network != null && network.foodbuffer > feedMe) {
             network.foodbuffer -= feedMe;
-            health = Mathf.Min(1.0f, health + feedMe);
+            health = System.Math.Min(1, health + feedMe);
         } else {
             health -= feedMe;
         }
 
-        if (health <= 0.0f) {
+        if (health <= 0.0m) {
             Destroy(gameObject);
             return;
         }

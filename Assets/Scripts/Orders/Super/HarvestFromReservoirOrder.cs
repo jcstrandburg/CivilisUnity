@@ -32,7 +32,7 @@ public class HarvestFromReservoirOrder : StatefulSuperOrder {
             null);
         CreateState("reservationWait",
             () => {
-                resourceReservation = reservoir.NewReservation(actor.gameObject, 1.0f);
+                resourceReservation = reservoir.NewReservation(actor.gameObject, 1);
                 return new WaitForReservationOrder(actor, resourceReservation);
             },
             () => GoToState("getResource"),

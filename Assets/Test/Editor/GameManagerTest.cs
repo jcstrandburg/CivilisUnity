@@ -13,46 +13,46 @@ public class GameManagerTests {
         ResourceProfile[] resources;
 
         resources = new ResourceProfile[] {
-            new ResourceProfile("meat", 1.0f),
-            new ResourceProfile("vegetables", 1.0f),
-            new ResourceProfile("fish", 1.0f),
+            new ResourceProfile("meat", 1),
+            new ResourceProfile("vegetables", 1),
+            new ResourceProfile("fish", 1),
         };
         Assert.AreEqual(6.0f, netowrk.CalcFoodValue(resources));
 
         resources = new ResourceProfile[] {
-            new ResourceProfile("meat", 2.0f),
-            new ResourceProfile("vegetables", 1.0f),
-            new ResourceProfile("fish", 1.0f),
+            new ResourceProfile("meat", 2.0m),
+            new ResourceProfile("vegetables", 1),
+            new ResourceProfile("fish", 1),
         };
         Assert.AreEqual(7.0f, netowrk.CalcFoodValue(resources));
 
         resources = new ResourceProfile[] {
-            new ResourceProfile("meat", 0.5f),
-            new ResourceProfile("vegetables", 0.75f),
-            new ResourceProfile("fish", 1.0f),
+            new ResourceProfile("meat", 0.5m),
+            new ResourceProfile("vegetables", 0.75m),
+            new ResourceProfile("fish", 1),
         };
         Assert.AreEqual(4.0f, netowrk.CalcFoodValue(resources));
 
         resources = new ResourceProfile[] {
-            new ResourceProfile("vegetables", 2.0f),
-            new ResourceProfile("fish", 1.0f),
+            new ResourceProfile("vegetables", 2.0m),
+            new ResourceProfile("fish", 1),
         };
         Assert.AreEqual(4.0f, netowrk.CalcFoodValue(resources));
 
         resources = new ResourceProfile[] {
-            new ResourceProfile("meat", 1.0f),
-            new ResourceProfile("fish", 0.5f),
+            new ResourceProfile("meat", 1),
+            new ResourceProfile("fish", 0.5m),
         };
         Assert.AreEqual(2.0f, netowrk.CalcFoodValue(resources));
 
         resources = new ResourceProfile[] {
-            new ResourceProfile("meat", 1.5f),
+            new ResourceProfile("meat", 1.5m),
         };
         Assert.AreEqual(1.5f, netowrk.CalcFoodValue(resources));
 
         resources = new ResourceProfile[] {
-            new ResourceProfile("vegetables", 1.0f),
+            new ResourceProfile("vegetables", 1),
         };
-        Assert.AreEqual(1.0f, netowrk.CalcFoodValue(resources));
+        Assert.AreEqual(1, netowrk.CalcFoodValue(resources));
     }
 }

@@ -28,7 +28,7 @@ public class ConstructionManagerEditor : Editor {
 [Serializable]
 public class BuildingRequirement: ICloneable {
     public string name;
-    public float amount;
+    public decimal amount;
 
     public object Clone() {
         var br = new BuildingRequirement();
@@ -127,11 +127,11 @@ public class ConstructionManager : MonoBehaviour {
     }
 
     public bool ConstructionFinished() {
-        float neededResources = 0.0f;
+        decimal neededResources = 0;
         foreach (BuildingRequirement req in unfilledResourceReqs) {
             neededResources += req.amount;
         }
-        return neededResources <= 0.0f;
+        return neededResources <= 0;
     }
 
 	public bool ElligibleToBuild() {
@@ -219,24 +219,24 @@ public class ConstructionManager : MonoBehaviour {
         var avails = gameController.GetAllAvailableResources();
         foreach (var kvp in avails) {
             string resourceTag = kvp.Key;
-            float amount = kvp.Value;
+            decimal amount = kvp.Value;
             Debug.Log("Checking if I need " + amount + " " + resourceTag);
-            float needed = GetNeededResource(resourceTag);
+            decimal needed = GetNeededResource(resourceTag);
             Debug.Log("I need " + needed + " " + resourceTag);
-            if (needed > 0.0f) {
+            if (needed > 0) {
                 Debug.Log("Making a ConstructionReservation");
                 var res = actor.gameObject.AddComponent<ConstructionReservation>();
                 reservations.Add(res);
                 res.resourceTag = resourceTag;
-                res.amount = 1.0f;
+                res.amount = 1;
                 return true;
             }
         }
         return false;
     }
 
-    public float GetNeededResource(string resourceTag) {
-        float needed = 0.0f;
+    public decimal GetNeededResource(string resourceTag) {
+        decimal needed = 0;
         foreach (var requirement in unfilledResourceReqs) {
             if (requirement.name == resourceTag) {
                 needed += requirement.amount;

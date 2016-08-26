@@ -13,14 +13,14 @@ public class ReservoirTest {
 
         Reservoir reservoir = go.AddComponent<Reservoir>();
         reservoir.resourceTag = "berries";
-        reservoir.amount = 0.0f;
-        reservoir.regenRate = 1.0f;
-        reservoir.max = 2.0f;
+        reservoir.amount = 0;
+        reservoir.regenRate = 1;
+        reservoir.max = 2;
 
         reservoir.Regen(1.5f);
-        reservoir.NewReservation(go2, 1.0f);
+        reservoir.NewReservation(go2, 1);
         Assert.AreEqual(0.5f, reservoir.GetAvailableContents());
-        reservoir.NewReservation(go3, 1.0f);
+        reservoir.NewReservation(go3, 1);
         Assert.AreEqual(0.0f, reservoir.GetAvailableContents());
         reservoir.UpdateReservations();
 

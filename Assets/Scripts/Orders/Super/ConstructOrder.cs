@@ -82,7 +82,7 @@ public class ConstructOrder : StatefulSuperOrder {
         CreateState("fetchResource",
             () => {
                 var res = actor.GetComponent<ConstructionReservation>();
-                return new FetchAvailableResourceOrder(actor, res.resourceTag, 1.0f);
+                return new FetchAvailableResourceOrder(actor, res.resourceTag, 1);
             },
             () => GoToState("depositResource"),
             null);
