@@ -3,7 +3,9 @@ using System.Collections;
 
 public class LoadGameMenu : MonoBehaviour {
 	void Start () {
-        SaverLoader saverLoader = GameController.Instance.saverLoader;
+        //this is kinda silly and should be done otherwise
+        SaverLoader saverLoader = GameObject.FindObjectOfType<SaverLoader>();
+
         string[] saves = saverLoader.GetSaveGames();
         SelectList list = GetComponentInChildren<SelectList>();
         foreach (var s in saves) {

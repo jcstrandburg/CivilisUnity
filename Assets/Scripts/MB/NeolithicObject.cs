@@ -34,6 +34,7 @@ public class NeolithicObject : MonoBehaviour {
     private SelectHalo halo;
 
     private GameController _gameController;
+    [Inject]
     public GameController gameController {
         get {
             if (_gameController == null) {

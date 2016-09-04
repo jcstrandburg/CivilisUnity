@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System;
 using System.Globalization;
 
-[assembly: AssemblyVersion("0.2.0.*")]
+[assembly: AssemblyVersion("0.2.2.*")]
 
 public class GameUIController : MonoBehaviour {
 
@@ -36,6 +36,9 @@ public class GameUIController : MonoBehaviour {
         dbs.AddBinding("spirit",
             () => gameController.spirit,
             (object val) => gameController.spirit = Convert.ToSingle(val));
+        dbs.AddBinding("dayfactor",
+            () => gameController.daytime,
+            (object val) => gameController.daytime = Convert.ToSingle(val));
     }
 
     // Use this for initialization
@@ -55,7 +58,7 @@ public class GameUIController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Pause)) {
             paused = !paused;
             Time.timeScale = paused ? 0.0f : 1.0f;
-        }
+        }        
         if (Input.GetKeyDown(KeyCode.BackQuote)) {
             Debug.Log("DEBUG");
             if (debugMenu) {

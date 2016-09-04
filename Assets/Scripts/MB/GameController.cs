@@ -26,12 +26,15 @@ public class GameControllerEditor : Editor {
 public class GameController : MonoBehaviour {
 	public List<NeolithicObject> selected = new List<NeolithicObject>();
 	public GameObject mainLight;
-	Vector2 boxStart;
+    public GameObject moonLight;
+    Vector2 boxStart;
 	Vector2 boxEnd;
 	public bool boxActive = false;
 	public bool additiveSelect = false;
     public List<Resource> resourcePrefabs;
     public TechManager techmanager;
+    public float daytime = 0.5f;
+    public float daylength = 10.0f;
 
     public GameFactory factory = new GameFactory();
 
@@ -268,11 +271,30 @@ public class GameController : MonoBehaviour {
         //remove destroyed objects from selection list
         selected.RemoveAll((s) => (s == null));
 
-		//mainLight.transform.eulerAngles += new Vector3(0, 0.2f, 0);
 		additiveSelect = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        //daytime += Time.fixedDeltaTime / daylength;
+        //daytime = daytime % 1.0f;
+
+        float x = Mathf.Sin((float)(daytime * Math.PI));
+        RenderSettings.ambientIntensity = Mathf.Lerp(0.8f, 1.0f, x);
+        float y = Mathf.Lerp(0.55f, 1.0f, x);
+        RenderSettings.ambientLight = new Color(1.0f, y, y);
+
+        float x2 = Mathf.Sin((float)((-0.25f+daytime) * 2 * Math.PI));
+        var light = mainLight.GetComponent<Light>();
+        light.color = new Color(1.0f, y, y);
+        light.intensity = x2*1.0f;
+        mainLight.transform.eulerAngles = new Vector3((daytime-0.25f)*360.0f, 0, 0);
+
+        float x3 = Mathf.Cos((float)((daytime) * Math.PI));
+        Debug.Log(x3);
+        var light2 = moonLight.GetComponent<Light>();
+        light2.color = new Color(1.0f, 1.0f, 1.0f);
+        light2.intensity = x3 * 0.2f;
+        moonLight.transform.eulerAngles = new Vector3((daytime + 0.25f) * 360.0f, 0, 0);
     }
 
-	public void AddSelected(NeolithicObject sel) {
+    public void AddSelected(NeolithicObject sel) {
 		guiController.HideContextMenu();
 		if (!selected.Contains(sel)) {
 			selected.Add(sel);
@@ -524,11 +546,15 @@ public class GameController : MonoBehaviour {
     public StorageReservation ReserveStorage(ActorController a, string tag, double amount) {
         var la = a.GetComponent<LogisticsActor>();
         var network = la.logisticsManager.FindNearestNetwork(a.transform.position);
-        Warehouse[] warehouses = network.FindComponents<Warehouse>();
-        foreach (Warehouse w in warehouses) {
-            if (w.ReserveStorage(a.gameObject, tag, amount)) {
-                return a.GetComponent<StorageReservation>();
+        if (network != null) {
+            Warehouse[] warehouses = network.FindComponents<Warehouse>();
+            foreach (Warehouse w in warehouses) {
+                if (w.ReserveStorage(a.gameObject, tag, amount)) {
+                    return a.GetComponent<StorageReservation>();
+                }
             }
+        } else {
+            Debug.Log("Unable to locate logistics network");
         }
         return null;
     }
@@ -552,5 +578,11 @@ public class GameController : MonoBehaviour {
 
     public void QuickLoad() {
         GetComponent<SaverLoader>().LoadGame();
+    }
+
+    public void MakeToast(Vector3 pos, string message) {
+        var prefab = Resources.Load("Toast") as GameObject;
+        var toast = factory.Instantiate(prefab);
+        toast.GetComponent<Toast>().Init(pos, message);
     }
 }

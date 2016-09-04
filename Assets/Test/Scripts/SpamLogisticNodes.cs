@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class SpamLogisticNodes : MonoBehaviour {
 
-    LogisticsNetwork network;
+    //LogisticsNetwork network;
     public int spawnCount=20;
     private List<GameObject> spawned = new List<GameObject>();
 
@@ -14,7 +14,7 @@ public class SpamLogisticNodes : MonoBehaviour {
             var obj = f.Instantiate(Resources.Load("Boulder") as GameObject);
             spawned.Add(obj);
         }
-        network = GetComponent<LogisticsNetwork>();
+        //network = GetComponent<LogisticsNetwork>();
     }
 
 	// Use this for initialization

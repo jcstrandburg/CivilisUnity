@@ -147,6 +147,7 @@
     <Compile Include="Assets\Scripts\MB\StatManager.cs" />
     <Compile Include="Assets\Scripts\MB\StorageReservation.cs" />
     <Compile Include="Assets\Scripts\MB\SubMenuController.cs" />
+    <Compile Include="Assets\Scripts\MB\Toast.cs" />
     <Compile Include="Assets\Scripts\MB\Warehouse.cs" />
     <Compile Include="Assets\Scripts\NonMono\GameFactory.cs" />
     <Compile Include="Assets\Scripts\NonMono\GameStat.cs" />

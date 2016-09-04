@@ -45,6 +45,18 @@ public class LogisticsNetwork : MonoBehaviour {
         }
     }
 
+    private GameController _gameController;
+    [Inject]
+    public GameController gameController {
+        get {
+            if (_gameController == null) {
+                _gameController = GameController.Instance;
+            }
+            return _gameController;
+        }
+        set { _gameController = value; }
+    }
+
     public void Start() {
         InvokeRepeating("KeepFoodBufferFilled", 1.0f, 0.5f);
     }
@@ -102,6 +114,8 @@ public class LogisticsNetwork : MonoBehaviour {
                         tagsToRemove.Add(t);
                         w.WithdrawContents(t, 1);
                         resources.Add(new ResourceProfile(t, 1));
+
+                        gameController.MakeToast(w.transform.position, "Food Consumed");
                     }
                 }
                 foreach (var t in tagsToRemove) {
