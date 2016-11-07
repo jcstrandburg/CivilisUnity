@@ -32,7 +32,7 @@ public class GameController : MonoBehaviour {
 	public bool boxActive = false;
 	public bool additiveSelect = false;
     public List<Resource> resourcePrefabs;
-    public TechManager techmanager;
+    public TechManager techManager;
     public float daytime = 0.5f;
     public float daylength = 10.0f;
 
@@ -126,16 +126,7 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    [SerializeField]
-    private float _spirit = 0.0f;
-    public float spirit {
-        get {
-            return _spirit;
-        }
-        set {
-            _spirit = value;
-        }
-    }
+    public float spirit { get; set; }
 
     public BuildingBlueprint _buildingPlacer;
     private BuildingBlueprint buildingPlacer {
@@ -150,17 +141,13 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    public void EndGame() {
-        Application.Quit();
-    }
-
-    // Use this for initialization
+    // Handles Start event
     void Start () {
         guiController = GameObject.Find("GameUI").GetComponent<GameUIController>();
         var techs = from t in Resources.LoadAll("Techs", typeof(Technology))
                     select (Technology)t;
-        techmanager = new TechManager();
-        techmanager.LoadArray(techs.ToArray());
+        techManager = new TechManager();
+        techManager.LoadArray(techs.ToArray());
 
         resourcePrefabs = new List<Resource>();
         var allFiles = Resources.LoadAll<UnityEngine.Object>("");
@@ -173,19 +160,101 @@ public class GameController : MonoBehaviour {
         }        
     }
 
+    // Handles FixedUpdate event
+    void FixedUpdate() {
+        //remove destroyed objects from selection list
+        selected.RemoveAll((s) => (s == null));
+
+        additiveSelect = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        //daytime += Time.fixedDeltaTime / daylength;
+        //daytime = daytime % 1.0f;
+
+        float x = Mathf.Sin((float)(daytime * Math.PI));
+        RenderSettings.ambientIntensity = Mathf.Lerp(0.8f, 1.0f, x);
+        float y = Mathf.Lerp(0.55f, 1.0f, x);
+        RenderSettings.ambientLight = new Color(1.0f, y, y);
+
+        float x2 = Mathf.Sin((float)((-0.25f + daytime) * 2 * Math.PI));
+        var light = mainLight.GetComponent<Light>();
+        light.color = new Color(1.0f, y, y);
+        light.intensity = x2 * 1.0f;
+        mainLight.transform.eulerAngles = new Vector3((daytime - 0.25f) * 360.0f, 0, 0);
+
+        float x3 = Mathf.Cos((float)((daytime) * Math.PI));
+        //Debug.Log(x3);
+        var light2 = moonLight.GetComponent<Light>();
+        light2.color = new Color(1.0f, 1.0f, 1.0f);
+        light2.intensity = x3 * 0.2f;
+        moonLight.transform.eulerAngles = new Vector3((daytime + 0.25f) * 360.0f, 0, 0);
+    }
+
+    // Handles Update event
+    void Update() {
+        if (Input.GetKeyDown(KeyCode.F5)) {
+            string[] ab = getSelectedAbilities();
+            if (ab.Length > 0) {
+                Debug.Log(string.Join(", ", getSelectedAbilities()));
+            }
+            else {
+                Debug.Log("No abilities");
+            }
+
+        }
+
+        if (boxActive) {
+            UpdateBoxSelect();
+        }
+        if (Input.GetMouseButtonDown(0)) {
+            if (!EventSystem.current.IsPointerOverGameObject()) {
+                StartBoxSelect();
+            }
+        }
+    }
+
+    // handles OnGUI event
+    void OnGUI() {
+        //drow the outline for box selection
+        if (boxActive) {
+            Vector2 start = boxStart;
+            Vector2 end = boxEnd;
+
+            if (end.x < start.x) {
+                float temp = end.x;
+                end = new Vector2(start.x, end.y);
+                start = new Vector2(temp, start.y);
+            }
+            if (end.y > start.y) {
+                float temp = end.y;
+                end = new Vector2(end.x, start.y);
+                start = new Vector2(start.x, temp);
+            }
+
+            GUI.Box(new Rect(start.x, Screen.height - start.y, end.x - start.x, start.y - end.y), "");
+        }
+    }
+
+    // Handles OnDeserialize event
     void OnDeserialize() {
         selected.Clear();
     }
 
+    /// <summary>
+    /// Gets all elligible techs from the TechManager
+    /// </summary>
+    /// <returns></returns>
     public Technology[] GetAvailableTechs() {
-        return techmanager.GetEligibleTechs();
+        return techManager.GetEligibleTechs();
     }
 
+    /// <summary>
+    /// Purchases a technology through the TechManager
+    /// </summary>
+    /// <param name="t"></param>
     public void BuyTech(Technology t) {
         Debug.Log("Researching tech: " + t.techName);
 		if (t.cost <= this.spirit) {
 			this.spirit -= t.cost;
-			techmanager.Research(t);
+			techManager.Research(t);
 		}
         guiController.subMenu.ClearMenu();
     }
@@ -206,11 +275,17 @@ public class GameController : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Pauses the game simulation
+    /// </summary>
     public void PauseGame() {
         Time.timeScale = 0.0f;
         menuManager.PushMenuName("PauseMenu");
     }
 
+    /// <summary>
+    /// Unpauses the game simulation
+    /// </summary>
     public void UnpauseGame() {
         Time.timeScale = 1.0f;
     }
@@ -230,6 +305,14 @@ public class GameController : MonoBehaviour {
         return normal;
     }
 
+    /// <summary>
+    /// Attempts to withdraw the given resource profile from any warehouse. 
+    /// Note that on failure to withdraw the full amount it is possible that partial widthrawals may 
+    /// happen and then those resources will be lost permanently. This function should only be called
+    /// when total available resources have already been verified.
+    /// </summary>
+    /// <param name="rp"></param>
+    /// <returns>True on success, false on failure</returns>
     public bool WithdrawFromAnyWarehouse(ResourceProfile rp) {
         var warehouses = FindObjectsOfType<Warehouse>();
         foreach (var w in warehouses) {
@@ -267,33 +350,10 @@ public class GameController : MonoBehaviour {
         return d;
     }
 
-	void FixedUpdate() {
-        //remove destroyed objects from selection list
-        selected.RemoveAll((s) => (s == null));
-
-		additiveSelect = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-        //daytime += Time.fixedDeltaTime / daylength;
-        //daytime = daytime % 1.0f;
-
-        float x = Mathf.Sin((float)(daytime * Math.PI));
-        RenderSettings.ambientIntensity = Mathf.Lerp(0.8f, 1.0f, x);
-        float y = Mathf.Lerp(0.55f, 1.0f, x);
-        RenderSettings.ambientLight = new Color(1.0f, y, y);
-
-        float x2 = Mathf.Sin((float)((-0.25f+daytime) * 2 * Math.PI));
-        var light = mainLight.GetComponent<Light>();
-        light.color = new Color(1.0f, y, y);
-        light.intensity = x2*1.0f;
-        mainLight.transform.eulerAngles = new Vector3((daytime-0.25f)*360.0f, 0, 0);
-
-        float x3 = Mathf.Cos((float)((daytime) * Math.PI));
-        Debug.Log(x3);
-        var light2 = moonLight.GetComponent<Light>();
-        light2.color = new Color(1.0f, 1.0f, 1.0f);
-        light2.intensity = x3 * 0.2f;
-        moonLight.transform.eulerAngles = new Vector3((daytime + 0.25f) * 360.0f, 0, 0);
-    }
-
+    /// <summary>
+    /// Adds a NeolithicObject to the selected objects and updates the selection menu
+    /// </summary>
+    /// <param name="sel"></param>
     public void AddSelected(NeolithicObject sel) {
 		guiController.HideContextMenu();
 		if (!selected.Contains(sel)) {
@@ -306,6 +366,10 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Starts building placement for the given prefab object
+    /// </summary>
+    /// <param name="prefab"></param>
     public void StartBuildingPlacement(GameObject prefab) {
         guiController.subMenu.ClearMenu();
         buildingPlacer.Activate(prefab);
@@ -337,22 +401,31 @@ public class GameController : MonoBehaviour {
 		return sharedAbilities.ToArray();
 	}
 
+    /// <summary>
+    /// Gets all buildable building from the Buildings resource folder
+    /// </summary>
+    /// <returns>Buildable building</returns>
     public GameObject[] GetBuildableBuildings() {
-        UnityEngine.Object[] objects = Resources.LoadAll("Buildings", typeof(ConstructionManager));
-        var c = from o in objects select ((ConstructionManager)o).gameObject;
-        return c.ToArray();
+        var constructionManagers = from o in Resources.LoadAll("Buildings", typeof(ConstructionManager))
+                                   select (ConstructionManager)o;
+        return (from cmgr in constructionManagers
+                where cmgr.RequirementsMet(statManager, techManager)
+                select cmgr.gameObject)
+                .ToArray();
     }
 
+    /// <summary>
+    /// Updates menus and starts a marquee select operation
+    /// </summary>
 	public void StartBoxSelect() {
 		guiController.HideContextMenu();
 		boxEnd = boxStart = Input.mousePosition;
 		boxActive = true;
 	}
-
-	private List<NeolithicObject> GetWithinBoxSelect() {
-		return null;
-	}
-
+    
+    /// <summary>
+    /// Updates the marquee select as well as updating NeolithicObjects under the marquee select
+    /// </summary>
 	public void UpdateBoxSelect() {
 		boxEnd = Input.mousePosition;
 		NeolithicObject[] allObjects = FindObjectsOfType(typeof(NeolithicObject)) as NeolithicObject[];
@@ -394,7 +467,11 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-	public void EndBoxSelect(List<NeolithicObject> selectables) {
+    /// <summary>
+    /// Disables the marquee select and selects all of the given NeolithicObjects
+    /// </summary>
+    /// <param name="selectables"></param>
+	public void EndBoxSelect(IEnumerable<NeolithicObject> selectables) {
 		boxActive = false;
 		if (!additiveSelect) {
 			DeselectAll();
@@ -405,10 +482,13 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Sets up a context menu for the given clicked object based on the abilities of the selected object(s)
+    /// </summary>
+    /// <param name="clickee"></param>
 	public void DoContextMenu(NeolithicObject clickee) {
 		string[] selectedActions = getSelectedAbilities();
 		string[] availableActions = selectedActions.Intersect(clickee.actionProfile.targetActions).ToArray();
-		//Debug.Log(string.Join(", ", availableActions));
 		guiController.ShowContextMenu(availableActions, clickee);
 	}
 
@@ -456,6 +536,10 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Issues a move order to all selected Actor objects
+    /// </summary>
+    /// <param name="eventData"></param>
 	public void IssueMoveOrder(PointerEventData eventData) {
 		guiController.HideContextMenu();
 
@@ -477,29 +561,10 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-	// Update is called once per frame
-	void Update () {
-		if (Input.GetKeyDown (KeyCode.F5)) {
-			string[] ab = getSelectedAbilities();
-			if (ab.Length > 0) {
-				Debug.Log(string.Join(", ", getSelectedAbilities()));
-			} else {
-				Debug.Log("No abilities");
-			}
-
-		}
-
-		if (boxActive) {
-			UpdateBoxSelect();
-		}
-		if (Input.GetMouseButtonDown (0)) {
-			if (!EventSystem.current.IsPointerOverGameObject()) {
-				StartBoxSelect();
-			}
-		}
-	}
-
-	public void DeselectAll() {
+    /// <summary>
+    /// Deselects all currently selected NeolithicObjects
+    /// </summary>
+    public void DeselectAll() {
 		guiController.HideSelectionMenu();
 		foreach (NeolithicObject s in selected) {
             if (s != null) {
@@ -509,27 +574,13 @@ public class GameController : MonoBehaviour {
 		selected.Clear();
 	}
 
-	void OnGUI() {
-        //drow the outline for box selection
-		if (boxActive) {
-			Vector2 start = boxStart;
-			Vector2 end = boxEnd;
-			
-			if ( end.x < start.x) {
-				float temp = end.x;
-				end = new Vector2(start.x, end.y);
-				start = new Vector2(temp, start.y);
-			}
-			if ( end.y > start.y ) {
-				float temp = end.y;
-				end = new Vector2(end.x, start.y);
-				start = new Vector2(start.x, temp);
-			}
-			
-			GUI.Box (new Rect (start.x, Screen.height-start.y, end.x-start.x, start.y-end.y), "");
-		}
-	}
-
+    /// <summary>
+    /// Gets a resource reservation from any available warehouse and attaches it to the given actor
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="tag"></param>
+    /// <param name="amount"></param>
+    /// <returns>The reservation created, or null on failure</returns>
     public ResourceReservation ReserveWarehouseResources(ActorController a, string tag, double amount) {
         var la = a.GetComponent<LogisticsActor>();
         var network = la.logisticsManager.FindNearestNetwork(a.transform.position);
@@ -543,6 +594,13 @@ public class GameController : MonoBehaviour {
         return null;
     }
 
+    /// <summary>
+    /// Gets a storage reservation and attaches it to the given actor.
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="tag"></param>
+    /// <param name="amount"></param>
+    /// <returns>The reservaton created, or null on failure</returns>
     public StorageReservation ReserveStorage(ActorController a, string tag, double amount) {
         var la = a.GetComponent<LogisticsActor>();
         var network = la.logisticsManager.FindNearestNetwork(a.transform.position);
@@ -559,6 +617,12 @@ public class GameController : MonoBehaviour {
         return null;
     }
 
+    /// <summary>
+    /// Creates a new resource pile
+    /// </summary>
+    /// <param name="typeTag"></param>
+    /// <param name="amount"></param>
+    /// <returns>A reference to the new pile's GameObject</returns>
     public GameObject CreateResourcePile(string typeTag, double amount) {
         foreach (Resource g in resourcePrefabs) {
             if (g.typeTag == typeTag) {
@@ -569,17 +633,27 @@ public class GameController : MonoBehaviour {
             }
         }
         throw new ArgumentException("Unable to location prefab for resource tag " + typeTag);
-        //return null;
     }
 
+    /// <summary>
+    /// Saves the game to the default quickload save file
+    /// </summary>
     public void QuickSave() {
         GetComponent<SaverLoader>().SaveGame();
     }
 
+    /// <summary>
+    /// Loades the game from the default quickload save file
+    /// </summary>
     public void QuickLoad() {
         GetComponent<SaverLoader>().LoadGame();
     }
 
+    /// <summary>
+    /// Creates a "toast" popup notification
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="message"></param>
     public void MakeToast(Vector3 pos, string message) {
         var prefab = Resources.Load("Toast") as GameObject;
         var toast = factory.Instantiate(prefab);

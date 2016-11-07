@@ -8,6 +8,9 @@ using System.Globalization;
 
 [assembly: AssemblyVersion("0.2.2.*")]
 
+/// <summary>
+/// Manages game UI functionality
+/// </summary>
 public class GameUIController : MonoBehaviour {
 
 	GameObject contextMenu;
@@ -27,12 +30,47 @@ public class GameUIController : MonoBehaviour {
         set { _gameController = value; }
     }
 
+    // Handles Start event
+    void Start() {
+        contextMenu = transform.Find("ContextMenu").gameObject;
+        contextMenu.SetActive(false);
+        selectionMenu.Hide();
+
+        Text t = transform.Find("VersionLabel").GetComponent<Text>();
+        t.text = string.Format("v{0}", Assembly.GetExecutingAssembly().GetName().Version.ToString());
+
+        MakeDataBindings();
+    }
+
+    // Handles Update event
+    void Update() {
+        if (Input.GetKeyDown(KeyCode.Pause)) {
+            paused = !paused;
+            Time.timeScale = paused ? 0.0f : 1.0f;
+        }
+        if (Input.GetKeyDown(KeyCode.BackQuote)) {
+            Debug.Log("DEBUG");
+            if (debugMenu) {
+                debugMenu.SetActive(!debugMenu.activeSelf);
+            }
+        }
+    }
+
+    // Handles OnGUI Event
+    void OnGUI() {
+        if (paused) {
+            GUI.Label(new Rect(200, 200, 200, 200), "paused");
+        }
+    }
+
+    /// <summary>
+    /// Creates databindings. This function needs to be replaced
+    /// </summary>
+    /// <todo></todo>
+    [Obsolete("This function needs to be replaced with new style databindings")]
     private void MakeDataBindings() {
         var dbs = GetComponent<DataBindingSource>();
 
-        //dbs.AddBinding("foodbuffer",
-        //    () => gameController.foodbuffer,
-        //    (object val) => gameController.foodbuffer = Convert.ToSingle(val));
         dbs.AddBinding("spirit",
             () => gameController.spirit,
             (object val) => gameController.spirit = Convert.ToSingle(val));
@@ -41,38 +79,11 @@ public class GameUIController : MonoBehaviour {
             (object val) => gameController.daytime = Convert.ToSingle(val));
     }
 
-    // Use this for initialization
-    void Start () {
-		contextMenu = transform.Find("ContextMenu").gameObject;
-		contextMenu.SetActive(false);
-		selectionMenu.Hide ();
-        
-        Text t = transform.Find("VersionLabel").GetComponent<Text>();
-        t.text = string.Format("v{0}", Assembly.GetExecutingAssembly().GetName().Version.ToString());
-
-        MakeDataBindings();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        if (Input.GetKeyDown(KeyCode.Pause)) {
-            paused = !paused;
-            Time.timeScale = paused ? 0.0f : 1.0f;
-        }        
-        if (Input.GetKeyDown(KeyCode.BackQuote)) {
-            Debug.Log("DEBUG");
-            if (debugMenu) {
-                debugMenu.SetActive(!debugMenu.activeSelf);
-            }
-        }
-	}
-
-    void OnGUI() {
-        if (paused) {
-            GUI.Label(new Rect(200, 200, 200, 200), "paused");
-        }
-    }
-
+    /// <summary>
+    /// Creates a context menu with the given opions and target object
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="target"></param>
 	public void ShowContextMenu(string[] options, NeolithicObject target) {
 		contextMenu.SetActive(true);
 		foreach (Transform child in contextMenu.transform) {
@@ -91,14 +102,24 @@ public class GameUIController : MonoBehaviour {
 		contextMenu.transform.position = Input.mousePosition;
 	}
 
+    /// <summary>
+    /// Hides the context menu
+    /// </summary>
 	public void HideContextMenu() {
 		contextMenu.SetActive (false);
 	}
 
+    /// <summary>
+    /// Shows a selection menu for the given selected NeolithicObject
+    /// </summary>
+    /// <param name="selected"></param>
 	public void ShowSelectionMenu(NeolithicObject selected) {
 		selectionMenu.ShowPrimative(selected);
 	}
 
+    /// <summary>
+    /// Hides the selection menu
+    /// </summary>
 	public void HideSelectionMenu() {
 		selectionMenu.Hide();
 	}
@@ -119,7 +140,17 @@ public class GameUIController : MonoBehaviour {
         GameObject x = GameObject.Find("SeedFieldText");
         Text t = x.GetComponent<Text>();
         string s = t.text;
-        float f = float.Parse(s);
+
+        float f;
+        try {
+            f = float.Parse(s);
+        } catch (Exception e) {
+            Debug.Log("wat");
+            f = UnityEngine.Random.value * 1000.0f;
+            string s2 = Convert.ToString(f);
+            t.text = s2;
+            Debug.Log(s2);
+        }
 
         GameObject y = GameObject.Find("Terrain");
         GroundController gc = y.GetComponent<GroundController>();
@@ -129,10 +160,12 @@ public class GameUIController : MonoBehaviour {
         NeolithicObject[] objects = GameObject.FindObjectsOfType<NeolithicObject>();
         foreach (NeolithicObject obj in objects) {
             obj.SnapToGround();
-            //obj.
         }
     }
 
+    /// <summary>
+    /// Finds available techs and shows the technology menu
+    /// </summary>
     public void ShowResearchMenu() {
         Technology[] techs = gameController.GetAvailableTechs();
         subMenu.ClearMenu();
@@ -143,6 +176,9 @@ public class GameUIController : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Finds buildable buildings and displays the build menu
+    /// </summary>
     public void ShowBuildMenu() {
         var buildings = gameController.GetBuildableBuildings();
         subMenu.ClearMenu();

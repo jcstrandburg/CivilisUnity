@@ -108,7 +108,6 @@ public class ConstructionManager : MonoBehaviour {
         set { _groundController = value; }
     }
 
-
     public void Start() {
         var cloneList = new List<BuildingRequirement>();
         foreach (var req in resourceRequirements) {
@@ -117,6 +116,15 @@ public class ConstructionManager : MonoBehaviour {
         unfilledResourceReqs = cloneList.ToArray();
     }
 
+    public void FixedUpdate() {
+        reservations.RemoveAll((r) => {
+            return r.Released || r.Cancelled;
+        });
+    }
+
+    /// <summary>
+    /// Enables ghost shading with the bad/unplaceable color
+    /// </summary>
     public void GhostGood() {
         var r = GetComponentsInChildren<MeshRenderer>();
         foreach (var q in r) {
@@ -125,6 +133,9 @@ public class ConstructionManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Enables ghost shading with the good/placeable color
+    /// </summary>
     public void GhostBad() {
         var r = GetComponentsInChildren<MeshRenderer>();
         foreach (var q in r) {
@@ -132,14 +143,10 @@ public class ConstructionManager : MonoBehaviour {
             q.material.SetColor("_GhostColor", Color.red);
         }
     }
-    public void GhostBuilding() {
-        var r = GetComponentsInChildren<MeshRenderer>();
-        foreach (var q in r) {
-            q.material.shader = Shader.Find("Custom/BuildingGhost");
-            q.material.SetColor("_GhostColor", Color.white);
-        }
-    }
 
+    /// <summary>
+    /// Disables ghost shading
+    /// </summary>
     public void UnGhost() {
         var r = GetComponentsInChildren<MeshRenderer>();
         foreach (var q in r) {
@@ -147,12 +154,10 @@ public class ConstructionManager : MonoBehaviour {
         }
     }
 
-    public void FixedUpdate() {
-        reservations.RemoveAll((r) => {
-            return r.Released || r.Cancelled;
-        });
-    }
-
+    /// <summary>
+    /// Determins if the construction process is finished
+    /// </summary>
+    /// <returns>True if finished, else false</returns>
     public bool ConstructionFinished() {
         double neededResources = 0;
         foreach (BuildingRequirement req in unfilledResourceReqs) {
@@ -161,22 +166,11 @@ public class ConstructionManager : MonoBehaviour {
         return neededResources <= 0;
     }
 
-	public bool ElligibleToBuild() {
-        TechManager tm = gameController.techmanager;
-        foreach (var r in techRequirements) {
-            if (!tm.TechResearched(r)) {
-                return false;
-            }
-        }
-        foreach (var r in statRequirements) {
-            var statManager = gameController.statManager;
-            if (statManager.Stat(r.name).Value < (decimal)r.amount) {
-                return false;
-            }
-        }
-        return true;
-    }
-
+    /// <summary>
+    /// Determins if this building can be placed at the given position. If this is an instabuild building resource requirements will be checked also
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns>True if buildable, else false</returns>
     public bool IsBuildable(Vector3 position) {
         if (position.y <= groundController.waterLevel) {
             return false;
@@ -194,6 +188,9 @@ public class ConstructionManager : MonoBehaviour {
         return true;
     }
 
+    /// <summary>
+    /// Starts the building placement process, caching some components and entering building/blueprint mode
+    /// </summary>
     public void StartPlacement() {
         NeolithicObject no = GetComponent<NeolithicObject>();
         no.selectable = false;
@@ -214,12 +211,15 @@ public class ConstructionManager : MonoBehaviour {
         GhostBad();
     }
 
+    /// <summary>
+    /// Starts the construction process, disabling and caching some key components
+    /// </summary>
     public void StartConstruction() {
         if (instabuild) {
             foreach (var r in resourceRequirements) {
                 var rp = new ResourceProfile(r.name, r.amount);
                 if (!gameController.WithdrawFromAnyWarehouse(rp)) {
-                    throw new Exception("Failed to build building, unable to withdraw "+r.name);
+                    throw new InvalidOperationException("Failed to build building, unable to withdraw "+r.name);
                 }
             }
 
@@ -227,10 +227,13 @@ public class ConstructionManager : MonoBehaviour {
         } else {
             NeolithicObject no = GetComponent<NeolithicObject>();
             no.actionProfile = (ActionProfile)Resources.Load("ActionProfiles/Constructable");
-            GhostBuilding();
+            GhostBad();
         }
     }
 
+    /// <summary>
+    /// Finalizes construction, re-enabling cached compenents and some other prep stuff
+    /// </summary>
     public void FinishContruction() {
         NeolithicObject no = GetComponent<NeolithicObject>();
         no.selectable = true;
@@ -242,6 +245,11 @@ public class ConstructionManager : MonoBehaviour {
         Destroy(this);
     }
 
+    /// <summary>
+    /// Builds a new ConstructionReservation and attaches it to the given actor
+    /// </summary>
+    /// <param name="actor"></param>
+    /// <returns>True on success, false on failure</returns>
     public bool GetJobReservation(ActorController actor) {
         var avails = gameController.GetAllAvailableResources();
         foreach (var kvp in avails) {
@@ -262,6 +270,11 @@ public class ConstructionManager : MonoBehaviour {
         return false;
     }
 
+    /// <summary>
+    /// Gets the total resources still needed to complete construction
+    /// </summary>
+    /// <param name="resourceTag"></param>
+    /// <returns>Resources needed to complete construction</returns>
     public double GetNeededResource(string resourceTag) {
         double needed = 0;
         foreach (var requirement in unfilledResourceReqs) {
@@ -300,5 +313,29 @@ public class ConstructionManager : MonoBehaviour {
         if (ConstructionFinished()) {
             FinishContruction();
         }
+    }
+
+    /// <summary>
+    /// Determins if all tech and stat requirements are met for this building
+    /// </summary>
+    /// <param name="statManager"></param>
+    /// <param name="techManager"></param>
+    /// <returns>True if requirements met, false otherwise</returns>
+    public bool RequirementsMet(StatManager statManager, TechManager techManager) {
+        foreach (var requirement in statRequirements) {
+            var statname = requirement.name;
+            var stat = statManager.Stat(statname);
+            if (!requirement.IsSatisfied((float)stat.Value)) {
+                return false;
+            }
+        }
+
+        foreach (var tech in techRequirements) {
+            if (!techManager.TechResearched(tech)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

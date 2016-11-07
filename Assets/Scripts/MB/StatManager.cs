@@ -1,14 +1,26 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System;
+using UnityEditor;
+
+[CustomEditor(typeof(StatManager))]
+public class StatmanagerEditor : Editor {
+    public override void OnInspectorGUI() {
+        StatManager my = (StatManager)target;
+
+        foreach (var stat in my.stats.Values) {
+            EditorGUILayout.LabelField(stat.name);
+            EditorGUILayout.FloatField((float)stat.Value);
+        }
+    }
+}
 
 public class StatManager : MonoBehaviour {
 
     [SerializeField]
-    private Dictionary<string, GameStat> stats = new Dictionary<string, GameStat>();
+    public Dictionary<string, GameStat> stats = new Dictionary<string, GameStat>();
     [DontSaveField]
     [NonSerialized]
     private IStatPersistor persistor;

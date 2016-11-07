@@ -11,12 +11,31 @@ public class Reservoir : MonoBehaviour {
 	public List<Reservation> reservations = new List<Reservation>();
     private NeolithicObject nobject;
 
-    public void Regen(float time) {
-        amount += (double)(time * regenRate);
-        //clamp
-        amount = (amount < 0 ? 0 : (amount > max ? max : amount));
+    // Handles Start event
+    void Start() {
+        nobject = GetComponent<NeolithicObject>();
     }
 
+    // Handles FixedUpdate event
+    void FixedUpdate() {
+        Regen(Time.fixedDeltaTime);
+        UpdateReservations();
+        nobject.statusString = string.Format("{0} reservations, {1} {2}", reservations.Count, amount.ToString("F1"), resourceTag);
+    }
+
+    /// <summary>
+    /// Regenerates resources based on the given time factor
+    /// </summary>
+    /// <param name="time"></param>
+    public void Regen(float time) {
+        amount += (double)(time * regenRate);
+        amount = Math.Min(Math.Max(0, amount), max);
+    }
+
+    /// <summary>
+    /// Gets all available contents for this reservoir
+    /// </summary>
+    /// <returns></returns>
     public double GetAvailableContents() {
         double avail = amount;
         foreach (ResourceReservation r in reservations) {
@@ -25,8 +44,10 @@ public class Reservoir : MonoBehaviour {
         return avail >= 0 ? avail : 0;
     }
 
+    /// <summary>
+    /// Updates ResourceReservations, marking them ready as appropriate
+    /// </summary>
     public void UpdateReservations() {
-        //reservations.RemoveAll((r) => { return r.Released || r.Cancelled; });
         double availAmount = amount;
         foreach (ResourceReservation res in reservations) {
             if (availAmount > res.amount) {
@@ -38,6 +59,12 @@ public class Reservoir : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Withdraws the given reservation from this reservoir
+    /// </summary>
+    /// <param name="res"></param>
+    /// <exception cref="System.ArgumentException">Thrown when an invalid reservation is passed</exception>
+    /// <returns>True on success, false if the reservation is not fulfillable</returns>
     public bool WithdrawReservation(ResourceReservation res) {
         if (res.source != this.gameObject) {
             Debug.Log(res);
@@ -58,16 +85,12 @@ public class Reservoir : MonoBehaviour {
         }
     }
 
-	void FixedUpdate() {
-        Regen(Time.fixedDeltaTime);
-        UpdateReservations();
-        nobject.statusString = string.Format("{0} reservations, {1} {2}", reservations.Count, amount.ToString("F1"), resourceTag);
-	}
-
-    void Start() {
-        nobject = GetComponent<NeolithicObject>();
-    }
-
+    /// <summary>
+    /// Creates a new resource reservation and adds it to the given GameObject, returning the reservation
+    /// </summary>
+    /// <param name="go"></param>
+    /// <param name="amount"></param>
+    /// <returns>The reservation</returns>
 	public ResourceReservation NewReservation(GameObject go, double amount) {
         ResourceReservation r = go.AddComponent<ResourceReservation>();
         r.resourceTag = this.resourceTag;

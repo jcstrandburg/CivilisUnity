@@ -10,6 +10,10 @@ public class LogisticsManager : MonoBehaviour {
     [SerializeField]
     private List<LogisticsNode> nodes = new List<LogisticsNode>();
 
+    /// <summary>
+    /// Adds a LogisticsNetwork to the logistics system
+    /// </summary>
+    /// <param name="network"></param>
     public void RegisterNetwork(LogisticsNetwork network) {
         if (networks.Contains(network)) {
             throw new InvalidOperationException("Network already registered");
@@ -17,10 +21,18 @@ public class LogisticsManager : MonoBehaviour {
         networks.Add(network);
     }
 
+    /// <summary>
+    /// Removes a LogisticsNetwork from the logistics system
+    /// </summary>
+    /// <param name="network"></param>
     public void UnregisterNetwork(LogisticsNetwork network) {
         networks.Remove(network);
     }
 
+    /// <summary>
+    /// Adds a logistics node to the logistics system
+    /// </summary>
+    /// <param name="node"></param>
     public void RegisterNode(LogisticsNode node) {
         if (nodes.Contains(node)) {
             throw new InvalidOperationException("Node already registered");
@@ -30,16 +42,28 @@ public class LogisticsManager : MonoBehaviour {
         node.logisticsNetwork = nearestNetwork;
     }
 
+    /// <summary>
+    /// Removes a logistics node from the logistics system
+    /// </summary>
+    /// <param name="node"></param>
     public void UnregisterNode(LogisticsNode node) {
         nodes.Remove(node);
     }
 
+    /// <summary>
+    /// Reassigns all logistics nodes to the nearest network
+    /// </summary>
     public void RebuildNetworks() {
         foreach (var n in nodes) {
             n.logisticsNetwork = FindNearestNetwork(n.transform.position);
         }
     }
 
+    /// <summary>
+    /// Finds the active logistics node nearest to the given position
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns>The nearest active network</returns>
     public LogisticsNetwork FindNearestNetwork(Vector3 position) {
         LogisticsNetwork closest = null;
         float closestDist = float.PositiveInfinity;

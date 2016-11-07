@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -38,12 +39,13 @@ public class ActorController : NeolithicObject {
     public ResourceReservation resourceReservation { get { return GetComponentInChildren<ResourceReservation>(); } }
     public LogisticsActor logisticsActor;
 
-	// Use this for initialization
+	// Handles Start event
 	public override void Start () {
 		base.Start();
         logisticsActor = GetComponent<LogisticsActor>();
 	}
 
+    // Handles OnDestroy event
     public void OnDestroy() {
         if (currentOrder != null) {
             currentOrder.Cancel();
@@ -54,6 +56,7 @@ public class ActorController : NeolithicObject {
         }
     }
 
+    // Handles FixedUpdate event
 	public virtual void FixedUpdate() {
         double feedMe = (double)(Time.fixedDeltaTime * 0.025f);
         LogisticsNetwork network = logisticsActor.logisticsManager.FindNearestNetwork(transform.position);
@@ -88,12 +91,15 @@ public class ActorController : NeolithicObject {
         queueLength = orderQueue.Count;
 	}
 
+    /// <summary>
+    /// Gets and removes the first order from the order queue
+    /// </summary>
+    /// <returns>The first order from the queue</returns>
 	public BaseOrder DequeueOrder() {
         //this is technically not safe, and should probably be changed back to a queue after i find a way to display the queue in the editor
         BaseOrder o = orderQueue[0];
         orderQueue.RemoveAt(0);
         return o;
-        //return orderQueue.Dequeue();
 	}
 
 	/// <summary>Adds an order to the pending order queue</summary>
@@ -136,8 +142,12 @@ public class ActorController : NeolithicObject {
         }
     }
 
+    /// <summary>
+    /// Finds and returned the first found child object that has the tag "Resource" and has a Resource component
+    /// </summary>
+    /// <param name="resourceType"></param>
+    /// <returns>A Resource object</returns>
     public Resource GetCarriedResource(string resourceType=null) {
-        //Debug.Log("Getting carried resource");
         foreach (Transform t in transform) {
             if (t.gameObject != null && t.tag == "Resource") {
                 Resource r = t.GetComponent<Resource>();
@@ -148,14 +158,10 @@ public class ActorController : NeolithicObject {
         }
         return null;
     }
-
-    public void CarryResource(Resource r) {
-        if (!r) {
-            Debug.Log(r);
-            throw new System.Exception("Cannot carry resource!");
-        }
-    }
-
+    
+    /// <summary>
+    /// Drops the currently carried resource on the ground as a resource pile
+    /// </summary>
     public void DropCarriedResource() {
         Resource r = GetCarriedResource();
         if (!r) {
@@ -168,12 +174,20 @@ public class ActorController : NeolithicObject {
         r.SetDown();
     }
 
-    public void PickupResource(GameObject res) {
+    /// <summary>
+    /// Picks up the given resource. It is assumed that the give
+    /// </summary>
+    /// <param name="res"></param>
+    public void PickupResource(Resource res) {
         res.transform.SetParent(this.transform);
         res.transform.localPosition = new Vector3(0, 4.0f, 0);
-        res.GetComponent<Resource>().Pickup();
+        res.Pickup();
     }
 
+    /// <summary>
+    /// Starts the actor panicing, pauses current orders and starts executing the given response order
+    /// </summary>
+    /// <param name="response">Response order</param>
     public void Panic(BaseOrder response) {
         if (!idle) {
             Debug.Log("Pausing order!");

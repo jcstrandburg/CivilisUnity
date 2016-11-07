@@ -3,6 +3,9 @@ using System.Collections;
 using System.Reflection;
 using System.Linq;
 
+/// <summary>
+/// Helper factory class that handles dependency injection
+/// </summary>
 public class GameFactory {
 
     private static GameController _gameController = null;
