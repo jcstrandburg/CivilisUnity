@@ -7,15 +7,11 @@ public class SimpleWithdrawOrder : BaseOrder {
     }
 
     public override void DoStep() {
-        //Debug.Log("Mercy me");
-        //Debug.Log(actor.resourceReservation);
-        //Debug.Log(actor.resourceReservation.source);
-        //Debug.Log(actor.resourceReservation.source.GetComponent<Warehouse>());
         Warehouse w = actor.resourceReservation.source.GetComponent<Warehouse>();
         try {
             string tag = actor.resourceReservation.resourceTag;
             w.WithdrawReservation(actor.resourceReservation);            
-            GameObject r = actor.gameController.CreateResourcePile(tag, 1);
+            Resource r = actor.gameController.CreateResourcePile(tag, 1);
             actor.PickupResource(r);
             this.completed = true;
         }

@@ -15,7 +15,7 @@ public class SlaughterHuntedAnimalOrder : BaseOrder {
         if (progress > 1.25f) {
             if (herd.KillAnimal()) {
                 string rtag = herd.resourceTag;
-                GameObject res = actor.gameController.CreateResourcePile(rtag, 1);
+                Resource res = actor.gameController.CreateResourcePile(rtag, 1);
                 actor.PickupResource(res);
                 this.completed = true;
             }

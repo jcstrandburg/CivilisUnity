@@ -623,13 +623,13 @@ public class GameController : MonoBehaviour {
     /// <param name="typeTag"></param>
     /// <param name="amount"></param>
     /// <returns>A reference to the new pile's GameObject</returns>
-    public GameObject CreateResourcePile(string typeTag, double amount) {
+    public Resource CreateResourcePile(string typeTag, double amount) {
         foreach (Resource g in resourcePrefabs) {
             if (g.typeTag == typeTag) {
                 GameObject pile = factory.Instantiate(g.gameObject);
                 Resource r = pile.GetComponent<Resource>();
                 r.amount = amount;
-                return pile;
+                return r;
             }
         }
         throw new ArgumentException("Unable to location prefab for resource tag " + typeTag);
