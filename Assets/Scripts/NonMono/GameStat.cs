@@ -2,17 +2,11 @@
 
 [Serializable]
 public class GameStat {
-    /// <summary>
-    /// The internal name
-    /// </summary>
+    /// <summary>The internal name</summary>
     public readonly string name;
-    /// <summary>
-    /// Whether the stat has a persistent value accross games
-    /// </summary>
+    /// <summary>Whether the stat has a persistent value across games</summary>
     public readonly bool persist;
-    /// <summary>
-    /// Whether the stat is allowed only to increase
-    /// </summary>
+    /// <summary>Whether the stat is allowed only to increase</summary>
     public readonly bool monotonic;
 
     private decimal value;
@@ -39,6 +33,14 @@ public class GameStat {
     /// </summary>
     /// <param name="v"></param>
     public void Add(int v) {
+        Add((decimal)v);
+    }
+
+    /// <summary>
+    /// Adds the given value to the stat
+    /// </summary>
+    /// <param name="v"></param>
+    public void Add(double v) {
         Add((decimal)v);
     }
 

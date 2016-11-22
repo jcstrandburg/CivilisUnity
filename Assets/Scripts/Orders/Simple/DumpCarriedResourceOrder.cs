@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System;
 
 /// <summary>
@@ -7,21 +6,28 @@ using System;
 /// </summary>
 public class DumpCarriedResourceOrder : BaseOrder {
     GameObject dump;
+    Vector3 target;
 
     public DumpCarriedResourceOrder(ActorController a) : base(a) {
         dump = GameObject.Find("DumpingGround");
-        dump.GetComponent<NeolithicObject>().SnapToGround();
+        if (dump) {
+            target = a.gameController.SnapToGround(dump.transform.position);
+        } else {
+            Vector2 offset = 10.0f * UnityEngine.Random.insideUnitCircle;
+            target = a.gameController
+                .SnapToGround(actor.transform.position + new Vector3(offset.x, 0, offset.y));
+        }
     }
 
     public override void DoStep() {
         try {
-            if (actor.MoveTowards(dump.transform.position, 1.1f)) {
+            if (actor.MoveTowards(target, 1.1f)) {
                 actor.DropCarriedResource();
                 this.completed = true;
             }
         }
         catch (Exception e) {
-            Debug.Log("Exception in TempDumpOrder");
+            Debug.Log("Exception in DumpCarriedResourceOrder");
             Debug.Log(e);
             this.failed = true;
         }

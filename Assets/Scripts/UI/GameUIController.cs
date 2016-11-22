@@ -64,19 +64,17 @@ public class GameUIController : MonoBehaviour {
     }
 
     /// <summary>
-    /// Creates databindings. This function needs to be replaced
+    /// Exports databindings
     /// </summary>
-    /// <todo></todo>
-    [Obsolete("This function needs to be replaced with new style databindings")]
     private void MakeDataBindings() {
         var dbs = GetComponent<DataBindingSource>();
 
         dbs.AddBinding("spirit",
-            () => gameController.spirit,
-            (object val) => gameController.spirit = Convert.ToSingle(val));
+            () => gameController.Spirit,
+            (object val) => gameController.Spirit = Convert.ToSingle(val));
         dbs.AddBinding("dayfactor",
-            () => gameController.daytime,
-            (object val) => gameController.daytime = Convert.ToSingle(val));
+            () => gameController.DayCycleController.daytime,
+            (object val) => gameController.DayCycleController.daytime = Convert.ToSingle(val));
     }
 
     /// <summary>
@@ -144,8 +142,7 @@ public class GameUIController : MonoBehaviour {
         float f;
         try {
             f = float.Parse(s);
-        } catch (Exception e) {
-            Debug.Log("wat");
+        } catch {
             f = UnityEngine.Random.value * 1000.0f;
             string s2 = Convert.ToString(f);
             t.text = s2;
@@ -172,7 +169,7 @@ public class GameUIController : MonoBehaviour {
         foreach (Technology t in techs) {
             Technology tech = t;
             Button b = subMenu.AddButton(t.displayName, () => gameController.BuyTech(tech));
-			b.interactable = (gameController.spirit >= t.cost);
+			b.interactable = (gameController.Spirit >= t.cost);
         }
     }
 

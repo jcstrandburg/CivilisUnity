@@ -18,7 +18,7 @@ public class LoadGameMenu : MonoBehaviour {
         string gameName = list.SelectedItem;
         if (gameName != null) {
             Debug.Log(gameName);
-            GameController.Instance.saverLoader.LoadGame(gameName);
+            GameController.Instance.SaverLoader.LoadGame(gameName);
             GetComponent<MenuController>().PopMenu();
         }
     }

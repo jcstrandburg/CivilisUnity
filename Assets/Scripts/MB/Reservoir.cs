@@ -8,8 +8,12 @@ public class Reservoir : MonoBehaviour {
     public double amount;
     public float regenRate;
     public double max;
+    public string harvestStat=null;
 	public List<Reservation> reservations = new List<Reservation>();
     private NeolithicObject nobject;
+
+    [Inject]
+    public StatManager statManager;
 
     // Handles Start event
     void Start() {
@@ -48,6 +52,7 @@ public class Reservoir : MonoBehaviour {
     /// Updates ResourceReservations, marking them ready as appropriate
     /// </summary>
     public void UpdateReservations() {
+        reservations.RemoveAll((r) => r.Cancelled || r.Released);
         double availAmount = amount;
         foreach (ResourceReservation res in reservations) {
             if (availAmount > res.amount) {
@@ -79,6 +84,11 @@ public class Reservoir : MonoBehaviour {
             amount -= res.amount;
             res.Released = true;
             reservations.Remove(res);
+
+            if (!String.IsNullOrEmpty(harvestStat)) {
+                statManager.Stat(harvestStat).Add(res.amount);
+            }
+
             return true;
         } else {
             return false;

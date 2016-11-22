@@ -86,28 +86,29 @@ public class ConstructionManager : MonoBehaviour {
     [SerializeField]
     private List<MonoBehaviour> cachedComponents;
 
-    private GameController _gameController;
-    public GameController gameController {
+    private GameController gameController;
+    public GameController GameController {
         get {
-            if (_gameController == null) {
-                _gameController = GameController.Instance;
+            if (gameController == null) {
+                gameController = GameController.Instance;
             }
-            return _gameController;
+            return gameController;
         }
-        set { _gameController = value; }
+        set { gameController = value; }
     }
 
-    private GroundController _groundController;
-    public GroundController groundController {
+    private GroundController groundController;
+    public GroundController GroundController {
         get {
-            if (_groundController == null) {
-                _groundController = gameController.groundController;
+            if (groundController == null) {
+                groundController = GameController.GroundController;
             }
-            return _groundController;
+            return groundController;
         }
-        set { _groundController = value; }
+        set { groundController = value; }
     }
 
+    // Handles Start event
     public void Start() {
         var cloneList = new List<BuildingRequirement>();
         foreach (var req in resourceRequirements) {
@@ -116,6 +117,7 @@ public class ConstructionManager : MonoBehaviour {
         unfilledResourceReqs = cloneList.ToArray();
     }
 
+    // Handles FixedUpdate event
     public void FixedUpdate() {
         reservations.RemoveAll((r) => {
             return r.Released || r.Cancelled;
@@ -141,6 +143,17 @@ public class ConstructionManager : MonoBehaviour {
         foreach (var q in r) {
             q.material.shader = Shader.Find("Custom/BuildingGhost");
             q.material.SetColor("_GhostColor", Color.red);
+        }
+    }
+
+    /// <summary>
+    /// Enables ghost shading with the neutral color
+    /// </summary>
+    public void GhostNeutral() {
+        var r = GetComponentsInChildren<MeshRenderer>();
+        foreach (var q in r) {
+            q.material.shader = Shader.Find("Custom/BuildingGhost");
+            q.material.SetColor("_GhostColor", Color.white);
         }
     }
 
@@ -172,11 +185,11 @@ public class ConstructionManager : MonoBehaviour {
     /// <param name="position"></param>
     /// <returns>True if buildable, else false</returns>
     public bool IsBuildable(Vector3 position) {
-        if (position.y <= groundController.waterLevel) {
+        if (position.y <= GroundController.waterLevel) {
             return false;
         }
         if (instabuild) {
-            var availResources = gameController.GetAllAvailableResources();
+            var availResources = GameController.GetAllAvailableResources();
             foreach (var r in resourceRequirements) {
                 if (  !availResources.ContainsKey(r.name) 
                     || availResources[r.name] < r.amount) 
@@ -218,7 +231,7 @@ public class ConstructionManager : MonoBehaviour {
         if (instabuild) {
             foreach (var r in resourceRequirements) {
                 var rp = new ResourceProfile(r.name, r.amount);
-                if (!gameController.WithdrawFromAnyWarehouse(rp)) {
+                if (!GameController.WithdrawFromAnyWarehouse(rp)) {
                     throw new InvalidOperationException("Failed to build building, unable to withdraw "+r.name);
                 }
             }
@@ -227,7 +240,7 @@ public class ConstructionManager : MonoBehaviour {
         } else {
             NeolithicObject no = GetComponent<NeolithicObject>();
             no.actionProfile = (ActionProfile)Resources.Load("ActionProfiles/Constructable");
-            GhostBad();
+            GhostNeutral();
         }
     }
 
@@ -251,7 +264,7 @@ public class ConstructionManager : MonoBehaviour {
     /// <param name="actor"></param>
     /// <returns>True on success, false on failure</returns>
     public bool GetJobReservation(ActorController actor) {
-        var avails = gameController.GetAllAvailableResources();
+        var avails = GameController.GetAllAvailableResources();
         foreach (var kvp in avails) {
             string resourceTag = kvp.Key;
             double amount = kvp.Value;

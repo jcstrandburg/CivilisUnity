@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Linq;
 
 /// <summary>
-/// Helper factory class that handles dependency injection
+/// Helper factory class that handles dependency injection/service location
 /// </summary>
 public class GameFactory {
 
@@ -24,7 +24,7 @@ public class GameFactory {
     public GameUIController guiController {
         get {
             if (_guiController == null) {
-                _guiController = gameController.guiController;
+                _guiController = gameController.GuiController;
             }
             return _guiController;
         }
@@ -38,7 +38,7 @@ public class GameFactory {
     public GroundController groundController {
         get {
             if (_groundController == null) {
-                _groundController = gameController.groundController;
+                _groundController = gameController.GroundController;
             }
             return _groundController;
         }
@@ -52,7 +52,7 @@ public class GameFactory {
     public StatManager statManager {
         get {
             if (_statManager == null) {
-                _statManager = gameController.statManager;
+                _statManager = gameController.StatManager;
             }
             return _statManager;
         }
@@ -66,7 +66,7 @@ public class GameFactory {
     public SaverLoader saverLoader {
         get {
             if (_saverLoader == null) {
-                _saverLoader = gameController.saverLoader;
+                _saverLoader = gameController.SaverLoader;
             }
             return _saverLoader;
         }
@@ -80,7 +80,7 @@ public class GameFactory {
     public MenuManager menuManager {
         get {
             if (_menuManager == null) {
-                _menuManager = gameController.menuManager;
+                _menuManager = gameController.MenuManager;
             }
             return _menuManager;
         }
@@ -94,7 +94,7 @@ public class GameFactory {
     public LogisticsManager logisticsManager {
         get {
             if (_logisticsManager == null) {
-                _logisticsManager = gameController.logisticsManager;
+                _logisticsManager = gameController.LogisticsManager;
             }
             return _logisticsManager;
         }

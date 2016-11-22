@@ -97,7 +97,7 @@ public class NeolithicObject : MonoBehaviour {
     // Handles Update event
     public void Update() {
         if (halo) {
-            halo.highlighted = selected || pointerHover;
+            halo.Highlighted = selected || pointerHover;
         }
     }
 

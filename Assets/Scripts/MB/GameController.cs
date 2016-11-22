@@ -24,21 +24,26 @@ public class GameControllerEditor : Editor {
 #endif
 
 public class GameController : MonoBehaviour {
+    /// <summary>A list containing all selected NeolithicObjects</summary>
 	public List<NeolithicObject> selected = new List<NeolithicObject>();
-	public GameObject mainLight;
-    public GameObject moonLight;
-    Vector2 boxStart;
-	Vector2 boxEnd;
-	public bool boxActive = false;
-	public bool additiveSelect = false;
-    public List<Resource> resourcePrefabs;
-    public TechManager techManager;
-    public float daytime = 0.5f;
-    public float daylength = 10.0f;
 
+    /// <summary>Marquee select start</summary>
+    Vector2 boxStart;
+    /// <summary>Marquee select end</summary>
+	Vector2 boxEnd;
+    /// <summary>Is marquee select active</summary>
+    public bool boxActive = false;
+    /// <summary>Should current selection remain when new objects are selected</summary>
+    public bool additiveSelect = false;
+    /// <summary>List of resource pile prefabs</summary>
+    public List<Resource> resourcePrefabs;
+    /// <summary>Manages technology tree</summary>
+    public TechManager techManager;
+    /// <summary>Manages creation of objects, dependency injection, etc</summary>
     public GameFactory factory = new GameFactory();
 
     private static GameController _instance = null;
+    /// <summary>"Singleton" instance getter. Only one of these objects is expected to exists in any scene.</summary>
     public static GameController Instance {
         get {
             if (_instance == null) {
@@ -48,102 +53,123 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    private GameUIController _guiController;
-    public GameUIController guiController {
+    private GameUIController guiController;
+    /// <summary>Manages the GuiController object. If no other controller is provided one will be found in the scene.</summary>
+    public GameUIController GuiController {
         get {
-            if (_guiController == null) {
-                _guiController = FindObjectOfType<GameUIController>();
+            if (guiController == null) {
+                guiController = FindObjectOfType<GameUIController>();
             }
-            return _guiController;
+            return guiController;
         }
         set {
-            _guiController = value;
+            guiController = value;
         }
     }
 
-    private GroundController _groundController;
-    public GroundController groundController {
+    private GroundController groundController;
+    /// <summary>Manages the GroundController object. If no other controller is provided one will be found in the scene.</summary>
+    public GroundController GroundController {
         get {
-            if (_groundController == null) {
-                _groundController = FindObjectOfType<GroundController>();
+            if (groundController == null) {
+                groundController = FindObjectOfType<GroundController>();
             }
-            return _groundController;
+            return groundController;
         }
         set {
-            _groundController = value;
+            groundController = value;
         }
     }
 
-    private StatManager _statManager;
-    public StatManager statManager {
+    private StatManager statManager;
+    /// <summary>Manages the StatManager object. If no other manager is provided one will be found in the scene.</summary>
+    public StatManager StatManager {
         get {
-            if (_statManager == null) {
-                _statManager = FindObjectOfType<StatManager>();
+            if (statManager == null) {
+                statManager = FindObjectOfType<StatManager>();
             }
-            return _statManager;
+            return statManager;
         }
         set {
-            _statManager = value;
+            statManager = value;
         }
     }
 
-    private SaverLoader _saverLoader;
-    public SaverLoader saverLoader {
+    private SaverLoader saverLoader;
+    /// <summary>Manages the SaverLoader object. If no other SaverLoader is provided one will be found in the scene.</summary>
+    public SaverLoader SaverLoader {
         get {
-            if (_saverLoader == null) {
-                _saverLoader = FindObjectOfType<SaverLoader>();
+            if (saverLoader == null) {
+                saverLoader = FindObjectOfType<SaverLoader>();
             }
-            return _saverLoader;
+            return saverLoader;
         }
         set {
-            _saverLoader = value;
+            saverLoader = value;
         }
     }
 
-    private MenuManager _menuManager;
-    public MenuManager menuManager {
+    private MenuManager menuManager;
+    /// <summary>Manages the MenuManager object. If no other manager is provided one will be found in the scene.</summary>
+    public MenuManager MenuManager {
         get {
-            if (_menuManager == null) {
-                _menuManager = FindObjectOfType<MenuManager>();
+            if (menuManager == null) {
+                menuManager = FindObjectOfType<MenuManager>();
             }
-            return _menuManager;
+            return menuManager;
         }
         set {
-            _menuManager = value;
+            menuManager = value;
         }
     }
 
-    private LogisticsManager _logisticsManager;
-    public LogisticsManager logisticsManager {
+    private LogisticsManager logisticsManager;
+    /// <summary>Manages the LogisticsManager object. If no other manager is provided one will be found in the scene.</summary>
+    public LogisticsManager LogisticsManager {
         get {
-            if (_logisticsManager == null) {
-                _logisticsManager = FindObjectOfType<LogisticsManager>();
+            if (logisticsManager == null) {
+                logisticsManager = FindObjectOfType<LogisticsManager>();
             }
-            return _logisticsManager;
+            return logisticsManager;
         }
         set {
-            _logisticsManager = value;
+            logisticsManager = value;
         }
     }
 
-    public float spirit { get; set; }
-
-    public BuildingBlueprint _buildingPlacer;
-    private BuildingBlueprint buildingPlacer {
+    private DayCycleController dayCycleController;
+    /// <summary>Manages the DayCycleController object. If no other controller is provided one will be found in the scene.</summary>
+    public DayCycleController DayCycleController {
         get {
-            if (_buildingPlacer == null) {
+            if (dayCycleController == null) {
+                dayCycleController = FindObjectOfType<DayCycleController>();
+            }
+            return dayCycleController;
+        }
+        set {
+            dayCycleController = value;
+        }
+    }
+
+    public float Spirit { get; set; }
+
+    public BuildingBlueprint buildingPlacer;
+    /// <summary>Manages the BuildingPlueprint object. If no other placer is provided one will be found in the scene.</summary>
+    private BuildingBlueprint BuildingPlacer {
+        get {
+            if (buildingPlacer == null) {
                 BuildingBlueprint[] bbps = FindObjectsOfType<BuildingBlueprint>();
                 if (bbps.Length > 0) {
-                    _buildingPlacer = bbps[0];
+                    buildingPlacer = bbps[0];
                 }
             }
-            return _buildingPlacer;
+            return buildingPlacer;
         }
     }
 
     // Handles Start event
     void Start () {
-        guiController = GameObject.Find("GameUI").GetComponent<GameUIController>();
+        GuiController = GameObject.Find("GameUI").GetComponent<GameUIController>();
         var techs = from t in Resources.LoadAll("Techs", typeof(Technology))
                     select (Technology)t;
         techManager = new TechManager();
@@ -164,28 +190,7 @@ public class GameController : MonoBehaviour {
     void FixedUpdate() {
         //remove destroyed objects from selection list
         selected.RemoveAll((s) => (s == null));
-
         additiveSelect = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-        //daytime += Time.fixedDeltaTime / daylength;
-        //daytime = daytime % 1.0f;
-
-        float x = Mathf.Sin((float)(daytime * Math.PI));
-        RenderSettings.ambientIntensity = Mathf.Lerp(0.8f, 1.0f, x);
-        float y = Mathf.Lerp(0.55f, 1.0f, x);
-        RenderSettings.ambientLight = new Color(1.0f, y, y);
-
-        float x2 = Mathf.Sin((float)((-0.25f + daytime) * 2 * Math.PI));
-        var light = mainLight.GetComponent<Light>();
-        light.color = new Color(1.0f, y, y);
-        light.intensity = x2 * 1.0f;
-        mainLight.transform.eulerAngles = new Vector3((daytime - 0.25f) * 360.0f, 0, 0);
-
-        float x3 = Mathf.Cos((float)((daytime) * Math.PI));
-        //Debug.Log(x3);
-        var light2 = moonLight.GetComponent<Light>();
-        light2.color = new Color(1.0f, 1.0f, 1.0f);
-        light2.intensity = x3 * 0.2f;
-        moonLight.transform.eulerAngles = new Vector3((daytime + 0.25f) * 360.0f, 0, 0);
     }
 
     // Handles Update event
@@ -252,11 +257,11 @@ public class GameController : MonoBehaviour {
     /// <param name="t"></param>
     public void BuyTech(Technology t) {
         Debug.Log("Researching tech: " + t.techName);
-		if (t.cost <= this.spirit) {
-			this.spirit -= t.cost;
+		if (t.cost <= this.Spirit) {
+			this.Spirit -= t.cost;
 			techManager.Research(t);
 		}
-        guiController.subMenu.ClearMenu();
+        GuiController.subMenu.ClearMenu();
     }
 
     /// <summary>
@@ -280,7 +285,7 @@ public class GameController : MonoBehaviour {
     /// </summary>
     public void PauseGame() {
         Time.timeScale = 0.0f;
-        menuManager.PushMenuName("PauseMenu");
+        MenuManager.PushMenuName("PauseMenu");
     }
 
     /// <summary>
@@ -355,14 +360,14 @@ public class GameController : MonoBehaviour {
     /// </summary>
     /// <param name="sel"></param>
     public void AddSelected(NeolithicObject sel) {
-		guiController.HideContextMenu();
+		GuiController.HideContextMenu();
 		if (!selected.Contains(sel)) {
 			selected.Add(sel);
 		}
 		if (selected.Count == 1) {
-			guiController.ShowSelectionMenu(sel);
+			GuiController.ShowSelectionMenu(sel);
 		} else {
-			guiController.HideSelectionMenu();
+			GuiController.HideSelectionMenu();
 		}
 	}
 
@@ -371,8 +376,8 @@ public class GameController : MonoBehaviour {
     /// </summary>
     /// <param name="prefab"></param>
     public void StartBuildingPlacement(GameObject prefab) {
-        guiController.subMenu.ClearMenu();
-        buildingPlacer.Activate(prefab);
+        GuiController.subMenu.ClearMenu();
+        BuildingPlacer.Activate(prefab);
     }
 
     private GameObject singleMouseCast(int layerMask) {
@@ -409,7 +414,7 @@ public class GameController : MonoBehaviour {
         var constructionManagers = from o in Resources.LoadAll("Buildings", typeof(ConstructionManager))
                                    select (ConstructionManager)o;
         return (from cmgr in constructionManagers
-                where cmgr.RequirementsMet(statManager, techManager)
+                where cmgr.RequirementsMet(StatManager, techManager)
                 select cmgr.gameObject)
                 .ToArray();
     }
@@ -418,7 +423,7 @@ public class GameController : MonoBehaviour {
     /// Updates menus and starts a marquee select operation
     /// </summary>
 	public void StartBoxSelect() {
-		guiController.HideContextMenu();
+		GuiController.HideContextMenu();
 		boxEnd = boxStart = Input.mousePosition;
 		boxActive = true;
 	}
@@ -489,10 +494,13 @@ public class GameController : MonoBehaviour {
 	public void DoContextMenu(NeolithicObject clickee) {
 		string[] selectedActions = getSelectedAbilities();
 		string[] availableActions = selectedActions.Intersect(clickee.actionProfile.targetActions).ToArray();
-		guiController.ShowContextMenu(availableActions, clickee);
+		GuiController.ShowContextMenu(availableActions, clickee);
 	}
 
-	/// <summary>Constructs an order from the orderTag against the given target, and assigns it to all selected actors</summary>
+	/// <summary>
+    /// Constructs an order from the orderTag against the given target, 
+    /// and assigns it to all selected actors
+    /// </summary>
 	public void IssueOrder(string orderTag, NeolithicObject target) {
 		foreach (NeolithicObject s in selected) {
 			ActorController a = s.GetComponent<ActorController>();
@@ -541,7 +549,7 @@ public class GameController : MonoBehaviour {
     /// </summary>
     /// <param name="eventData"></param>
 	public void IssueMoveOrder(PointerEventData eventData) {
-		guiController.HideContextMenu();
+		GuiController.HideContextMenu();
 
 		//this should be done diffently, but for some reason I'm getting 0,0,0 world position
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -565,7 +573,7 @@ public class GameController : MonoBehaviour {
     /// Deselects all currently selected NeolithicObjects
     /// </summary>
     public void DeselectAll() {
-		guiController.HideSelectionMenu();
+		GuiController.HideSelectionMenu();
 		foreach (NeolithicObject s in selected) {
             if (s != null) {
                 s.Deselect();

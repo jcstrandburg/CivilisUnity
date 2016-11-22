@@ -6,7 +6,7 @@ using UnityEngine;
 public class ReservoirTest {
 
     [Test]
-    public void Test() {
+    public void BasicTest() {
         var go = new GameObject();
         var go2 = new GameObject();
         var go3 = new GameObject();
@@ -35,6 +35,38 @@ public class ReservoirTest {
 
         Assert.AreEqual(2.0f, reservoir.amount);
         Assert.AreEqual(1.0f, reservoir.GetAvailableContents());
+    }
+
+    [Test]
+    public void StatTest() {
+        var sm = new StatManager();
+        sm.SetPersistor(StatManager.DummyPersistor);
+        sm.SetStats(new StatProfile[] { StatProfile.Make("berries-harvested", false, false) });
+
+        var go = new GameObject();
+        var go2 = new GameObject();
+        var dummyActor = new GameObject();
+
+        var reservoir = go.AddComponent<Reservoir>();
+        reservoir.resourceTag = "berries";
+        reservoir.amount = 10.0;
+        reservoir.statManager = sm;
+        reservoir.harvestStat = "berries-harvested";
+
+        var reservoir2 = go.AddComponent<Reservoir>();
+        reservoir2.resourceTag = "berries";
+        reservoir.amount = 10.0;
+        reservoir.statManager = sm;
+
+        //make sure stat is incremented when a reservoir with a harvestStat fills a reservation
+        var reservation = reservoir.NewReservation(dummyActor, 2.0);
+        reservoir.WithdrawReservation(reservation);
+        Assert.AreEqual(2.0, sm.Stat("berries-harvested").Value);
+
+        //make sure the reservoir with no harvestStat did not manipulate the stats
+        var reservation2 = reservoir2.NewReservation(dummyActor, 2.0);
+        reservoir2.WithdrawReservation(reservation2);
+        Assert.AreEqual(2.0, sm.Stat("berries-harvested").Value);
     }
 
 }

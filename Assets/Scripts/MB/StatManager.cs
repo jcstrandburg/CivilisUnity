@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System;
+
+#if UNITY_EDITOR
 using UnityEditor;
 
 [CustomEditor(typeof(StatManager))]
@@ -16,7 +18,11 @@ public class StatmanagerEditor : Editor {
         }
     }
 }
+#endif
 
+/// <summary>
+/// Manages values and persistence of stats
+/// </summary>
 public class StatManager : MonoBehaviour {
 
     [SerializeField]
@@ -25,13 +31,16 @@ public class StatManager : MonoBehaviour {
     [NonSerialized]
     private IStatPersistor persistor;
 
-
+    //dummy stat persistor for testing purposes
     public static IStatPersistor DummyPersistor {
         get {
             return new StreamStatPersistor(Stream.Null);
         }
     }
 
+    /// <summary>
+    /// Stat persistor property, will create a default StreamStatPersistor if no other persistor is supplied
+    /// </summary>
     private IStatPersistor Persistor {
         set {
             SetPersistor(value);
@@ -46,6 +55,23 @@ public class StatManager : MonoBehaviour {
         }
     }
 
+    // Handles Start event
+    void Start() {
+        UnityEngine.Object[] allstats = Resources.LoadAll("Stats", typeof(StatProfile));
+        StatProfile[] profiles = (from r in allstats select (StatProfile)r).ToArray();
+        SetStats(profiles);
+    }
+
+    // Handles OnDisable event
+    public void OnDisable() {
+        //this is kinda hacky, probably need to rewrite the interface for persistor
+        persistor.Destroy();
+    }
+
+    /// <summary>
+    /// Sets the stat persistor
+    /// </summary>
+    /// <param name="p"></param>
     public void SetPersistor(IStatPersistor p) {
         persistor = p;
         foreach (var kvp in stats) {
@@ -53,6 +79,11 @@ public class StatManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Gets the GameStat object with the given name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
     public GameStat Stat(string name) {
         if (stats.ContainsKey(name)) {
             return stats[name];
@@ -60,6 +91,10 @@ public class StatManager : MonoBehaviour {
         return null;
     }
 
+    /// <summary>
+    /// Creates GameStat objects for all of the given StatProfile objects
+    /// </summary>
+    /// <param name="statProfiles"></param>
     public void SetStats(IEnumerable<StatProfile> statProfiles) {
         stats.Clear();
         foreach (var profile in statProfiles) {
@@ -67,16 +102,5 @@ public class StatManager : MonoBehaviour {
             s.SetPersistor(Persistor);
             stats[profile.statname] = s;
         }
-    }
-
-    void Start() {
-        UnityEngine.Object[] allstats = Resources.LoadAll("Stats", typeof(StatProfile));
-        StatProfile[] profiles = (from r in allstats select (StatProfile)r).ToArray();
-        SetStats(profiles);
-    }
-
-    //this is kinda hacky, probably need to rewrite the interface for persistor
-    public void OnDisable() {
-        persistor.Destroy();
-    }
+    }    
 }

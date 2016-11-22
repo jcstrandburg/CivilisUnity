@@ -55,7 +55,7 @@ public class CameraController : MonoBehaviour {
     public GroundController groundController {
         get {
             if (_groundController == null) {
-                _groundController = gameController.groundController;
+                _groundController = gameController.GroundController;
             }
             return _groundController;
         }
