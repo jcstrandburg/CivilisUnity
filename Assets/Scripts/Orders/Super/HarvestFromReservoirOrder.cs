@@ -16,7 +16,6 @@ public class HarvestFromReservoirOrder : StatefulSuperOrder {
     }
 
     public override void Initialize() {
-        Debug.Log("Initializing Harvest order");
         Resource r = actor.GetCarriedResource();
         if (r != null && r.typeTag == reservoir.resourceTag) {
             GoToState("storeContents");

@@ -86,4 +86,23 @@ public class StatTests {
         Assert.AreEqual(12m, sm2.Stat("stat2").PersistantValue);
         Assert.AreEqual(11m, sm2.Stat("stat3").PersistantValue);
     }
+
+    [Test]
+    public void TestOnChangeNotification() {
+        GameStat testStat = new GameStat("teststat", false, false);
+        int invocations = 0;
+        decimal value = 10;
+
+        testStat.OnChange += (stat) => {
+            invocations++;
+            value = stat.Value;
+            Assert.AreSame(testStat, stat);
+        };
+
+        testStat.Add(10);
+        testStat.Add(0);
+
+        Assert.AreEqual(1, invocations);
+        Assert.AreEqual(10, value);
+    }
 }

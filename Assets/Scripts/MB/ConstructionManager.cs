@@ -25,14 +25,6 @@ public class ConstructionManagerEditor : Editor {
 }
 #endif
 
-public enum Comparison {
-    LessThan,
-    LesserOrEqual,
-    Equal,
-    GreaterOrEqual,
-    GreaterThan
-}
-
 [Serializable]
 public class BuildingRequirement : ICloneable {
     public string name;

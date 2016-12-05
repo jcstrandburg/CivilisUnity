@@ -7,7 +7,7 @@ using System.Collections;
 /// <todo>Finish transitioning to projector rather than sprite based selection halos</todo>
 public class SelectHalo : MonoBehaviour {
 
-	private SpriteRenderer renderer;
+	private SpriteRenderer spriteRenderer;
     private Projector projector;
 
     /// <summary>
@@ -18,23 +18,23 @@ public class SelectHalo : MonoBehaviour {
             if (projector) {
                 return projector.enabled;
             } else {
-                return renderer.enabled;
+                return spriteRenderer.enabled;
             }
         }
 		set {
             if (projector) {
                 projector.enabled = value;
             } else {
-                renderer.enabled = value;
+                spriteRenderer.enabled = value;
             }            
         }
 	}
 
     // Handles Awake event
 	void Awake() {
-		renderer = GetComponent<SpriteRenderer>();
-        if (renderer) {
-            renderer.enabled = false;
+		spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer) {
+            spriteRenderer.enabled = false;
         }
         projector = GetComponent<Projector>();
         if (projector) {

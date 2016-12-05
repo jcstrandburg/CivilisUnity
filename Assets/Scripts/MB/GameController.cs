@@ -41,6 +41,8 @@ public class GameController : MonoBehaviour {
     public TechManager techManager;
     /// <summary>Manages creation of objects, dependency injection, etc</summary>
     public GameFactory factory = new GameFactory();
+    /// <summary>Actions that no actor can currently take</summary>
+    public List<string> forbiddenActions;
 
     private static GameController _instance = null;
     /// <summary>"Singleton" instance getter. Only one of these objects is expected to exists in any scene.</summary>
@@ -167,23 +169,40 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    // Handles Start event
-    void Start () {
-        GuiController = GameObject.Find("GameUI").GetComponent<GameUIController>();
-        var techs = from t in Resources.LoadAll("Techs", typeof(Technology))
-                    select (Technology)t;
+    // Handles Awake event
+    void Awake() {
+        var techs = Resources.LoadAll("Techs", typeof(Technology)).Select(t => (Technology)t).ToArray();
         techManager = new TechManager();
-        techManager.LoadArray(techs.ToArray());
+        techManager.LoadArray(techs);
 
         resourcePrefabs = new List<Resource>();
         var allFiles = Resources.LoadAll<UnityEngine.Object>("");
-        foreach (var obj in allFiles) {
-            if (obj is GameObject) {
-                if (((GameObject)obj).GetComponent<Resource>() != null) {
-                    resourcePrefabs.Add(((GameObject)obj).GetComponent<Resource>());
-                }
-            }
-        }        
+        resourcePrefabs = allFiles
+            .Where(obj => (obj is GameObject && ((GameObject)obj).GetComponent<Resource>() != null))
+            .Select(obj => ((GameObject)obj).GetComponent<Resource>())
+            .ToList<Resource>();
+
+        InitializeAllObjects();
+    }
+
+    // Handles Start event
+    void Start () {
+    }
+
+    public void InitializeAllObjects() {
+        var s = new System.Diagnostics.Stopwatch();
+
+        s.Start();
+        //have the gamefactory inject all dependencies at scene start
+        var allObjects = FindObjectsOfType<GameObject>()
+            .Where(go => go.activeInHierarchy);
+        Debug.Log(String.Format("Finding objects took {0}", s.ElapsedMilliseconds));
+        s.Reset();
+        s.Start();
+        foreach (var obj in allObjects) {
+            factory.InjectObject(obj);
+        }
+        Debug.Log(String.Format("Injecting objects took {0}", s.ElapsedMilliseconds));
     }
 
     // Handles FixedUpdate event
@@ -492,8 +511,13 @@ public class GameController : MonoBehaviour {
     /// </summary>
     /// <param name="clickee"></param>
 	public void DoContextMenu(NeolithicObject clickee) {
+        var forbidden = new HashSet<string>(forbiddenActions);
+
 		string[] selectedActions = getSelectedAbilities();
-		string[] availableActions = selectedActions.Intersect(clickee.actionProfile.targetActions).ToArray();
+		string[] availableActions = selectedActions
+            .Intersect(clickee.actionProfile.targetActions)
+            .Where((a) => !forbidden.Contains(a))
+            .ToArray();
 		GuiController.ShowContextMenu(availableActions, clickee);
 	}
 
@@ -611,7 +635,8 @@ public class GameController : MonoBehaviour {
     /// <returns>The reservaton created, or null on failure</returns>
     public StorageReservation ReserveStorage(ActorController a, string tag, double amount) {
         var la = a.GetComponent<LogisticsActor>();
-        var network = la.logisticsManager.FindNearestNetwork(a.transform.position);
+        var manager = la.logisticsManager;
+        var network = manager.FindNearestNetwork(a.transform.position);
         if (network != null) {
             Warehouse[] warehouses = network.FindComponents<Warehouse>();
             foreach (Warehouse w in warehouses) {

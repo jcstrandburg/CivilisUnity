@@ -52,7 +52,11 @@ public class GameFactory {
     public StatManager statManager {
         get {
             if (_statManager == null) {
-                _statManager = gameController.StatManager;
+                //_statManager = gameController.StatManager;
+                _statManager = GameObject.FindObjectOfType<StatManager>();
+                //if (_statManager == null) {
+                //    throw new System.Exception("fuck");
+                //}
             }
             return _statManager;
         }
@@ -94,7 +98,7 @@ public class GameFactory {
     public LogisticsManager logisticsManager {
         get {
             if (_logisticsManager == null) {
-                _logisticsManager = gameController.LogisticsManager;
+                _logisticsManager = GameObject.FindObjectOfType<LogisticsManager>();
             }
             return _logisticsManager;
         }
@@ -193,7 +197,7 @@ public class GameFactory {
                            .ToArray();
         var myProps = this.GetType()
                            .GetProperties()
-                           .Where(field => field.IsDefined(typeof(Injectable), false))
+                           .Where(prop => prop.IsDefined(typeof(Injectable), false))
                            .ToArray();
 
         foreach (var component in components) {

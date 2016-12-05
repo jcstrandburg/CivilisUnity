@@ -39,12 +39,12 @@ public class ReservoirTest {
 
     [Test]
     public void StatTest() {
-        var sm = new StatManager();
+        var go3 = new GameObject();
+        var sm = go3.AddComponent<StatManager>();
         sm.SetPersistor(StatManager.DummyPersistor);
         sm.SetStats(new StatProfile[] { StatProfile.Make("berries-harvested", false, false) });
 
         var go = new GameObject();
-        var go2 = new GameObject();
         var dummyActor = new GameObject();
 
         var reservoir = go.AddComponent<Reservoir>();

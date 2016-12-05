@@ -8,7 +8,7 @@ public class StatManipulator : MonoBehaviour {
         CreateDestroy,
     };
 
-    public string stat;
+    public string statName;
     public float amount;
     public TriggerType triggerType;
     [Inject]
@@ -17,14 +17,16 @@ public class StatManipulator : MonoBehaviour {
     // Handles the Start event
     public void Start() {
         if (triggerType == TriggerType.Create || triggerType == TriggerType.CreateDestroy) {
-            stats.Stat("camps").Add((decimal)amount);
+            var stat = stats.Stat(statName);
+            stat.Add((decimal)amount);
         }
     }
 
     // Handles the OnDestroy event
     public void OnDestroy() {
         if (triggerType == TriggerType.Destroy || triggerType == TriggerType.CreateDestroy) {
-            stats.Stat("camps").Add(-(decimal)amount);
+            var stat = stats.Stat(statName);
+            stat.Add(-(decimal)amount);
         }
     }
 }

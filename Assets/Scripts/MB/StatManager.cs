@@ -55,19 +55,6 @@ public class StatManager : MonoBehaviour {
         }
     }
 
-    // Handles Start event
-    void Start() {
-        UnityEngine.Object[] allstats = Resources.LoadAll("Stats", typeof(StatProfile));
-        StatProfile[] profiles = (from r in allstats select (StatProfile)r).ToArray();
-        SetStats(profiles);
-    }
-
-    // Handles OnDisable event
-    public void OnDisable() {
-        //this is kinda hacky, probably need to rewrite the interface for persistor
-        persistor.Destroy();
-    }
-
     /// <summary>
     /// Sets the stat persistor
     /// </summary>
@@ -102,5 +89,18 @@ public class StatManager : MonoBehaviour {
             s.SetPersistor(Persistor);
             stats[profile.statname] = s;
         }
-    }    
+    }
+
+    // Handles Awake event
+    public void Awake() {
+        UnityEngine.Object[] allstats = Resources.LoadAll("Stats", typeof(StatProfile));
+        StatProfile[] profiles = (from r in allstats select (StatProfile)r).ToArray();
+        SetStats(profiles);
+    }
+
+    // Handles OnDisable event
+    public void OnDisable() {
+        //this is kinda hacky, probably need to rewrite the interface for persistor
+        persistor.Destroy();
+    }
 }

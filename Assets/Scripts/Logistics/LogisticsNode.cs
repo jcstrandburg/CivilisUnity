@@ -35,6 +35,11 @@ public class LogisticsNode : MonoBehaviour {
             }
         }
         get {
+            if (_manager == null) {
+                if (_manager) {
+                    _manager = GetComponentInParent<LogisticsManager>();
+                }
+            }
             return _manager;
         }
     }

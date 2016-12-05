@@ -29,7 +29,9 @@ public class Reservation : MonoBehaviour {
 			released = value; 
 			if (released) {
 #if UNITY_EDITOR
-                DestroyImmediate(this);
+                if (this != null) {
+                    DestroyImmediate(this);
+                }
 #else
                 Destroy(this);
 #endif

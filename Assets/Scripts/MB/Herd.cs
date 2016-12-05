@@ -45,7 +45,12 @@ public class Herd : MonoBehaviour {
         set { _gameController = value; }
     }
 
-    void Awake() {
+    // Handles Awake event
+    void Awake() {        
+	}
+
+    // Handles Start event
+    void Start() {
         RandomizePath();
         UpdateRabbitPosition();
         AnimalController[] aminals = transform.GetComponentsInChildren<AnimalController>();
@@ -56,7 +61,7 @@ public class Herd : MonoBehaviour {
         while (animals.Count < maxSize) {
             SpawnNewAnimal();
         }
-	}
+    }
 
     public bool KillAnimal() {
         foreach (AnimalController a in animals) {

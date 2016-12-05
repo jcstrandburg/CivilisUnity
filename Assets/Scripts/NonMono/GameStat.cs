@@ -15,6 +15,10 @@ public class GameStat {
     [NonSerialized]
     private IStatPersistor persistor;
 
+    public delegate void GameStatChangeListener(GameStat s);
+    [field: DontSaveField]
+    public event GameStatChangeListener OnChange;
+
     public GameStat(string name, bool persist, bool monotonic) {
         this.name = name;
         this.persist = persist;
@@ -52,11 +56,17 @@ public class GameStat {
         if (v < 0 && monotonic) {
             throw new ArgumentException("Monotonic stats cannot decrease");
         }
-        value += v;
-        if (persist) {
-            persistantValue += v;
-            persistor.SetValue(name, persistantValue);
-        }   
+
+        if (v != 0) {
+            value += v;
+            if (persist) {
+                persistantValue += v;
+                persistor.SetValue(name, persistantValue);
+            }
+            if (OnChange != null) {
+                OnChange(this);
+            }
+        }
     }
 
     /// <summary>

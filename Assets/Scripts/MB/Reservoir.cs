@@ -86,7 +86,12 @@ public class Reservoir : MonoBehaviour {
             reservations.Remove(res);
 
             if (!String.IsNullOrEmpty(harvestStat)) {
-                statManager.Stat(harvestStat).Add(res.amount);
+                GameStat stat = statManager.Stat(harvestStat);
+                if (stat != null) {
+                    stat.Add(res.amount);
+                } else {
+                    Debug.Log("Unable to resolve stat " + harvestStat);
+                }                
             }
 
             return true;

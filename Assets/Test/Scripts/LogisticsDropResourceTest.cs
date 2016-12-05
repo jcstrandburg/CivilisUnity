@@ -23,6 +23,6 @@ public class LogisticsDropResourceTest : MonoBehaviour {
             IntegrationTest.Fail("Network has no logistics manager");
         }
 
-        Debug.Log(node.logisticsNetwork);
+        //Debug.Log(node.logisticsNetwork);
     }
 }

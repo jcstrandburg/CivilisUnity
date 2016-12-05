@@ -59,7 +59,8 @@ public class ActorController : NeolithicObject {
     // Handles FixedUpdate event
 	public virtual void FixedUpdate() {
         double feedMe = (double)(Time.fixedDeltaTime * 0.025f);
-        LogisticsNetwork network = logisticsActor.logisticsManager.FindNearestNetwork(transform.position);
+        var logisticsManager = logisticsActor.logisticsManager;
+        LogisticsNetwork network = logisticsManager ? logisticsManager.FindNearestNetwork(transform.position) : null;
 
         if (network != null && network.foodbuffer > feedMe) {
             network.foodbuffer -= feedMe;
@@ -165,7 +166,6 @@ public class ActorController : NeolithicObject {
     public void DropCarriedResource() {
         Resource r = GetCarriedResource();
         if (!r) {
-            Debug.Log("No carried resource to drop");
             return;
         }
         float range = 3.5f;
