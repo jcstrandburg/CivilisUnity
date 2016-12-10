@@ -54,7 +54,7 @@ public class LogisticsManager : MonoBehaviour {
     /// Reassigns all logistics nodes to the nearest network
     /// </summary>
     public void RebuildNetworks() {
-        foreach (var n in nodes) {
+        foreach (LogisticsNode n in nodes) {
             n.logisticsNetwork = FindNearestNetwork(n.transform.position);
         }
     }

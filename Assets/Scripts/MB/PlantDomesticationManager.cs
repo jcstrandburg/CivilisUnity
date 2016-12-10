@@ -39,7 +39,6 @@ public class PlantDomesticationManager : MonoBehaviour {
     /// </summary>
     /// <param name="s"></param>
     public void OnVegetablesHarvestedChange(GameStat s) {
-        Debug.Log(s.Value);
         if ((double)s.Value >= forestGardenThreshold) {
             EnableForestGardens();
         }

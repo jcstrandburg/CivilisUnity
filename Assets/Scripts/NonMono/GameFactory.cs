@@ -2,18 +2,20 @@
 using System.Collections;
 using System.Reflection;
 using System.Linq;
+using System.Collections.Generic;
+using System;
 
 /// <summary>
 /// Helper factory class that handles dependency injection/service location
 /// </summary>
 public class GameFactory {
 
-    private static GameController _gameController = null;
+    private GameController _gameController = null;
     [Injectable]
-    public static GameController gameController {
+    public GameController gameController {
         get {
             if (_gameController == null) {
-                _gameController = GameController.Instance;
+                _gameController = GameObject.FindObjectOfType<GameController>();
             }
             return _gameController;
         }
@@ -24,7 +26,7 @@ public class GameFactory {
     public GameUIController guiController {
         get {
             if (_guiController == null) {
-                _guiController = gameController.GuiController;
+                _guiController = GameObject.FindObjectOfType<GameUIController>();
             }
             return _guiController;
         }
@@ -38,7 +40,7 @@ public class GameFactory {
     public GroundController groundController {
         get {
             if (_groundController == null) {
-                _groundController = gameController.GroundController;
+                _groundController = GameObject.FindObjectOfType<GroundController>();
             }
             return _groundController;
         }
@@ -52,11 +54,7 @@ public class GameFactory {
     public StatManager statManager {
         get {
             if (_statManager == null) {
-                //_statManager = gameController.StatManager;
                 _statManager = GameObject.FindObjectOfType<StatManager>();
-                //if (_statManager == null) {
-                //    throw new System.Exception("fuck");
-                //}
             }
             return _statManager;
         }
@@ -70,7 +68,7 @@ public class GameFactory {
     public SaverLoader saverLoader {
         get {
             if (_saverLoader == null) {
-                _saverLoader = gameController.SaverLoader;
+                _saverLoader = GameObject.FindObjectOfType<SaverLoader>();
             }
             return _saverLoader;
         }
@@ -84,7 +82,7 @@ public class GameFactory {
     public MenuManager menuManager {
         get {
             if (_menuManager == null) {
-                _menuManager = gameController.MenuManager;
+                _menuManager = GameObject.FindObjectOfType<MenuManager>();
             }
             return _menuManager;
         }
@@ -107,6 +105,30 @@ public class GameFactory {
         }
     }
 
+    /// <summary>Injectable fields from this class</summary>
+    private Dictionary<Type, FieldInfo> myFields;
+    /// <summary>Injectable properties from this class</summary>
+    private Dictionary<Type, PropertyInfo> myProps;
+    /// <summary>Injectable fields by object type</summary>
+    private Dictionary<Type, FieldInfo[]> fieldInfoCache = new Dictionary<Type, FieldInfo[]>();
+    /// <summary>Injectable properties by object type</summary>
+    private Dictionary<Type, PropertyInfo[]> propInfoCache = new Dictionary<Type, PropertyInfo[]>();
+
+    public GameFactory() {
+        myFields = GetType()
+            .GetFields()
+            .Where(field => field.IsDefined(typeof(Injectable), false))
+            .ToDictionary(
+                ele => ele.FieldType,
+                ele => ele);
+        myProps = GetType()
+            .GetProperties()
+            .Where(prop => prop.IsDefined(typeof(Injectable), false))
+            .ToDictionary(
+                ele => ele.PropertyType,
+                ele => ele);
+    }
+
     /// <summary>
     /// Instatiates and injects a copy of the given GameObject (assumed to be a prefab)
     /// </summary>
@@ -114,73 +136,85 @@ public class GameFactory {
     /// <returns>The instantiated object</returns>
     public GameObject Instantiate(GameObject prefab) {
         var instance = GameObject.Instantiate(prefab);
-        InjectObject(instance);
+        InjectGameobject(instance);
         return instance;
     }
 
     /// <summary>
-    /// Injects an individual component from the given source FieldInfo and PropertyInfo arrays
+    /// Gets all Fields for the given type that can be injected.
     /// </summary>
-    /// <param name="comp"></param>
-    /// <param name="myFields"></param>
-    /// <param name="myProps"></param>
-    public void InjectComponenent(Component comp, FieldInfo[] myFields, PropertyInfo[] myProps) {
+    /// <param name="t"></param>
+    /// <returns></returns>
+    private FieldInfo[] GetInjectableFields(Type t) {
         var flags = BindingFlags.Public | BindingFlags.Instance;
 
+        if (!fieldInfoCache.ContainsKey(t)) {
+            fieldInfoCache[t] = t
+                .GetFields(flags)
+                .Where(field => field.IsDefined(typeof(Inject), false))
+                .ToArray();
+        }
+        return fieldInfoCache[t];
+    }
+
+    /// <summary>
+    /// Gets all Properties for the given type that can be injected. The results will be cached.
+    /// </summary>
+    /// <param name="t"></param>
+    /// <returns></returns>
+    private PropertyInfo[] GetInjectableProps(Type t) {
+        var flags = BindingFlags.Public | BindingFlags.Instance;
+
+        if (!propInfoCache.ContainsKey(t)) {
+            propInfoCache[t] = t
+                .GetProperties(flags)
+                .Where(prop => prop.IsDefined(typeof(Inject), false))
+                .ToArray();
+        }
+        return propInfoCache[t];
+    }
+
+    /// <summary>
+    /// Injects an individual object from the Injectable fields and properties of this object
+    /// </summary>
+    /// <param name="injectme"></param>
+    /// <returns>The object passed in</returns>
+    public T InjectObject<T>(T injectme) {
+        var compType = injectme.GetType();
+
         //get fields and properties to be injected
-        var compFields = comp.GetType()
-                            .GetFields(flags)
-                            .Where(field => field.IsDefined(typeof(Inject), false))
-                            .ToArray();
-        var compProperties = comp.GetType()
-                                .GetProperties(flags)
-                                .Where(prop => prop.IsDefined(typeof(Inject), false))
-                                .ToArray();
+        var compFields = GetInjectableFields(compType);
+        var compProperties = GetInjectableProps(compType);
 
         foreach (var compField in compFields) {
-            //select from myFields where the type is correct, if any matches are found just use the first one
-            var sourceFields = myFields
-                                .Where(field => field.FieldType == compField.FieldType)
-                                .ToArray();
-            if (sourceFields.Length > 0) {
-                compField.SetValue(comp, sourceFields[0].GetValue(this));
-                //Debug.Log(string.Format("Injecting {0} on {1} for {2}", compField.Name, comp.GetType().Name, comp.gameObject.name));
-                continue;
+            var type = compField.FieldType;
+
+            if (myFields.ContainsKey(type)) {
+                var sourceField = myFields[type];
+                compField.SetValue(injectme, sourceField.GetValue(this));
             }
 
-            //select from myProps where the type is correct, if any matches are found just use the first one
-            var sourceProps = myProps
-                                .Where(prop => prop.PropertyType == compField.FieldType)
-                                .ToArray();
-            if (sourceProps.Length > 0) {
-                compField.SetValue(comp, sourceProps[0].GetValue(this, null));
-                //Debug.Log(string.Format("Injecting {0} on {1} for {2}", compField.Name, comp.GetType().Name, comp.gameObject.name));
-                continue;
+            if (myProps.ContainsKey(type)) {
+                var sourceProp = myProps[type];
+                compField.SetValue(injectme, sourceProp.GetValue(this, null));
             }
         }
 
         foreach (var compProp in compProperties) {
-            //select from myFields where the type is correct, if any matches are found just use the first one
-            var sourceFields = myFields
-                                .Where(field => field.FieldType == compProp.PropertyType)
-                                .ToArray();
-            if (sourceFields.Length > 0) {
-                compProp.SetValue(comp, sourceFields[0].GetValue(this), null);
-                //Debug.Log(string.Format("Injecting {0} on {1} for {2}", compProp.Name, comp.GetType().Name, comp.gameObject.name));
-                continue;
+            var type = compProp.PropertyType;
+
+            if (myFields.ContainsKey(type)) {
+                var sourceField = myFields[type];
+                compProp.SetValue(injectme, sourceField.GetValue(this), null);
             }
 
-            //select from myProps where the type is correct, if any matches are found just use the first one
-            var sourceProps = myProps
-                                .Where(prop => prop.PropertyType == compProp.PropertyType)
-                                .ToArray();
-            if (sourceProps.Length > 0) {
-                var value = sourceProps[0].GetValue(this, null);
-                compProp.SetValue(comp, value, null);
-                //Debug.Log(string.Format("Injecting {0} on {1} for {2} with value {3}", compProp.Name, comp.GetType().Name, comp.gameObject.name, value));
-                continue;
+            if (myProps.ContainsKey(type)) {
+                var sourceProp = myProps[type];
+                compProp.SetValue(injectme, sourceProp.GetValue(this, null), null);
             }
         }
+
+        return injectme;
     }
 
     /// <summary>
@@ -189,19 +223,37 @@ public class GameFactory {
     /// or properties on this object with the "injectable" attribute
     /// </summary>
     /// <param name="obj">The object to be injected</param>
-    public void InjectObject(GameObject obj) {
+    public void InjectGameobject(GameObject obj) {
         var components = obj.GetComponentsInChildren<Component>();
-        var myFields = this.GetType()
-                           .GetFields()
-                           .Where(field=>field.IsDefined(typeof(Injectable), false))
-                           .ToArray();
-        var myProps = this.GetType()
-                           .GetProperties()
-                           .Where(prop => prop.IsDefined(typeof(Injectable), false))
-                           .ToArray();
 
         foreach (var component in components) {
-            InjectComponenent(component, myFields, myProps);
+            InjectObject(component);
         }
     }
+
+    /// <summary>
+    /// Adds the given component type to the given game object and then injects it with dependencies
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="go"></param>
+    /// <returns>The component added</returns>
+    public T AddComponent<T>(GameObject go) where T : MonoBehaviour {
+        var t = go.AddComponent<T>();
+        InjectObject(t);
+        return t;
+    }
+
+    /// <summary>
+    /// Makes a component for an editor test, which involved instantiating a 
+    /// temporary GameObject to add the component to
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns>The instantiated component</returns>
+    //public T MakeTestComponent<T>() where T : MonoBehaviour {
+    //    var tempGo = new GameObject();
+    //    tempGo.name = String.Format("Temp_{0}_object", typeof(T).Name);
+    //    var t = tempGo.AddComponent<T>();
+    //    InjectObject(t);
+    //    return t;
+    //}
 }

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System;
 using System.Globalization;
 
-[assembly: AssemblyVersion("0.2.2.*")]
+[assembly: AssemblyVersion("0.2.3.*")]
 
 /// <summary>
 /// Manages game UI functionality

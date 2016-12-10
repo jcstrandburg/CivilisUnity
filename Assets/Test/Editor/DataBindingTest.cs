@@ -3,12 +3,11 @@ using UnityEngine;
 
 [TestFixture]
 [Category("Data Binding Tests")]
-public class DataBindingTest {
+public class DataBindingTest : NeolithicTest {
 
     [Test]
-	public void testExplicitBindings() {
-        GameObject go = new GameObject();
-        var dbs = go.AddComponent<DataBindingSource>();
+	public void TestExplicitBindings() {
+        var dbs = MakePlainComponent<DataBindingSource>();
 
         float jimmy = 0.0f;
         dbs.AddBinding("jimmy", () => jimmy, (object val) => jimmy = (float)val);

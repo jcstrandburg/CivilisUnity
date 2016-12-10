@@ -35,9 +35,7 @@ public class GetConstructionJobOrder : BaseOrder {
 public class CompleteConstructionReservation : BaseOrder {
     ConstructionManager manager;
 
-    public CompleteConstructionReservation(ActorController actor, 
-                                         ConstructionManager manager) 
-        :base(actor)
+    public CompleteConstructionReservation(ActorController actor, ConstructionManager manager) : base(actor)
     {
         this.manager = manager;
     }

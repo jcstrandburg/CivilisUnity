@@ -4,7 +4,7 @@ using System.Collections;
 public class ForceInjectTestObject : MonoBehaviour {
 
     void Awake() {
-        GameController.Instance.factory.InjectObject(gameObject);
+        GameController.Instance.factory.InjectGameobject(gameObject);
         Destroy(this);
     }
 }

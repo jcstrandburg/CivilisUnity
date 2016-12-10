@@ -26,7 +26,9 @@ public class HarvestFromReservoirOrder : StatefulSuperOrder {
 
     protected override void CreateStates() {
         CreateState("seekTarget",
-            () => new SimpleMoveOrder(actor, targetObj.transform.position),
+            () => new SimpleMoveOrder(
+                    actor, 
+                    GameController.Instance.SnapToGround(targetObj.transform.position)),
             () => GoToState("reservationWait"),
             null);
         CreateState("reservationWait",

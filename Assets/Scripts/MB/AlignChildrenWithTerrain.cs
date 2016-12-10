@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
+
+
 
 public class AlignChildrenWithTerrain : MonoBehaviour {
 
@@ -17,6 +18,6 @@ public class AlignChildrenWithTerrain : MonoBehaviour {
 
     private void AlignChild(Transform child) {
         var relativeSnappedPosition = GameController.Instance.SnapToGround(child.position);
-        child.position += new Vector3(0.0f, relativeSnappedPosition.y - origin.y, 0.0f);
+        child.position += new Vector3(0.0f, relativeSnappedPosition.y - origin.y, 0.0f)/transform.localScale.y;
     }
 }

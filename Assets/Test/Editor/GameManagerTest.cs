@@ -3,13 +3,11 @@ using UnityEngine;
 
 [TestFixture]
 [Category("Reservoir Tests")]
-public class GameManagerTests {
-
+public class GameManagerTests : NeolithicTest {
 
     [Test]
     public void TestFoodValue() {
-        var go = new GameObject();
-        var network = go.AddComponent<LogisticsNetwork>();
+        var network = MakePlainComponent<LogisticsNetwork>();
         ResourceProfile[] resources;
 
         resources = new ResourceProfile[] {

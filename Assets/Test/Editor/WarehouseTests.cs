@@ -4,7 +4,7 @@ using UnityEngine;
 
 [TestFixture]
 [Category("Warehouse Tests")]
-public class WarehouseTests {
+public class WarehouseTests : NeolithicTest {
 
     /// <summary>
     /// Tests that when you set resource contents with profiles missing for 
@@ -14,8 +14,7 @@ public class WarehouseTests {
     /// </summary>
     [Test]
     public void TestContentsMissingFromLimits1() {
-        var go = new GameObject();
-        Warehouse w = go.AddComponent<Warehouse>();
+        Warehouse w = MakePlainComponent<Warehouse>();
 
         var resourceLimits = new ResourceProfile[] {
             new ResourceProfile("wood", 2),
@@ -31,10 +30,10 @@ public class WarehouseTests {
         w.SetLimits(resourceLimits);
         w.SetContents(resourceContents);
 
-        Assert.False(w.ReserveStorage(go, "stone", 3));
-        Assert.IsNull(go.GetComponent<StorageReservation>());
-        Assert.True(w.ReserveStorage(go, "stone", 1));
-        var res = go.GetComponent<StorageReservation>();
+        Assert.False(w.ReserveStorage(dummyObject, "stone", 3));
+        Assert.IsNull(dummyObject.GetComponent<StorageReservation>());
+        Assert.True(w.ReserveStorage(dummyObject, "stone", 1));
+        var res = dummyObject.GetComponent<StorageReservation>();
         Assert.IsNotNull(res);
 
         Assert.True(res.Ready);
@@ -42,10 +41,10 @@ public class WarehouseTests {
         Assert.True(res.Released);
         Assert.AreEqual(1, w.GetAvailableContents("stone"));
 
-        Assert.False(w.ReserveContents(go, "wood", 1));
-        Assert.IsNull(go.GetComponent<ResourceReservation>());
-        Assert.True(w.ReserveContents(go, "stone", 1));
-        var res2 = go.GetComponent<ResourceReservation>();
+        Assert.False(w.ReserveContents(dummyObject, "wood", 1));
+        Assert.IsNull(dummyObject.GetComponent<ResourceReservation>());
+        Assert.True(w.ReserveContents(dummyObject, "stone", 1));
+        var res2 = dummyObject.GetComponent<ResourceReservation>();
         Assert.IsNotNull(res2);
         w.WithdrawReservation(res2);
         Assert.True(res2.Released);
@@ -59,8 +58,7 @@ public class WarehouseTests {
     /// </summary>
     [Test]
     public void TestContentsMissingFromLimits2() {
-        var go = new GameObject();
-        Warehouse w = go.AddComponent<Warehouse>();
+        Warehouse w = MakePlainComponent<Warehouse>();
 
         var resourceLimits = new ResourceProfile[] {
             new ResourceProfile("wood", 2),
@@ -76,10 +74,10 @@ public class WarehouseTests {
         w.SetContents(resourceContents);
         w.SetLimits(resourceLimits);
 
-        Assert.False(w.ReserveStorage(go, "stone", 3));
-        Assert.IsNull(go.GetComponent<StorageReservation>());
-        Assert.True(w.ReserveStorage(go, "stone", 1));
-        var res = go.GetComponent<StorageReservation>();
+        Assert.False(w.ReserveStorage(dummyObject, "stone", 3));
+        Assert.IsNull(dummyObject.GetComponent<StorageReservation>());
+        Assert.True(w.ReserveStorage(dummyObject, "stone", 1));
+        var res = dummyObject.GetComponent<StorageReservation>();
         Assert.IsNotNull(res);
 
         Assert.True(res.Ready);
@@ -87,10 +85,10 @@ public class WarehouseTests {
         Assert.True(res.Released);
         Assert.AreEqual(1, w.GetAvailableContents("stone"));
 
-        Assert.False(w.ReserveContents(go, "wood", 1));
-        Assert.IsNull(go.GetComponent<ResourceReservation>());
-        Assert.True(w.ReserveContents(go, "stone", 1));
-        var res2 = go.GetComponent<ResourceReservation>();
+        Assert.False(w.ReserveContents(dummyObject, "wood", 1));
+        Assert.IsNull(dummyObject.GetComponent<ResourceReservation>());
+        Assert.True(w.ReserveContents(dummyObject, "stone", 1));
+        var res2 = dummyObject.GetComponent<ResourceReservation>();
         Assert.IsNotNull(res2);
         w.WithdrawReservation(res2);
         Assert.True(res2.Released);
@@ -98,9 +96,7 @@ public class WarehouseTests {
 
     [Test]
     public void TestContentsAndSpaceAvailability() {
-        var go = new GameObject();
-        var go2 = new GameObject();
-        Warehouse w = go.AddComponent<Warehouse>();
+        Warehouse w = MakePlainComponent<Warehouse>();
         w.SetLimits(new ResourceProfile[] {
             new ResourceProfile("stone", 10),
         });
@@ -109,8 +105,8 @@ public class WarehouseTests {
         Assert.AreEqual(0, w.GetReservedStorage("stone"));
         Assert.AreEqual(10, w.GetAvailableStorage("stone"));
 
-        Assert.True(w.ReserveStorage(go2, "stone", 2));
-        var res = go2.GetComponent<StorageReservation>();
+        Assert.True(w.ReserveStorage(dummyObject, "stone", 2));
+        var res = dummyObject.GetComponent<StorageReservation>();
         Assert.IsNotNull(res);
         Assert.AreEqual(8, w.GetAvailableStorage("stone"));
         Assert.AreEqual(0, w.GetAvailableContents("stone"));
@@ -119,8 +115,8 @@ public class WarehouseTests {
         Assert.AreEqual(2, w.GetAvailableContents("stone"));
         Assert.AreEqual(2, w.GetTotalContents("stone"));
 
-        Assert.True(w.ReserveContents(go2, "stone", 1));
-        var res2 = go2.GetComponent<ResourceReservation>();
+        Assert.True(w.ReserveContents(dummyObject, "stone", 1));
+        var res2 = dummyObject.GetComponent<ResourceReservation>();
         Assert.IsNotNull(res2);
         Assert.AreEqual(1, w.GetReservedContents("stone"));
         Assert.AreEqual(1, w.GetAvailableContents("stone"));
@@ -132,30 +128,27 @@ public class WarehouseTests {
         Assert.AreEqual(1, w.GetAvailableContents("stone"));
         Assert.AreEqual(1, w.GetTotalContents("stone"));
 
-        Assert.False(w.ReserveContents(go2, "stone", 3));
-        Assert.True(w.ReserveStorage(go2, "stone", 3));
-        var res3 = go2.GetComponent<StorageReservation>();
+        Assert.False(w.ReserveContents(dummyObject, "stone", 3));
+        Assert.True(w.ReserveStorage(dummyObject, "stone", 3));
+        var res3 = dummyObject.GetComponent<StorageReservation>();
         Assert.IsNotNull(res3);
         Assert.AreEqual(6, w.GetAvailableStorage("stone"));
         Assert.AreEqual(1, w.GetAvailableContents("stone"));
-        Assert.False(w.ReserveContents(go2, "stone", 2));
-        var res4 = go2.GetComponent<ResourceReservation>();
+        Assert.False(w.ReserveContents(dummyObject, "stone", 2));
+        var res4 = dummyObject.GetComponent<ResourceReservation>();
         Assert.IsNull(res4);
 
         w.DepositReservation(res3);
         Assert.AreEqual(6, w.GetAvailableStorage("stone"));
         Assert.AreEqual(4, w.GetAvailableContents("stone"));
         Assert.AreEqual(4, w.GetTotalContents("stone"));
-        Assert.False(w.ReserveContents(go2, "stone", 5));
-        Assert.IsNull(go2.GetComponent<ResourceReservation>());
+        Assert.False(w.ReserveContents(dummyObject, "stone", 5));
+        Assert.IsNull(dummyObject.GetComponent<ResourceReservation>());
     }
 
     [Test]
     public void TestGetAllAvailableContents() {
-        var go = new GameObject();
-        var go2 = new GameObject();
-        var w = go.AddComponent<Warehouse>();
-
+        var w = MakePlainComponent<Warehouse>();
         var resourceContents = new ResourceProfile[] {
             new ResourceProfile("fish", 2),
             new ResourceProfile("gold", 2),
@@ -170,8 +163,8 @@ public class WarehouseTests {
             },
             availables);
 
-        w.ReserveContents(go2, "fish", 2);
-        w.ReserveContents(go2, "gold", 1);
+        w.ReserveContents(dummyObject, "fish", 2);
+        w.ReserveContents(dummyObject, "gold", 1);
         availables = w.GetAllAvailableContents();
         Assert.AreEqual(0, availables["fish"]);
         Assert.AreEqual(1, availables["gold"]);

@@ -1,50 +1,47 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public class DoBuildingUpgrade : BaseOrder {
+    NeolithicObject myTargetObj;
+    GameObject myPrefab;
+
+    public DoBuildingUpgrade(ActorController a, NeolithicObject target, GameObject prefab) : base(a) {
+        myTargetObj = target;
+        myPrefab = prefab;
+    }
+
+    public override void DoStep() {
+        var replacement = GameController.Instance.factory.Instantiate(myPrefab);
+        replacement.transform.position = myTargetObj.transform.position;
+        replacement.transform.rotation = myTargetObj.transform.rotation;
+        GameObject.Destroy(myTargetObj.gameObject);
+        GameController.Instance.StatManager.Stat("forest-gardens").Add(1);
+
+        completed = true;
+    }
+}
+
 /// <summary>
 /// Order to upgrade a reservoir to it's next stage
 /// </summary>
 public class UpgradeReservoirOrder : StatefulSuperOrder {
     NeolithicObject targetObj;
-    Reservoir reservoir;
-    ResourceReservation resourceReservation;
+    GameObject myPrefab;
 
-    public UpgradeReservoirOrder(ActorController a, NeolithicObject target) : base(a) {
+    public UpgradeReservoirOrder(ActorController a, NeolithicObject target, GameObject prefab) : base(a) {
         targetObj = target;
-        reservoir = target.GetComponent<Reservoir>();
+        myPrefab = prefab;
         GoToState("seekTarget");
     }
 
     protected override void CreateStates() {
         CreateState("seekTarget",
             () => new SimpleMoveOrder(actor, targetObj.transform.position),
-            () => GoToState("reservationWait"),
+            () => GoToState("doUpgrade"),
             null);
-        CreateState("reservationWait",
-            () => {
-                resourceReservation = reservoir.NewReservation(actor.gameObject, 1);
-                return new WaitForReservationOrder(actor, resourceReservation);
-            },
-            () => GoToState("getResource"),
+        CreateState("doUpgrade",
+            () => new DoBuildingUpgrade(actor, targetObj, myPrefab),
+            () => completed = true,
             null);
-        CreateState("getResource",
-            () => new ExtractFromReservoirOrder(actor, resourceReservation),
-            () => {
-                resourceReservation = null;
-                GoToState("storeContents");
-            },
-            null);
-        CreateState("storeContents",
-            () => new StoreCarriedResourceOrder(actor),
-            () => GoToState("seekTarget"),
-            null);
-    }
-
-    public override void Cancel() {
-        base.Cancel();
-        if (resourceReservation) {
-            resourceReservation.Released = true;
-            GameObject.Destroy(resourceReservation);
-        }
     }
 }

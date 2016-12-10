@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.Linq;
@@ -71,6 +70,7 @@ public class LogisticsNetwork : MonoBehaviour {
 
     public void DetachNode(LogisticsNode node) {
         nodes.Remove(node);
+        node.transform.parent = transform.parent;
     }
 
     public T[] FindComponents<T>() {

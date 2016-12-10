@@ -3,30 +3,26 @@ using UnityEngine;
 
 [TestFixture]
 [Category("Reservoir Tests")]
-public class ReservoirTest {
+public class ReservoirTest : NeolithicTest {
 
     [Test]
     public void BasicTest() {
-        var go = new GameObject();
         var go2 = new GameObject();
         var go3 = new GameObject();
 
-        Reservoir reservoir = go.AddComponent<Reservoir>();
+        Reservoir reservoir = MakePlainComponent<Reservoir>();
         reservoir.resourceTag = "berries";
         reservoir.amount = 0;
         reservoir.regenRate = 1;
         reservoir.max = 2;
 
         reservoir.Regen(1.5f);
-        reservoir.NewReservation(go2, 1);
+        ResourceReservation r1 = reservoir.NewReservation(go2, 1);
         Assert.AreEqual(0.5f, reservoir.GetAvailableContents());
-        reservoir.NewReservation(go3, 1);
+        ResourceReservation r2 = reservoir.NewReservation(go3, 1);
         Assert.AreEqual(0.0f, reservoir.GetAvailableContents());
         reservoir.UpdateReservations();
-
-        ResourceReservation r1 = go2.GetComponent<ResourceReservation>();
         Assert.True(r1.Ready);
-        ResourceReservation r2 = go3.GetComponent<ResourceReservation>();
         Assert.False(r2.Ready);
 
         reservoir.WithdrawReservation(r1);
@@ -39,32 +35,28 @@ public class ReservoirTest {
 
     [Test]
     public void StatTest() {
-        var go3 = new GameObject();
-        var sm = go3.AddComponent<StatManager>();
+        var sm = MakePlainComponent<StatManager>();
         sm.SetPersistor(StatManager.DummyPersistor);
         sm.SetStats(new StatProfile[] { StatProfile.Make("berries-harvested", false, false) });
 
-        var go = new GameObject();
-        var dummyActor = new GameObject();
-
-        var reservoir = go.AddComponent<Reservoir>();
+        var reservoir = MakePlainComponent<Reservoir>();
         reservoir.resourceTag = "berries";
         reservoir.amount = 10.0;
         reservoir.statManager = sm;
         reservoir.harvestStat = "berries-harvested";
 
-        var reservoir2 = go.AddComponent<Reservoir>();
+        var reservoir2 = MakePlainComponent<Reservoir>();
         reservoir2.resourceTag = "berries";
         reservoir.amount = 10.0;
         reservoir.statManager = sm;
 
         //make sure stat is incremented when a reservoir with a harvestStat fills a reservation
-        var reservation = reservoir.NewReservation(dummyActor, 2.0);
+        var reservation = reservoir.NewReservation(dummyObject, 2.0);
         reservoir.WithdrawReservation(reservation);
         Assert.AreEqual(2.0, sm.Stat("berries-harvested").Value);
 
         //make sure the reservoir with no harvestStat did not manipulate the stats
-        var reservation2 = reservoir2.NewReservation(dummyActor, 2.0);
+        var reservation2 = reservoir2.NewReservation(dummyObject, 2.0);
         reservoir2.WithdrawReservation(reservation2);
         Assert.AreEqual(2.0, sm.Stat("berries-harvested").Value);
     }

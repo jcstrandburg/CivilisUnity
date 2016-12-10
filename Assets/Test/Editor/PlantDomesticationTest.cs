@@ -4,23 +4,15 @@ using UnityEngine;
 
 [TestFixture]
 [Category("Domestication Tests")]
-public class PlantDomesticationTests {
-
+public class PlantDomesticationTests : NeolithicTest {
     StatManager stats;
     PlantDomesticationManager pdm;
-    GameFactory factory;
 
     [SetUp]
-    public void Setup() {
-        var go = new GameObject();
-        var go2 = new GameObject();
-
-        factory = new GameFactory();
-        stats = go.AddComponent<StatManager>();
-        pdm = go2.AddComponent<PlantDomesticationManager>();
-
-        factory.statManager = stats;
-        factory.InjectObject(go2);
+    public override void SetUp() {
+        base.SetUp();
+        stats = MakeDummyStatManager();
+        pdm = MakeTestComponent<PlantDomesticationManager>();
 
         Assert.IsNotNull(pdm.stats);
         stats.Awake();

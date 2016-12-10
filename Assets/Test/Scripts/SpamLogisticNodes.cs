@@ -22,7 +22,7 @@ public class SpamLogisticNodes : MonoBehaviour {
         GameFactory f = GameController.Instance.factory;
 	    foreach (var obj in spawned) {
             obj.GetComponent<Resource>().SetDown();
-            f.InjectObject(obj);
+            f.InjectGameobject(obj);
             obj.transform.position = this.transform.position;
             var offset = new Vector3(Random.Range(-10, 10),
                                      0,

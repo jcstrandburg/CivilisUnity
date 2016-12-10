@@ -4,16 +4,19 @@ using UnityEngine;
 
 [TestFixture]
 [Category("Logistics Tests")]
-public class BasicLogisticsTests {
+public class BasicLogisticsTests : NeolithicTest {
+
+    protected LogisticsManager manager;
+
+    public override void SetUp() {
+        base.SetUp();
+        manager = MakeTestComponent<LogisticsManager>();
+    }
 
     [Test]
     public void TestGetClosestNetwork() {
-        var managerObject = new GameObject();
-        var manager = managerObject.AddComponent<LogisticsManager>();
-        var networkObject1 = new GameObject();
-        var network1 = networkObject1.AddComponent<LogisticsNetwork>();
-        var networkObject2 = new GameObject();
-        var network2 = networkObject2.AddComponent<LogisticsNetwork>();
+        var network1 = MakePlainComponent<LogisticsNetwork>();
+        var network2 = MakePlainComponent<LogisticsNetwork>();
         network1.transform.position = new Vector3(10, 0, 10);
         network2.transform.position = new Vector3(-10, 0, -10);
 
@@ -32,16 +35,12 @@ public class BasicLogisticsTests {
     }
 
     [Test]
-    public void TestNetworkNode() {
+    public void TestNodeDistribution() {
         //create two networks and two nodes
-        var networkObject1 = new GameObject();
-        var network1 = networkObject1.AddComponent<LogisticsNetwork>();
-        var networkObject2 = new GameObject();
-        var network2 = networkObject2.AddComponent<LogisticsNetwork>();
-        var nodeObject1 = new GameObject();
-        var node1 = nodeObject1.AddComponent<LogisticsNode>();
-        var nodeObject2 = new GameObject();
-        var node2 = nodeObject2.AddComponent<LogisticsNode>();
+        var network1 = MakePlainComponent<LogisticsNetwork>();
+        var network2 = MakePlainComponent<LogisticsNetwork>();
+        var node1 = MakePlainComponent<LogisticsNode>();
+        var node2 = MakePlainComponent<LogisticsNode>();
 
         //make sure the networks start with no members
         Assert.AreEqual(0, network1.FindComponents<LogisticsNode>().Length);
@@ -53,7 +52,6 @@ public class BasicLogisticsTests {
         Assert.AreSame(network1.transform, node1.transform.parent);
         Assert.AreEqual(1, network1.FindComponents<LogisticsNode>().Length);
         Assert.AreEqual(0, network2.FindComponents<LogisticsNode>().Length);
-
 
         //make sure each network has one node
         node2.logisticsNetwork = network2;
@@ -73,16 +71,11 @@ public class BasicLogisticsTests {
     [Test]
     public void TestRebuildNetwork() {
         //create one manager, two networks, and two nodes
-        var managerObject = new GameObject();
-        var manager = managerObject.AddComponent<LogisticsManager>();
-        var networkObject1 = new GameObject();
-        var network1 = networkObject1.AddComponent<LogisticsNetwork>();
-        var networkObject2 = new GameObject();
-        var network2 = networkObject2.AddComponent<LogisticsNetwork>();
-        var nodeObject1 = new GameObject();
-        var node1 = nodeObject1.AddComponent<LogisticsNode>();
-        var nodeObject2 = new GameObject();
-        var node2 = nodeObject2.AddComponent<LogisticsNode>();
+        var manager = MakePlainComponent<LogisticsManager>();
+        var network1 = MakePlainComponent<LogisticsNetwork>();
+        var network2 = MakePlainComponent<LogisticsNetwork>();
+        var node1 = MakePlainComponent<LogisticsNode>();
+        var node2 = MakePlainComponent<LogisticsNode>();
 
         network1.logisticsManager = manager;
         network1.transform.position = new Vector3(0, 0, 0);
@@ -102,39 +95,53 @@ public class BasicLogisticsTests {
     }
 
     [Test]
-    public void TestDestroyNetwork() {
-        //create one manager, two networks, and two nodes
-        var managerObject = new GameObject();
-        var manager = managerObject.AddComponent<LogisticsManager>();
-        var networkObject1 = new GameObject();
-        var network1 = networkObject1.AddComponent<LogisticsNetwork>();
-        var networkObject2 = new GameObject();
-        var network2 = networkObject2.AddComponent<LogisticsNetwork>();
-        var nodeObject1 = new GameObject();
-        var node1 = nodeObject1.AddComponent<LogisticsNode>();
-        var nodeObject2 = new GameObject();
-        var node2 = nodeObject2.AddComponent<LogisticsNode>();
+    public void TestNetworkInjectionWorks() {
+        var network = MakeTestComponent<LogisticsNetwork>();
+        Assert.AreSame(manager, network.logisticsManager);
+        var node = MakeTestComponent<LogisticsNode>();
+        Assert.AreSame(manager, node.logisticsManager);
+        Assert.AreSame(network, node.logisticsNetwork);
+    }
+
+    [Test]
+    public void TestDestroyNetworkPreservesNodes() {
+        var manager = MakeTestComponent<LogisticsManager>();
+        var network = MakeTestComponent<LogisticsNetwork>();
+        var node = MakeTestComponent<LogisticsNode>();
+
+        manager.RebuildNetworks();
+        Assert.IsNotNull(node.logisticsNetwork);
+        Assert.AreSame(network.transform, node.transform.parent);
+
+        DestroyGameObject(network.gameObject);
+        Assert.IsNotNull(node.gameObject);
+        Assert.IsNotNull(node);
+        Assert.IsNull(node.logisticsNetwork);
+    }
+
+    [Test]
+    public void TestDestroyNetworkRedistributesNodes() {
+        var network1 = MakeTestComponent<LogisticsNetwork>();
+        var network2 = MakeTestComponent<LogisticsNetwork>();
+        var node1 = MakePlainComponent<LogisticsNode>();//don't inject yet
 
         network1.logisticsManager = manager;
         network1.transform.position = new Vector3(0, 0, 0);
         network2.logisticsManager = manager;
         network2.transform.position = new Vector3(5, 0, 3);
 
+        node1.transform.position = new Vector3(0, 0, 0);
         node1.logisticsManager = manager;
-        node1.transform.position = new Vector3(1, 0, 1);
-        node2.logisticsManager = manager;
-        node2.transform.position = new Vector3(3, 0, 3);
+        Assert.AreSame(network1, node1.logisticsNetwork);
 
-        //destroy the first network and test to make sure all nodes now belong to network2
-        manager.RebuildNetworks();
-        //network1.OnDestroy();
-        Object.DestroyImmediate(network1.gameObject);
-        //Assert.AreEqual(2, network2.FindComponents<LogisticsNode>().Length);
+        //destroy the first network
+        DestroyGameObject(network1.gameObject);
+        Assert.AreSame(network2, node1.logisticsNetwork);
+        Assert.IsNotNull(node1.gameObject);
+        Assert.IsNotNull(node1);
 
         //destroy network2 and make sure that the nodes all still exist
-        //network2.OnDestroy();
-        Object.DestroyImmediate(network2.gameObject);
-        Assert.IsNotNull(nodeObject1);
-        Assert.IsNotNull(nodeObject2);
+        DestroyGameObject(network2.gameObject);
+        Assert.IsNotNull(node1.gameObject);
     }
 }

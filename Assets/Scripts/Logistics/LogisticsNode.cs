@@ -11,7 +11,6 @@ public class LogisticsNode : MonoBehaviour {
                 _network = null;
             }
             if (_network == null && value != null) {
-
                 _network = value;
                 _network.AttachNode(this);
             }

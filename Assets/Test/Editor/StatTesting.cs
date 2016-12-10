@@ -4,42 +4,36 @@ using UnityEngine;
 
 [TestFixture]
 [Category("Statistic Tests")]
-public class StatTests {
+public class StatTests : NeolithicTest {
 
     [Test]
     [ExpectedException("System.ArgumentException")]
     public void MonotonicTest() {
-        GameObject go = new GameObject();
-        StatManager sm = go.AddComponent<StatManager>();
-
         var stats = new StatProfile[] {
-            StatProfile.Make("monotonicStats", false, true),
+            StatProfile.Make("monotonicStat", false, true),
         };
-        sm.SetPersistor(StatManager.DummyPersistor);
-        sm.SetStats(stats);
-        sm.Stat("monotonicStats").Add(-1);
+        var statManager = MakeDummyStatManager();
+        statManager.SetStats(stats);
+        statManager.Stat("monotonicStat").Add(-1);
     }
 
     /// <summary>
     /// </summary>
     [Test]
     public void GeneralStatTests() {
-        GameObject go = new GameObject();
-        StatManager sm = go.AddComponent<StatManager>();
-
         var stats = new StatProfile[] {
             StatProfile.Make("stat1", false, false),
             StatProfile.Make("stat2", false, true),
             StatProfile.Make("stat3", true, false),
         };
-        sm.SetPersistor(StatManager.DummyPersistor);
-        sm.SetStats(stats);
-        sm.Stat("stat2").Add(2);
+        var statManager = MakeDummyStatManager();
+        statManager.SetStats(stats);
+        statManager.Stat("stat2").Add(2);
 
-        Assert.AreEqual(0, sm.Stat("stat1").Value);
-        Assert.AreEqual(2, sm.Stat("stat2").Value);
-        Assert.AreEqual(0, sm.Stat("stat3").Value);
-        Assert.IsNull(sm.Stat("otherstat"));
+        Assert.AreEqual(0, statManager.Stat("stat1").Value);
+        Assert.AreEqual(2, statManager.Stat("stat2").Value);
+        Assert.AreEqual(0, statManager.Stat("stat3").Value);
+        Assert.IsNull(statManager.Stat("otherstat"));
     }
 
     [Test]
@@ -64,17 +58,15 @@ public class StatTests {
             StatProfile.Make("stat3", true, false),
         };
         var stream = new MemoryStream();
-
-        GameObject go = new GameObject();
-        StatManager sm = go.AddComponent<StatManager>();
         var persist = new StreamStatPersistor(stream);
-        
+        var statManager = MakeTestComponent<StatManager>();
+
         //test intra-session persistence
         persist.SetValue("stat2", 12m);
-        sm.SetPersistor(persist);
-        sm.SetStats(stats);
-        sm.Stat("stat3").Add(11);
-        Assert.AreEqual(12m, sm.Stat("stat2").PersistantValue);
+        statManager.SetPersistor(persist);
+        statManager.SetStats(stats);
+        statManager.Stat("stat3").Add(11);
+        Assert.AreEqual(12m, statManager.Stat("stat2").PersistantValue);
         Assert.AreEqual(11m, persist.GetValue("stat3"));
 
         //test exporting persistence
@@ -91,7 +83,7 @@ public class StatTests {
     public void TestOnChangeNotification() {
         GameStat testStat = new GameStat("teststat", false, false);
         int invocations = 0;
-        decimal value = 10;
+        decimal value = -1;
 
         testStat.OnChange += (stat) => {
             invocations++;

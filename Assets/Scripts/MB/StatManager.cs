@@ -91,16 +91,25 @@ public class StatManager : MonoBehaviour {
         }
     }
 
-    // Handles Awake event
-    public void Awake() {
+    /// <summary>
+    /// Loads the default stat profiles from the resources folder
+    /// </summary>
+    public void LoadDefaultStats() {
         UnityEngine.Object[] allstats = Resources.LoadAll("Stats", typeof(StatProfile));
         StatProfile[] profiles = (from r in allstats select (StatProfile)r).ToArray();
         SetStats(profiles);
     }
 
-    // Handles OnDisable event
-    public void OnDisable() {
+    // Handles Awake event
+    public void Awake() {
+        LoadDefaultStats();
+    }
+
+    // Handles OnDestroy event
+    public void OnDestroy() {
         //this is kinda hacky, probably need to rewrite the interface for persistor
-        persistor.Destroy();
+        if (persistor != null) {
+            persistor.Destroy();
+        }
     }
 }

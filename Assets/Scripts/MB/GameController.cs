@@ -190,19 +190,10 @@ public class GameController : MonoBehaviour {
     }
 
     public void InitializeAllObjects() {
-        var s = new System.Diagnostics.Stopwatch();
-
-        s.Start();
-        //have the gamefactory inject all dependencies at scene start
-        var allObjects = FindObjectsOfType<GameObject>()
-            .Where(go => go.activeInHierarchy);
-        Debug.Log(String.Format("Finding objects took {0}", s.ElapsedMilliseconds));
-        s.Reset();
-        s.Start();
-        foreach (var obj in allObjects) {
-            factory.InjectObject(obj);
+        var monoBehaviors = FindObjectsOfType<MonoBehaviour>();
+        foreach (var b in monoBehaviors) {
+            factory.InjectObject(b);
         }
-        Debug.Log(String.Format("Injecting objects took {0}", s.ElapsedMilliseconds));
     }
 
     // Handles FixedUpdate event
@@ -555,6 +546,17 @@ public class GameController : MonoBehaviour {
                     case "TearDown":
                         newOrder = new TearDownOrder(a, target);
                         break;
+                    case "ForestGarden":
+                        var prefab = (GameObject)Resources.Load("Buildings/ForestGarden");
+                        if (prefab == null) {
+                            throw new InvalidOperationException("Can't find prefab");
+                        }
+                        newOrder = factory.InjectObject(
+                           new UpgradeReservoirOrder(a, target, prefab)
+                        );
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unrecognized order tag " + orderTag);
                 }
 
 				if (newOrder != null) {

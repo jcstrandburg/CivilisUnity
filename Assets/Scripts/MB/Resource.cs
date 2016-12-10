@@ -76,7 +76,7 @@ public class Resource : MonoBehaviour {
 
         w.SetLimits(rp);
         w.SetContents(rp);
-        gameController.factory.InjectObject(gameObject);
+        gameController.factory.InjectGameobject(gameObject);
     }
 
     public void OnResourceWithdrawn() {
