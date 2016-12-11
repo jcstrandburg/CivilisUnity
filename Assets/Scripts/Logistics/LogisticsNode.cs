@@ -3,43 +3,43 @@ using System.Collections;
 
 public class LogisticsNode : MonoBehaviour {
 
-    private LogisticsNetwork _network;
-    public LogisticsNetwork logisticsNetwork {
+    private LogisticsNetwork logisticsNetwork;
+    public LogisticsNetwork LogisticsNetwork {
         set {
-            if (_network && _network != value) {
-                _network.DetachNode(this);
-                _network = null;
+            if (logisticsNetwork && logisticsNetwork != value) {
+                logisticsNetwork.DetachNode(this);
+                logisticsNetwork = null;
             }
-            if (_network == null && value != null) {
-                _network = value;
-                _network.AttachNode(this);
+            if (logisticsNetwork == null && value != null) {
+                logisticsNetwork = value;
+                logisticsNetwork.AttachNode(this);
             }
         }
         get {
-            return _network;
+            return logisticsNetwork;
         }
     }
 
-    private LogisticsManager _manager;
+    private LogisticsManager logisticsManager;
     [Inject]
-    public LogisticsManager logisticsManager {
+    public LogisticsManager LogisticsLogisticsManager {
         set {
-            if (_manager && _manager != value) {
-                _manager.UnregisterNode(this);
-                _manager = null;
+            if (logisticsManager && logisticsManager != value) {
+                logisticsManager.UnregisterNode(this);
+                logisticsManager = null;
             }
-            if (_manager == null && value != null) {
-                _manager = value;
-                _manager.RegisterNode(this);
+            if (logisticsManager == null && value != null) {
+                logisticsManager = value;
+                logisticsManager.RegisterNode(this);
             }
         }
         get {
-            if (_manager == null) {
-                if (_manager) {
-                    _manager = GetComponentInParent<LogisticsManager>();
+            if (logisticsManager == null) {
+                if (logisticsManager) {
+                    logisticsManager = GetComponentInParent<LogisticsManager>();
                 }
             }
-            return _manager;
+            return logisticsManager;
         }
     }
 }

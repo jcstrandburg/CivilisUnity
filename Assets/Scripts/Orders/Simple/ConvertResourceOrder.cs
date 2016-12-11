@@ -19,7 +19,7 @@ public class ConvertResourceOrder : BaseOrder {
     }
 
     public override void DoStep() {
-        Resource newResource = actor.gameController.CreateResourcePile(toTag, 1);
+        Resource newResource = actor.GameController.CreateResourcePile(toTag, 1);
         newResource.amount = sourceResource.amount;
         actor.PickupResource(newResource);
         sourceResource.transform.SetParent(null);

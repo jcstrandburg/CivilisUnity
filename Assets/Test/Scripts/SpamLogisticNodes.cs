@@ -8,32 +8,33 @@ public class SpamLogisticNodes : MonoBehaviour {
     public int spawnCount=20;
     private List<GameObject> spawned = new List<GameObject>();
 
-    void Awake() {
-        GameFactory f = GameController.Instance.factory;
-        for (int i = 0; i < spawnCount; ++i) {
-            var obj = f.Instantiate(Resources.Load("Boulder") as GameObject);
+    [Inject]
+    public GameController GameController { get; set; }
+
+    public void Awake() {
+        var factory = GameController.Factory;
+        var prefab = Resources.Load("Boulder") as GameObject;
+        for (var i = 0; i < spawnCount; ++i) {
+            var obj = factory.Instantiate(prefab);
             spawned.Add(obj);
         }
-        //network = GetComponent<LogisticsNetwork>();
     }
 
 	// Use this for initialization
-	void Start () {
-        GameFactory f = GameController.Instance.factory;
+	public void Start () {
+        var factory = GameController.Factory;
 	    foreach (var obj in spawned) {
             obj.GetComponent<Resource>().SetDown();
-            f.InjectGameobject(obj);
+            factory.InjectGameobject(obj);
             obj.transform.position = this.transform.position;
-            var offset = new Vector3(Random.Range(-10, 10),
-                                     0,
-                                     Random.Range(-10, 10));
-            obj.transform.position += offset;
+	        var offset = Random.insideUnitCircle*10;
+            obj.transform.position += new Vector3(offset.x, 0, offset.y);
             obj.GetComponent<NeolithicObject>().SnapToGround();
         }
 	}
 	
 	// Update is called once per frame
-	void FixedUpdate () {
+    public void FixedUpdate () {
         //var x = network.FindComponents<Warehouse>();
         //Debug.Log(x.Length);
 	}

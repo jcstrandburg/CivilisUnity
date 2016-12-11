@@ -78,27 +78,10 @@ public class ConstructionManager : MonoBehaviour {
     [SerializeField]
     private List<MonoBehaviour> cachedComponents;
 
-    private GameController gameController;
-    public GameController GameController {
-        get {
-            if (gameController == null) {
-                gameController = GameController.Instance;
-            }
-            return gameController;
-        }
-        set { gameController = value; }
-    }
-
-    private GroundController groundController;
-    public GroundController GroundController {
-        get {
-            if (groundController == null) {
-                groundController = GameController.GroundController;
-            }
-            return groundController;
-        }
-        set { groundController = value; }
-    }
+    [Inject]
+    public GameController GameController { get; set; }
+    [Inject]
+    public GroundController GroundController { get; set; }
 
     // Handles Start event
     public void Start() {

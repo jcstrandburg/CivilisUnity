@@ -7,7 +7,7 @@ public class AlignChildrenWithTerrain : MonoBehaviour {
     private Vector3 origin;//our current position as snapped to ground
 
 	// Use this for initialization
-	void Start () {
+	public void Start () {
         origin = GameController.Instance.SnapToGround(transform.position);
         foreach (Transform child in transform) {
             if (child.GetComponent<MeshRenderer>()) {

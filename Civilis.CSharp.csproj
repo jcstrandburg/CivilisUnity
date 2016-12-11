@@ -183,7 +183,7 @@
     <Compile Include="Assets\Scripts\Orders\Super\StatefulSuperOrder.cs" />
     <Compile Include="Assets\Scripts\Orders\Super\StoreCarriedResourceOrder.cs" />
     <Compile Include="Assets\Scripts\Orders\Super\TransmuteOrder.cs" />
-    <Compile Include="Assets\Scripts\Orders\Super\UpgradeReservoir.cs" />
+    <Compile Include="Assets\Scripts\Orders\Super\UpgradeReservoirOrder.cs" />
     <Compile Include="Assets\Scripts\ScriptableObjects\ActionProfile.cs" />
     <Compile Include="Assets\Scripts\ScriptableObjects\StatProfile.cs" />
     <Compile Include="Assets\Scripts\ScriptableObjects\Technology.cs" />
@@ -223,7 +223,6 @@
     <Compile Include="Assets\Scripts\UI\SettingsMenu.cs" />
     <Compile Include="Assets\Scripts\UI\SliderBinding.cs" />
     <Compile Include="Assets\Scripts\UI\TextBinding.cs" />
-    <Compile Include="Assets\Test\Mono\ForceInjectTestObject.cs" />
     <Compile Include="Assets\Test\Mono\PlantDomesticationTestRunner.cs" />
     <Compile Include="Assets\Test\Mono\ReservoirHarvestStatTest.cs" />
     <Compile Include="Assets\Test\Mono\TestSaveable.cs" />

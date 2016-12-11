@@ -17,9 +17,9 @@ public class LogisticsDropResourceTest : MonoBehaviour {
         var node = resource.GetComponent<LogisticsNode>();
         if (!node) {
             IntegrationTest.Fail("No logistics node present");
-        } else if (node.logisticsNetwork == null) {
+        } else if (node.LogisticsNetwork == null) {
             IntegrationTest.Fail("Node is not a member of a network");
-        } else if (node.logisticsNetwork.logisticsManager == null) {
+        } else if (node.LogisticsNetwork.logisticsManager == null) {
             IntegrationTest.Fail("Network has no logistics manager");
         }
 

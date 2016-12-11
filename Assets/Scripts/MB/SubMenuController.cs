@@ -53,7 +53,7 @@ public class SubMenuController : MonoBehaviour, IPointerEnterHandler, IPointerEx
     /// <returns></returns>
     public Button AddButton(string label, UnityAction action) {
         gameObject.SetActive(true);
-        GameObject newButton = GameController.Instance.factory.Instantiate(buttonPrefab);
+        GameObject newButton = GameController.Instance.Factory.Instantiate(buttonPrefab);
         newButton.transform.SetParent(transform);
 
         newButton.GetComponent<Button>().onClick.AddListener(action);

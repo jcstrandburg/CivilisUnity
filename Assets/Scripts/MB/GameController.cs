@@ -3,7 +3,8 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 #if UNITY_EDITOR
 using UnityEditor;
 
@@ -38,11 +39,11 @@ public class GameController : MonoBehaviour {
     /// <summary>List of resource pile prefabs</summary>
     public List<Resource> resourcePrefabs;
     /// <summary>Manages technology tree</summary>
-    public TechManager techManager;
+    public TechManager TechManager;
     /// <summary>Manages creation of objects, dependency injection, etc</summary>
-    public GameFactory factory = new GameFactory();
+    public GameFactory Factory = new GameFactory();
     /// <summary>Actions that no actor can currently take</summary>
-    public List<string> forbiddenActions;
+    public List<string> ForbiddenActions;
 
     private static GameController _instance = null;
     /// <summary>"Singleton" instance getter. Only one of these objects is expected to exists in any scene.</summary>
@@ -55,106 +56,24 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    private GameUIController guiController;
-    /// <summary>Manages the GuiController object. If no other controller is provided one will be found in the scene.</summary>
-    public GameUIController GuiController {
-        get {
-            if (guiController == null) {
-                guiController = FindObjectOfType<GameUIController>();
-            }
-            return guiController;
-        }
-        set {
-            guiController = value;
-        }
-    }
-
-    private GroundController groundController;
-    /// <summary>Manages the GroundController object. If no other controller is provided one will be found in the scene.</summary>
-    public GroundController GroundController {
-        get {
-            if (groundController == null) {
-                groundController = FindObjectOfType<GroundController>();
-            }
-            return groundController;
-        }
-        set {
-            groundController = value;
-        }
-    }
-
-    private StatManager statManager;
-    /// <summary>Manages the StatManager object. If no other manager is provided one will be found in the scene.</summary>
-    public StatManager StatManager {
-        get {
-            if (statManager == null) {
-                statManager = FindObjectOfType<StatManager>();
-            }
-            return statManager;
-        }
-        set {
-            statManager = value;
-        }
-    }
-
-    private SaverLoader saverLoader;
-    /// <summary>Manages the SaverLoader object. If no other SaverLoader is provided one will be found in the scene.</summary>
-    public SaverLoader SaverLoader {
-        get {
-            if (saverLoader == null) {
-                saverLoader = FindObjectOfType<SaverLoader>();
-            }
-            return saverLoader;
-        }
-        set {
-            saverLoader = value;
-        }
-    }
-
-    private MenuManager menuManager;
-    /// <summary>Manages the MenuManager object. If no other manager is provided one will be found in the scene.</summary>
-    public MenuManager MenuManager {
-        get {
-            if (menuManager == null) {
-                menuManager = FindObjectOfType<MenuManager>();
-            }
-            return menuManager;
-        }
-        set {
-            menuManager = value;
-        }
-    }
-
-    private LogisticsManager logisticsManager;
-    /// <summary>Manages the LogisticsManager object. If no other manager is provided one will be found in the scene.</summary>
-    public LogisticsManager LogisticsManager {
-        get {
-            if (logisticsManager == null) {
-                logisticsManager = FindObjectOfType<LogisticsManager>();
-            }
-            return logisticsManager;
-        }
-        set {
-            logisticsManager = value;
-        }
-    }
-
-    private DayCycleController dayCycleController;
-    /// <summary>Manages the DayCycleController object. If no other controller is provided one will be found in the scene.</summary>
-    public DayCycleController DayCycleController {
-        get {
-            if (dayCycleController == null) {
-                dayCycleController = FindObjectOfType<DayCycleController>();
-            }
-            return dayCycleController;
-        }
-        set {
-            dayCycleController = value;
-        }
-    }
+    [Inject]
+    public GameUIController GuiController { get; set; }
+    [Inject]
+    public GroundController GroundController { get; set; }
+    [Inject]
+    public StatManager StatManager { get; set; }
+    [Inject]
+    public SaverLoader SaverLoader { get; set; }
+    [Inject]
+    public MenuManager MenuManager { get; set; }
+    [Inject]
+    public LogisticsManager LogisticsManager { get; set; }
+    [Inject]
+    public DayCycleController DayCycleController { get; set; }
 
     public float Spirit { get; set; }
 
+    [Inject]
     public BuildingBlueprint buildingPlacer;
     /// <summary>Manages the BuildingPlueprint object. If no other placer is provided one will be found in the scene.</summary>
     private BuildingBlueprint BuildingPlacer {
@@ -172,8 +91,8 @@ public class GameController : MonoBehaviour {
     // Handles Awake event
     void Awake() {
         var techs = Resources.LoadAll("Techs", typeof(Technology)).Select(t => (Technology)t).ToArray();
-        techManager = new TechManager();
-        techManager.LoadArray(techs);
+        TechManager = new TechManager();
+        TechManager.LoadArray(techs);
 
         resourcePrefabs = new List<Resource>();
         var allFiles = Resources.LoadAll<UnityEngine.Object>("");
@@ -190,9 +109,18 @@ public class GameController : MonoBehaviour {
     }
 
     public void InitializeAllObjects() {
+        var gameObjects = FindObjectsOfType<GameObject>().Where(x => x.activeInHierarchy && x.transform.parent == null).ToArray();
+        foreach (var go in gameObjects) {
+            go.BroadcastMessage("BeforeInject", SendMessageOptions.DontRequireReceiver);
+        }
+
         var monoBehaviors = FindObjectsOfType<MonoBehaviour>();
         foreach (var b in monoBehaviors) {
-            factory.InjectObject(b);
+            Factory.InjectObject(b);
+        }
+
+        foreach (var go in gameObjects) {
+            go.BroadcastMessage("AfterInject", SendMessageOptions.DontRequireReceiver);
         }
     }
 
@@ -258,7 +186,7 @@ public class GameController : MonoBehaviour {
     /// </summary>
     /// <returns></returns>
     public Technology[] GetAvailableTechs() {
-        return techManager.GetEligibleTechs();
+        return TechManager.GetEligibleTechs();
     }
 
     /// <summary>
@@ -269,7 +197,7 @@ public class GameController : MonoBehaviour {
         Debug.Log("Researching tech: " + t.techName);
 		if (t.cost <= this.Spirit) {
 			this.Spirit -= t.cost;
-			techManager.Research(t);
+			TechManager.Research(t);
 		}
         GuiController.subMenu.ClearMenu();
     }
@@ -424,7 +352,7 @@ public class GameController : MonoBehaviour {
         var constructionManagers = from o in Resources.LoadAll("Buildings", typeof(ConstructionManager))
                                    select (ConstructionManager)o;
         return (from cmgr in constructionManagers
-                where cmgr.RequirementsMet(StatManager, techManager)
+                where cmgr.RequirementsMet(StatManager, TechManager)
                 select cmgr.gameObject)
                 .ToArray();
     }
@@ -502,7 +430,7 @@ public class GameController : MonoBehaviour {
     /// </summary>
     /// <param name="clickee"></param>
 	public void DoContextMenu(NeolithicObject clickee) {
-        var forbidden = new HashSet<string>(forbiddenActions);
+        var forbidden = new HashSet<string>(ForbiddenActions);
 
 		string[] selectedActions = getSelectedAbilities();
 		string[] availableActions = selectedActions
@@ -551,7 +479,7 @@ public class GameController : MonoBehaviour {
                         if (prefab == null) {
                             throw new InvalidOperationException("Can't find prefab");
                         }
-                        newOrder = factory.InjectObject(
+                        newOrder = Factory.InjectObject(
                            new UpgradeReservoirOrder(a, target, prefab)
                         );
                         break;
@@ -661,7 +589,7 @@ public class GameController : MonoBehaviour {
     public Resource CreateResourcePile(string typeTag, double amount) {
         foreach (Resource g in resourcePrefabs) {
             if (g.typeTag == typeTag) {
-                GameObject pile = factory.Instantiate(g.gameObject);
+                GameObject pile = Factory.Instantiate(g.gameObject);
                 Resource r = pile.GetComponent<Resource>();
                 r.amount = amount;
                 return r;
@@ -691,7 +619,7 @@ public class GameController : MonoBehaviour {
     /// <param name="message"></param>
     public void MakeToast(Vector3 pos, string message) {
         var prefab = Resources.Load("Toast") as GameObject;
-        var toast = factory.Instantiate(prefab);
+        var toast = Factory.Instantiate(prefab);
         toast.GetComponent<Toast>().Init(pos, message);
     }
 }

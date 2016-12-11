@@ -10,6 +10,6 @@ public class GameFactoryTest : NeolithicTest {
         var logisticsManager = MakeTestComponent<LogisticsManager>();
         var logisticsnode = MakeTestComponent<LogisticsNode>();
         factory.InjectObject(logisticsnode);
-        Assert.AreSame(logisticsManager, logisticsnode.logisticsManager);
+        Assert.AreSame(logisticsManager, logisticsnode.LogisticsLogisticsManager);
 	}
 }

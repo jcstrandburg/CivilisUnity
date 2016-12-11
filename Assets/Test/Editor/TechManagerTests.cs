@@ -1,10 +1,4 @@
-﻿using UnityEngine;
-using UnityEditor;
-using NUnit.Framework;
-using NSubstitute;
-using System.Collections.Generic;
-using System;
-using System.Linq;
+﻿using NUnit.Framework;
 
 [TestFixture]
 [Category("Techmanager Tests")]

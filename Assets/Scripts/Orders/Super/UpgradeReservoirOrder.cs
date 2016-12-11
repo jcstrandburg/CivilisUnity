@@ -2,8 +2,8 @@
 using System.Collections;
 
 public class DoBuildingUpgrade : BaseOrder {
-    NeolithicObject myTargetObj;
-    GameObject myPrefab;
+    private NeolithicObject myTargetObj;
+    private GameObject myPrefab;
 
     public DoBuildingUpgrade(ActorController a, NeolithicObject target, GameObject prefab) : base(a) {
         myTargetObj = target;
@@ -11,10 +11,10 @@ public class DoBuildingUpgrade : BaseOrder {
     }
 
     public override void DoStep() {
-        var replacement = GameController.Instance.factory.Instantiate(myPrefab);
+        var replacement = GameController.Instance.Factory.Instantiate(myPrefab);
         replacement.transform.position = myTargetObj.transform.position;
         replacement.transform.rotation = myTargetObj.transform.rotation;
-        GameObject.Destroy(myTargetObj.gameObject);
+        Object.Destroy(myTargetObj.gameObject);
         GameController.Instance.StatManager.Stat("forest-gardens").Add(1);
 
         completed = true;
@@ -25,8 +25,8 @@ public class DoBuildingUpgrade : BaseOrder {
 /// Order to upgrade a reservoir to it's next stage
 /// </summary>
 public class UpgradeReservoirOrder : StatefulSuperOrder {
-    NeolithicObject targetObj;
-    GameObject myPrefab;
+    private NeolithicObject targetObj;
+    private GameObject myPrefab;
 
     public UpgradeReservoirOrder(ActorController a, NeolithicObject target, GameObject prefab) : base(a) {
         targetObj = target;

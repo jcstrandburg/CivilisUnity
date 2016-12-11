@@ -34,33 +34,16 @@ public class CameraController : MonoBehaviour {
     public float strategicRotation = 0.25f;
 
     //target position being lerped to
-    Vector3 targetPos;
+    private Vector3 targetPos;
     //target x rotation being lerped to
-    Vector3 targetRot;
+    private Vector3 targetRot;
     //helper variables to serialize camera settings
     private Quaternion cameraRotation;
 
-    private GameController _gameController;
-    public GameController gameController {
-        get {
-            if (_gameController == null) {
-                _gameController = GameController.Instance;
-            }
-            return _gameController;
-        }
-        set { _gameController = value; }
-    }
-
-    private GroundController _groundController;
-    public GroundController groundController {
-        get {
-            if (_groundController == null) {
-                _groundController = gameController.GroundController;
-            }
-            return _groundController;
-        }
-        set { _groundController = value; }
-    }
+    [Inject]
+    public GameController GameController { get; set; }
+    [Inject]
+    public GroundController GroundController { get; set; }
 
     public void Start() {
         targetPos = transform.position;
@@ -95,7 +78,7 @@ public class CameraController : MonoBehaviour {
 
         //screen edge scrolling
         Vector3 mousePos = Input.mousePosition;
-        if (edgeScrolling && !gameController.boxActive && mousePos.x >= 0.0f && mousePos.y >= 0.0 && mousePos.x < Screen.width && mousePos.y < Screen.width) {
+        if (edgeScrolling && !GameController.boxActive && mousePos.x >= 0.0f && mousePos.y >= 0.0 && mousePos.x < Screen.width && mousePos.y < Screen.width) {
             float xScroll = 0.0f, yScroll = 0.0f;
             if (mousePos.x < screenMargin && mousePos.x >= 0.0f) {
                 xScroll = tranSpeed * (-1.0f + Mathf.Min(mousePos.x / screenMargin, 1.0f - minScrollRatio));
@@ -149,8 +132,8 @@ public class CameraController : MonoBehaviour {
                                     cam.transform.eulerAngles.z);
             //hover off the ground, hover a little higher when pointing towards the ground
             float hoverBias = 1.0f + (cam.transform.eulerAngles.x / 90.0f);
-            Vector3 intermediate = gameController.SnapToGround(targetPos);
-            intermediate += new Vector3(0.0f, Mathf.Max(0.0f, groundController.waterLevel - intermediate.y), 0.0f);
+            Vector3 intermediate = GameController.SnapToGround(targetPos);
+            intermediate += new Vector3(0.0f, Mathf.Max(0.0f, GroundController.waterLevel - intermediate.y), 0.0f);
             targetPos = intermediate + new Vector3(0.0f, hoverBias * hover, 0.0f);
         } else {
             float z = -zoomLevel/2.0f;
@@ -160,7 +143,7 @@ public class CameraController : MonoBehaviour {
                                     cam.transform.eulerAngles.y,
                                     cam.transform.eulerAngles.z);
             Vector3 tempPos = new Vector3(targetPos.x, Mathf.Lerp(hover * 2, strategicZoomMaxHeight, z), targetPos.z);
-            Vector3 tempPos2 = gameController.SnapToGround(tempPos);
+            Vector3 tempPos2 = GameController.SnapToGround(tempPos);
             targetPos = new Vector3(tempPos.x, Mathf.Max(tempPos.y, tempPos2.y + hover * 2), tempPos.z);
         }
 

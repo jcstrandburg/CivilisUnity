@@ -39,7 +39,7 @@ public class LogisticsManager : MonoBehaviour {
         }
         nodes.Add(node);
         var nearestNetwork = FindNearestNetwork(node.transform.position);
-        node.logisticsNetwork = nearestNetwork;
+        node.LogisticsNetwork = nearestNetwork;
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ public class LogisticsManager : MonoBehaviour {
     /// </summary>
     public void RebuildNetworks() {
         foreach (LogisticsNode n in nodes) {
-            n.logisticsNetwork = FindNearestNetwork(n.transform.position);
+            n.LogisticsNetwork = FindNearestNetwork(n.transform.position);
         }
     }
 

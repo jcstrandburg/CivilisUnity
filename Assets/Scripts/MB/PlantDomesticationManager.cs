@@ -11,24 +11,14 @@ public class PlantDomesticationManager : MonoBehaviour {
     }
 
     [Inject]
-    private GameController _gameController;
-    public GameController gameController {
-        get {
-            if (_gameController == null) {
-                _gameController = GameController.Instance;
-            }
-            return _gameController;
-        }
-        set { _gameController = value; }
-    }
-
+    public GameController GameController { get; set; }
     [Inject]
-    public StatManager stats;
+    public StatManager Stats;
 
     public double forestGardenThreshold;
 
     public void Start() {
-        var stat = stats.Stat("vegetables-harvested");
+        var stat = Stats.Stat("vegetables-harvested");
         if (stat != null) {
             stat.OnChange += this.OnVegetablesHarvestedChange;
         }
@@ -46,8 +36,8 @@ public class PlantDomesticationManager : MonoBehaviour {
 
     public void EnableForestGardens() {
         forestGardensEnabled = true;
-        if (gameController != null) {
-            gameController.forbiddenActions.Remove("ForestGarden");
+        if (GameController != null) {
+            GameController.ForbiddenActions.Remove("ForestGarden");
         }
     }
 }

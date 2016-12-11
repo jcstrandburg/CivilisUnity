@@ -91,8 +91,10 @@ public class LogisticsNetwork : MonoBehaviour {
 
     public void OnDestroy() {
         if (logisticsManager != null) {
+            Debug.Log(">Jobify");
             logisticsManager.UnregisterNetwork(this);
             logisticsManager.RebuildNetworks();
+            Debug.Log("<Jobify");
         }
     }
 

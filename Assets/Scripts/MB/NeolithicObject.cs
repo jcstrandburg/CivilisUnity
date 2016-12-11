@@ -27,23 +27,12 @@ public class NeolithicObject : MonoBehaviour {
 	public bool pointerHover = false;
 	public bool orderable = false;
 	public string statusString;
-
-    //[DontSaveField]
     public ActionProfile actionProfile;
 
     private SelectHalo halo;
 
-    private GameController _gameController;
     [Inject]
-    public GameController gameController {
-        get {
-            if (_gameController == null) {
-                _gameController = GameController.Instance;
-            }
-            return _gameController;
-        }
-        set { _gameController = value; }
-    }
+    public GameController GameController { get; set; }
 
     // Handles Start event
     public virtual void Start() {
@@ -63,7 +52,7 @@ public class NeolithicObject : MonoBehaviour {
     public void SelectClick() {
         if (selectability != Selectability.Unselectable) {
             if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift)) {
-                gameController.DeselectAll();
+                GameController.DeselectAll();
             }
             Select();
         }
@@ -71,7 +60,7 @@ public class NeolithicObject : MonoBehaviour {
 
     // Handles ContextClick event
     public void ContextClick() {
-        gameController.DoContextMenu(this);
+        GameController.DoContextMenu(this);
     }
 
     // Handles HoverStart event
@@ -84,7 +73,7 @@ public class NeolithicObject : MonoBehaviour {
     public virtual void Select() {
         selected = true;
         BroadcastMessage("OnSelect", null, SendMessageOptions.DontRequireReceiver);
-        gameController.AddSelected(this);
+        GameController.AddSelected(this);
     }
 
     // Handles Deselect event
@@ -107,7 +96,7 @@ public class NeolithicObject : MonoBehaviour {
     /// <param name="force">If true the snapToGround field will be ignored</param>
     public void SnapToGround(bool force=false) {
         if (snapToGround || force) {
-            transform.position = gameController.SnapToGround(transform.position);
+            transform.position = GameController.SnapToGround(transform.position);
         }
     }
 

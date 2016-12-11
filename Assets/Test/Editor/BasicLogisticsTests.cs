@@ -47,21 +47,21 @@ public class BasicLogisticsTests : NeolithicTest {
         Assert.AreEqual(0, network2.FindComponents<LogisticsNode>().Length);
 
         //make sure network1 has node1 and network2 has none
-        node1.logisticsNetwork = network1;
+        node1.LogisticsNetwork = network1;
         Assert.AreEqual(1, network1.NodeCount);
         Assert.AreSame(network1.transform, node1.transform.parent);
         Assert.AreEqual(1, network1.FindComponents<LogisticsNode>().Length);
         Assert.AreEqual(0, network2.FindComponents<LogisticsNode>().Length);
 
         //make sure each network has one node
-        node2.logisticsNetwork = network2;
+        node2.LogisticsNetwork = network2;
         Assert.AreEqual(1, network2.NodeCount);
         Assert.AreEqual(1, network1.FindComponents<LogisticsNode>().Length);
         Assert.AreEqual(1, network2.FindComponents<LogisticsNode>().Length);
         Assert.AreSame(network2.transform, node2.transform.parent);
 
         //make sure that network1 has both nodes and network2 has none
-        node2.logisticsNetwork = network1;
+        node2.LogisticsNetwork = network1;
         Assert.AreEqual(2, network1.FindComponents<LogisticsNode>().Length);
         Assert.AreEqual(0, network2.FindComponents<LogisticsNode>().Length);
         Assert.AreSame(network1.transform, node1.transform.parent);
@@ -82,9 +82,9 @@ public class BasicLogisticsTests : NeolithicTest {
         network2.logisticsManager = manager;
         network2.transform.position = new Vector3(5, 0, 3);
 
-        node1.logisticsManager = manager;
+        node1.LogisticsLogisticsManager = manager;
         node1.transform.position = new Vector3(1, 0, 1);
-        node2.logisticsManager = manager;
+        node2.LogisticsLogisticsManager = manager;
         node2.transform.position = new Vector3(3, 0, 3);
 
         manager.RebuildNetworks();
@@ -99,8 +99,8 @@ public class BasicLogisticsTests : NeolithicTest {
         var network = MakeTestComponent<LogisticsNetwork>();
         Assert.AreSame(manager, network.logisticsManager);
         var node = MakeTestComponent<LogisticsNode>();
-        Assert.AreSame(manager, node.logisticsManager);
-        Assert.AreSame(network, node.logisticsNetwork);
+        Assert.AreSame(manager, node.LogisticsLogisticsManager);
+        Assert.AreSame(network, node.LogisticsNetwork);
     }
 
     [Test]
@@ -110,13 +110,13 @@ public class BasicLogisticsTests : NeolithicTest {
         var node = MakeTestComponent<LogisticsNode>();
 
         manager.RebuildNetworks();
-        Assert.IsNotNull(node.logisticsNetwork);
+        Assert.IsNotNull(node.LogisticsNetwork);
         Assert.AreSame(network.transform, node.transform.parent);
 
         DestroyGameObject(network.gameObject);
         Assert.IsNotNull(node.gameObject);
         Assert.IsNotNull(node);
-        Assert.IsNull(node.logisticsNetwork);
+        Assert.IsNull(node.LogisticsNetwork);
     }
 
     [Test]
@@ -131,12 +131,12 @@ public class BasicLogisticsTests : NeolithicTest {
         network2.transform.position = new Vector3(5, 0, 3);
 
         node1.transform.position = new Vector3(0, 0, 0);
-        node1.logisticsManager = manager;
-        Assert.AreSame(network1, node1.logisticsNetwork);
+        node1.LogisticsLogisticsManager = manager;
+        Assert.AreSame(network1, node1.LogisticsNetwork);
 
         //destroy the first network
         DestroyGameObject(network1.gameObject);
-        Assert.AreSame(network2, node1.logisticsNetwork);
+        Assert.AreSame(network2, node1.LogisticsNetwork);
         Assert.IsNotNull(node1.gameObject);
         Assert.IsNotNull(node1);
 

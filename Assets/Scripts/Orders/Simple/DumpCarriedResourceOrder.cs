@@ -11,10 +11,10 @@ public class DumpCarriedResourceOrder : BaseOrder {
     public DumpCarriedResourceOrder(ActorController a) : base(a) {
         dump = GameObject.Find("DumpingGround");
         if (dump) {
-            target = a.gameController.SnapToGround(dump.transform.position);
+            target = a.GameController.SnapToGround(dump.transform.position);
         } else {
             Vector2 offset = 10.0f * UnityEngine.Random.insideUnitCircle;
-            target = a.gameController
+            target = a.GameController
                 .SnapToGround(actor.transform.position + new Vector3(offset.x, 0, offset.y));
         }
     }

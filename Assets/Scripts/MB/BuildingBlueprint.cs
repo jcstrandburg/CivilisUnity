@@ -20,7 +20,7 @@ public class BuildingBlueprint : MonoBehaviour { //, IPointerDownHandler {
     /// <todo>This needs to get updated to not spawn an actual building until placement or something</todo>
     public void Activate(GameObject prefab) {
         //this is probably not the best way to handle this, deal with this later
-        GameObject go = GameController.Instance.factory.Instantiate(prefab);
+        GameObject go = GameController.Instance.Factory.Instantiate(prefab);
 
         constructMe = go.GetComponent<ConstructionManager>();
         constructMe.transform.position = transform.position;

@@ -32,16 +32,8 @@ public class Warehouse : MonoBehaviour {
     [SerializeField]
     public List<ResourceReservation> resourceReservations = new List<ResourceReservation>();
 
-    private GameController _gameController;
-    public GameController gameController {
-        get {
-            if (_gameController == null) {
-                _gameController = GameController.Instance;
-            }
-            return _gameController;
-        }
-        set { _gameController = value; }
-    }
+    [Inject]
+    public GameController GameController { get; set; }
 
     /// <summary>
     /// Deposits the contents of the given reservation into this warehouse
@@ -338,7 +330,7 @@ public class Warehouse : MonoBehaviour {
             while (rc.amount > 0) {
                 rc.amount -= 1;
 
-                var resource = gameController.CreateResourcePile(rc.resourceTag, Math.Min(rc.amount, 1.0));
+                var resource = GameController.CreateResourcePile(rc.resourceTag, Math.Min(rc.amount, 1.0));
                 resource.transform.position = transform.position;
                 resource.GetComponent<Resource>().SetDown();
             }

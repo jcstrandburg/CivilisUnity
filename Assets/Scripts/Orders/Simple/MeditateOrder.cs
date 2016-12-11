@@ -9,6 +9,6 @@ public class MeditateOrder : BaseOrder {
     }
 
     public override void DoStep() {
-        actor.gameController.Spirit += 0.03f;
+        actor.GameController.Spirit += 0.03f;
     }
 }

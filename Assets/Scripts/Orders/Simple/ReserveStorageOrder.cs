@@ -18,7 +18,7 @@ public class ReserveStorageOrder : BaseOrder {
         string type = resource.typeTag;
         double amount = resource.amount;
 
-        if (actor.gameController.ReserveStorage(actor, type, amount)) {
+        if (actor.GameController.ReserveStorage(actor, type, amount)) {
             Debug.Log("Reserved storage");
             completed = true;
         }

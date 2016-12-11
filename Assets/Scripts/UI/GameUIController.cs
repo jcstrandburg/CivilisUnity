@@ -19,16 +19,8 @@ public class GameUIController : MonoBehaviour {
     public GameObject debugMenu;
     public bool paused = false;
 
-    private GameController _gameController;
-    public GameController gameController {
-        get {
-            if (_gameController == null) {
-                _gameController = GameController.Instance;
-            }
-            return _gameController;
-        }
-        set { _gameController = value; }
-    }
+    [Inject]
+    public GameController GameController { get; set; }
 
     // Handles Start event
     void Start() {
@@ -70,11 +62,11 @@ public class GameUIController : MonoBehaviour {
         var dbs = GetComponent<DataBindingSource>();
 
         dbs.AddBinding("spirit",
-            () => gameController.Spirit,
-            (object val) => gameController.Spirit = Convert.ToSingle(val));
+            () => GameController.Spirit,
+            (object val) => GameController.Spirit = Convert.ToSingle(val));
         dbs.AddBinding("dayfactor",
-            () => gameController.DayCycleController.daytime,
-            (object val) => gameController.DayCycleController.daytime = Convert.ToSingle(val));
+            () => GameController.DayCycleController.daytime,
+            (object val) => GameController.DayCycleController.daytime = Convert.ToSingle(val));
     }
 
     /// <summary>
@@ -90,7 +82,7 @@ public class GameUIController : MonoBehaviour {
 
 		foreach (string o in options) {
             var prefab = Resources.Load("ContextTextButton") as GameObject;
-            var temp = gameController.factory.Instantiate(prefab);
+            var temp = GameController.Factory.Instantiate(prefab);
 			Button button = temp.GetComponent<Button>();
 			string capture = o;
 			button.onClick.AddListener( () => ExecuteContextAction(capture, target));
@@ -127,7 +119,7 @@ public class GameUIController : MonoBehaviour {
 	/// selected units against the target, and then hides the context menu
 	/// </summary>
 	public void ExecuteContextAction(string action, NeolithicObject target) {
-        gameController.IssueOrder(action, target);
+        GameController.IssueOrder(action, target);
 		HideContextMenu();
 	}
 
@@ -164,12 +156,12 @@ public class GameUIController : MonoBehaviour {
     /// Finds available techs and shows the technology menu
     /// </summary>
     public void ShowResearchMenu() {
-        Technology[] techs = gameController.GetAvailableTechs();
+        Technology[] techs = GameController.GetAvailableTechs();
         subMenu.ClearMenu();
         foreach (Technology t in techs) {
             Technology tech = t;
-            Button b = subMenu.AddButton(t.displayName, () => gameController.BuyTech(tech));
-			b.interactable = (gameController.Spirit >= t.cost);
+            Button b = subMenu.AddButton(t.displayName, () => GameController.BuyTech(tech));
+			b.interactable = (GameController.Spirit >= t.cost);
         }
     }
 
@@ -177,12 +169,12 @@ public class GameUIController : MonoBehaviour {
     /// Finds buildable buildings and displays the build menu
     /// </summary>
     public void ShowBuildMenu() {
-        var buildings = gameController.GetBuildableBuildings();
+        var buildings = GameController.GetBuildableBuildings();
         subMenu.ClearMenu();
         foreach (var building in buildings) {
             GameObject prefab = building;
             subMenu.AddButton(building.name,
-                            () => gameController.StartBuildingPlacement(prefab));
+                            () => GameController.StartBuildingPlacement(prefab));
         }
     }
 }

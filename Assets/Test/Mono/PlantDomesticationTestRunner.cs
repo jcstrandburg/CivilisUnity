@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.Assertions;
+//using NUnit.Framework;
 
 public class PlantDomesticationTestRunner : MonoBehaviour {
 
@@ -15,16 +15,17 @@ public class PlantDomesticationTestRunner : MonoBehaviour {
     public float vegetablesHarvested;
     public bool forestGardenForbidden;
 
-	void Start () {
+	public void Start () {
         GameController.Instance.InitializeAllObjects();
         var order = new HarvestFromReservoirOrder(testActor, testReservoir);
         testActor.OverrideOrder(order);
 
-        Assert.IsTrue(gameController.forbiddenActions.Contains("ForestGarden"));
+	    //Assert.That(gameController.ForbiddenActions, Has.Member("ForestGarden'"));
+        Assert.IsTrue(gameController.ForbiddenActions.Contains("ForestGarden"));
     }
 
-    void FixedUpdate() {
+    public void FixedUpdate() {
         vegetablesHarvested = (float)stats.Stat("vegetables-harvested").Value;
-        forestGardenForbidden = gameController.forbiddenActions.Contains("ForestGarden");        
+        forestGardenForbidden = gameController.ForbiddenActions.Contains("ForestGarden");        
     }
 }

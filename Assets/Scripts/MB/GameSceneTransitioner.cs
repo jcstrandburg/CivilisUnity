@@ -11,27 +11,32 @@ public class GameSceneTransitioner : MonoBehaviour {
     /// <summary>Name of the save game file to load when the scene transitions</summary>
     private string loadGameName = null;
 
+    [Inject]
+    public GameController GameController { get; set; }
+    [Inject]
+    public GameController GroundController { get; set; }
+
     // Handles Start event
-    void Start() {
+    public void Start() {
         DontDestroyOnLoad(gameObject);
     }
 
     // Handles OnEnable event
-    void OnEnable() {
+    public void OnEnable() {
         SceneManager.sceneLoaded += DoSceneTransition;
     }
 
     // Handles OnDisable event
-    void OnDisable() {
+    public void OnDisable() {
         SceneManager.sceneLoaded -= DoSceneTransition;
     }
 
     /// <summary>
     /// Initializes the transitioner to load a saved game on scene change
     /// </summary>
-    /// <param name="loadGameName"></param>
-    public void InitLoadGame(string loadGameName) {
-        this.loadGameName = loadGameName;
+    /// <param name="gameGame"></param>
+    public void InitLoadGame(string gameGame) {
+        loadGameName = gameGame;
     }
 
     /// <summary>

@@ -19,7 +19,7 @@ public class ExtractFromReservoirOrder : BaseOrder {
         if (progress >= 1.0f) {
             Reservoir reservoir = reservation.source.GetComponent<Reservoir>();
             reservoir.WithdrawReservation(reservation);
-            Resource res = actor.gameController.CreateResourcePile(reservoir.resourceTag, 1);
+            Resource res = actor.GameController.CreateResourcePile(reservoir.resourceTag, 1);
             actor.PickupResource(res);
             completed = true;
         }

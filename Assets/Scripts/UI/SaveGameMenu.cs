@@ -5,8 +5,11 @@ using System.Collections;
 public class SaveGameMenu : MonoBehaviour {
     public InputField saveNameField;
 
+    [Inject]
+    public SaverLoader SaverLoader { get; set; }
+
     void Start() {
-        SaverLoader saverLoader = GameController.Instance.SaverLoader;
+        SaverLoader saverLoader = SaverLoader;
         string[] saves = saverLoader.GetSaveGames();
         SelectList list = GetComponentInChildren<SelectList>();
         if (list) {
@@ -25,7 +28,7 @@ public class SaveGameMenu : MonoBehaviour {
         var gameName = saveNameField.text;
         if (gameName != null) {
             Debug.Log("Saving game: " + gameName);
-            GameController.Instance.SaverLoader.SaveGame(gameName);
+            SaverLoader.SaveGame(gameName);
             GetComponent<MenuController>().PopMenu();
         } else {
             Debug.Log("NULL");
