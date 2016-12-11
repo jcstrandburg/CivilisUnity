@@ -146,13 +146,13 @@ public class ActorController : NeolithicObject {
     /// <summary>
     /// Finds and returned the first found child object that has the tag "Resource" and has a Resource component
     /// </summary>
-    /// <param name="resourceType"></param>
+    /// <param name="type"></param>
     /// <returns>A Resource object</returns>
-    public Resource GetCarriedResource(string resourceType=null) {
+    public Resource GetCarriedResource(Resource.Type? type=null) {
         foreach (Transform t in transform) {
             if (t.gameObject != null && t.tag == "Resource") {
                 Resource r = t.GetComponent<Resource>();
-                if (resourceType == null || r.typeTag == resourceType) {
+                if (type == null || r.type == type) {
                     return r;
                 }
             }

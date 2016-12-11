@@ -5,6 +5,6 @@ using System;
 [Serializable]
 public class StorageReservation : Reservation {
     public Warehouse warehouse;
-    public string resourceTag;
+    public Resource.Type resourceType;
     public double amount;
 }

@@ -10,6 +10,13 @@ using UnityEditor;
 
 [CustomEditor(typeof(GameController))]
 public class GameControllerEditor : Editor {
+
+    public void OnEnable() {
+        Debug.Log("Wat");
+        var gc = (GameController) target;
+        gc.InitializeAllObjects();
+    }
+
     public override void OnInspectorGUI() {
         DrawDefaultInspector();
         GameController gc = (GameController)target;
@@ -259,10 +266,10 @@ public class GameController : MonoBehaviour {
     public bool WithdrawFromAnyWarehouse(ResourceProfile rp) {
         var warehouses = FindObjectsOfType<Warehouse>();
         foreach (var w in warehouses) {
-            double avail = w.GetAvailableContents(rp.resourceTag);
+            double avail = w.GetAvailableContents(rp.type);
             double amount = (rp.amount < avail ? rp.amount : avail);
             if (amount > 0) {
-                w.WithdrawContents(rp.resourceTag, amount);
+                w.WithdrawContents(rp.type, amount);
                 rp.amount -= amount;
             }
 
@@ -277,8 +284,8 @@ public class GameController : MonoBehaviour {
     /// Gets all available contents in all warehouses in game total
     /// </summary>
     /// <returns></returns>
-    public Dictionary<string, double> GetAllAvailableResources() {
-        var d = new Dictionary<string, double>();
+    public Dictionary<Resource.Type, double> GetAllAvailableResources() {
+        var d = new Dictionary<Resource.Type, double>();
         var warehouses = FindObjectsOfType<Warehouse>();
         foreach (var w in warehouses) {
             var x = w.GetAllAvailableContents();
@@ -457,7 +464,7 @@ public class GameController : MonoBehaviour {
 					    newOrder = new HarvestFromReservoirOrder(a, target);
 					    break;
                     case "ChuckWood":
-                        newOrder = new TransmuteOrder(a, target, "wood", "gold");
+                        newOrder = new TransmuteOrder(a, target, Resource.Type.Wood, Resource.Type.Gold);
                         break;
                     case "Meditate":
                         newOrder = new MeditateOrder(a, target);
@@ -540,16 +547,16 @@ public class GameController : MonoBehaviour {
     /// Gets a resource reservation from any available warehouse and attaches it to the given actor
     /// </summary>
     /// <param name="a"></param>
-    /// <param name="tag"></param>
+    /// <param name="type"></param>
     /// <param name="amount"></param>
     /// <returns>The reservation created, or null on failure</returns>
-    public ResourceReservation ReserveWarehouseResources(ActorController a, string tag, double amount) {
+    public ResourceReservation ReserveWarehouseResources(ActorController a, Resource.Type type, double amount) {
         var la = a.GetComponent<LogisticsActor>();
         var network = la.logisticsManager.FindNearestNetwork(a.transform.position);
 
         Warehouse[] warehouses = network.FindComponents<Warehouse>();
         foreach (Warehouse w in warehouses) {
-            if (w.ReserveContents(a.gameObject, tag, amount)) {
+            if (w.ReserveContents(a.gameObject, type, amount)) {
                 return a.resourceReservation;
             }
         }
@@ -560,17 +567,17 @@ public class GameController : MonoBehaviour {
     /// Gets a storage reservation and attaches it to the given actor.
     /// </summary>
     /// <param name="a"></param>
-    /// <param name="tag"></param>
+    /// <param name="type"></param>
     /// <param name="amount"></param>
     /// <returns>The reservaton created, or null on failure</returns>
-    public StorageReservation ReserveStorage(ActorController a, string tag, double amount) {
+    public StorageReservation ReserveStorage(ActorController a, Resource.Type type, double amount) {
         var la = a.GetComponent<LogisticsActor>();
         var manager = la.logisticsManager;
         var network = manager.FindNearestNetwork(a.transform.position);
         if (network != null) {
             Warehouse[] warehouses = network.FindComponents<Warehouse>();
             foreach (Warehouse w in warehouses) {
-                if (w.ReserveStorage(a.gameObject, tag, amount)) {
+                if (w.ReserveStorage(a.gameObject, type, amount)) {
                     return a.GetComponent<StorageReservation>();
                 }
             }
@@ -583,19 +590,19 @@ public class GameController : MonoBehaviour {
     /// <summary>
     /// Creates a new resource pile
     /// </summary>
-    /// <param name="typeTag"></param>
+    /// <param name="type"></param>
     /// <param name="amount"></param>
     /// <returns>A reference to the new pile's GameObject</returns>
-    public Resource CreateResourcePile(string typeTag, double amount) {
+    public Resource CreateResourcePile(Resource.Type type, double amount) {
         foreach (Resource g in resourcePrefabs) {
-            if (g.typeTag == typeTag) {
+            if (g.type == type) {
                 GameObject pile = Factory.Instantiate(g.gameObject);
                 Resource r = pile.GetComponent<Resource>();
                 r.amount = amount;
                 return r;
             }
         }
-        throw new ArgumentException("Unable to location prefab for resource tag " + typeTag);
+        throw new ArgumentException("Unable to location prefab for resource tag " + type);
     }
 
     /// <summary>

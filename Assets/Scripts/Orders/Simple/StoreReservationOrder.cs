@@ -14,7 +14,7 @@ public class StoreReservationOrder : BaseOrder {
     public override void DoStep() {
         if (actor.MoveTowards(res.warehouse.transform.position)) {
             res.warehouse.DepositReservation(res);
-            GameObject.Destroy(actor.GetCarriedResource(res.resourceTag).gameObject);
+            GameObject.Destroy(actor.GetCarriedResource(res.resourceType).gameObject);
             res.Released = true;
             this.completed = true;
         }

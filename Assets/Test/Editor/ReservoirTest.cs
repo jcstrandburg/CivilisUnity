@@ -11,7 +11,7 @@ public class ReservoirTest : NeolithicTest {
         var go3 = new GameObject();
 
         Reservoir reservoir = MakePlainComponent<Reservoir>();
-        reservoir.resourceTag = "berries";
+        reservoir.resourceType = Resource.Type.Vegetables;
         reservoir.amount = 0;
         reservoir.regenRate = 1;
         reservoir.max = 2;
@@ -37,28 +37,28 @@ public class ReservoirTest : NeolithicTest {
     public void StatTest() {
         var sm = MakePlainComponent<StatManager>();
         sm.SetPersistor(StatManager.DummyPersistor);
-        sm.SetStats(new StatProfile[] { StatProfile.Make("berries-harvested", false, false) });
+        sm.SetStats(new StatProfile[] { StatProfile.Make("harvested", false, false) });
 
         var reservoir = MakePlainComponent<Reservoir>();
-        reservoir.resourceTag = "berries";
+        reservoir.resourceType = Resource.Type.Vegetables;
         reservoir.amount = 10.0;
         reservoir.statManager = sm;
-        reservoir.harvestStat = "berries-harvested";
+        reservoir.harvestStat = "harvested";
 
         var reservoir2 = MakePlainComponent<Reservoir>();
-        reservoir2.resourceTag = "berries";
+        reservoir2.resourceType = Resource.Type.Vegetables;
         reservoir.amount = 10.0;
         reservoir.statManager = sm;
 
         //make sure stat is incremented when a reservoir with a harvestStat fills a reservation
         var reservation = reservoir.NewReservation(dummyObject, 2.0);
         reservoir.WithdrawReservation(reservation);
-        Assert.AreEqual(2.0, sm.Stat("berries-harvested").Value);
+        Assert.AreEqual(2.0, sm.Stat("harvested").Value);
 
         //make sure the reservoir with no harvestStat did not manipulate the stats
         var reservation2 = reservoir2.NewReservation(dummyObject, 2.0);
         reservoir2.WithdrawReservation(reservation2);
-        Assert.AreEqual(2.0, sm.Stat("berries-harvested").Value);
+        Assert.AreEqual(2.0, sm.Stat("harvested").Value);
     }
 
 }

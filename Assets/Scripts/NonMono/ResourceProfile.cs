@@ -3,8 +3,8 @@
 [Serializable]
 public class ResourceProfile : ICloneable {
 
-    public ResourceProfile(string rt, double a) {
-        resourceTag = rt;
+    public ResourceProfile(Resource.Type type, double a) {
+        this.type = type;
         amount = a;
     }
 
@@ -12,6 +12,6 @@ public class ResourceProfile : ICloneable {
         return MemberwiseClone();
     }
 
-    public string resourceTag;
+    public Resource.Type type;
     public double amount;
 }

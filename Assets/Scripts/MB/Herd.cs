@@ -26,7 +26,7 @@ public class Herd : MonoBehaviour {
 	public float migrateSpeed;
 	public Vector3 diff;
 	//public GameObject resourcePrefab;
-    public string resourceTag;
+    public Resource.Type resourceType;
     public GameObject animalPrefab;
     public int maxSize = 3;
     public float respawnDelay = 10.0f;
