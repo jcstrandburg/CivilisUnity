@@ -3,7 +3,6 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -50,7 +49,7 @@ public class GameController : MonoBehaviour {
     /// <summary>Manages creation of objects, dependency injection, etc</summary>
     public GameFactory Factory = new GameFactory();
     /// <summary>Actions that no actor can currently take</summary>
-    public List<string> ForbiddenActions;
+    public List<CommandType> ForbiddenActions;
 
     private static GameController _instance = null;
     /// <summary>"Singleton" instance getter. Only one of these objects is expected to exists in any scene.</summary>
@@ -96,7 +95,7 @@ public class GameController : MonoBehaviour {
     }
 
     // Handles Awake event
-    void Awake() {
+    public void Awake() {
         var techs = Resources.LoadAll("Techs", typeof(Technology)).Select(t => (Technology)t).ToArray();
         TechManager = new TechManager();
         TechManager.LoadArray(techs);
@@ -112,7 +111,7 @@ public class GameController : MonoBehaviour {
     }
 
     // Handles Start event
-    void Start () {
+    public void Start () {
     }
 
     public void InitializeAllObjects() {
@@ -132,25 +131,14 @@ public class GameController : MonoBehaviour {
     }
 
     // Handles FixedUpdate event
-    void FixedUpdate() {
+    public void FixedUpdate() {
         //remove destroyed objects from selection list
         selected.RemoveAll((s) => (s == null));
         additiveSelect = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
     }
 
     // Handles Update event
-    void Update() {
-        if (Input.GetKeyDown(KeyCode.F5)) {
-            string[] ab = getSelectedAbilities();
-            if (ab.Length > 0) {
-                Debug.Log(string.Join(", ", getSelectedAbilities()));
-            }
-            else {
-                Debug.Log("No abilities");
-            }
-
-        }
-
+    public void Update() {
         if (boxActive) {
             UpdateBoxSelect();
         }
@@ -335,21 +323,14 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-	private string[] getSelectedAbilities() {
-		IEnumerable<string> sharedAbilities = null;
-
-		if (selected.Count == 0) {
-			return new string[] {};
-		}
-		foreach (NeolithicObject s in selected) {
-			if (sharedAbilities == null) {
-				sharedAbilities = s.actionProfile.abilities;
-			} else {
-				sharedAbilities = s.actionProfile.abilities.Intersect(sharedAbilities);
-			}
-		}
-		return sharedAbilities.ToArray();
-	}
+	private CommandType[] getSelectedAbilities() {
+	    if (!selected.Any()) {
+	        return new CommandType[] {};
+	    }
+	    var abilities = selected.Select(s => s.actionProfile.abilities);
+	    var sharedAbilities = abilities.Skip(1).Aggregate((IEnumerable<CommandType>)abilities.First(), (current, a) => a.Intersect(current));
+	    return sharedAbilities.ToArray();
+    }
 
     /// <summary>
     /// Gets all buildable building from the Buildings resource folder
@@ -437,10 +418,10 @@ public class GameController : MonoBehaviour {
     /// </summary>
     /// <param name="clickee"></param>
 	public void DoContextMenu(NeolithicObject clickee) {
-        var forbidden = new HashSet<string>(ForbiddenActions);
+        var forbidden = new HashSet<CommandType>(ForbiddenActions);
 
-		string[] selectedActions = getSelectedAbilities();
-		string[] availableActions = selectedActions
+		var selectedActions = getSelectedAbilities();
+		var availableActions = selectedActions
             .Intersect(clickee.actionProfile.targetActions)
             .Where((a) => !forbidden.Contains(a))
             .ToArray();
@@ -451,58 +432,56 @@ public class GameController : MonoBehaviour {
     /// Constructs an order from the orderTag against the given target, 
     /// and assigns it to all selected actors
     /// </summary>
-	public void IssueOrder(string orderTag, NeolithicObject target) {
-		foreach (NeolithicObject s in selected) {
-			ActorController a = s.GetComponent<ActorController>();
-			if (a) {
-				BaseOrder newOrder = null;
-				switch (orderTag) {
-				    case "ChopWood":
-				    case "MineGold":
-				    case "MineStone":
-				    case "Forage":
-					    newOrder = new HarvestFromReservoirOrder(a, target);
-					    break;
-                    case "ChuckWood":
-                        newOrder = new TransmuteOrder(a, target, Resource.Type.Wood, Resource.Type.Gold);
-                        break;
-                    case "Meditate":
-                        newOrder = new MeditateOrder(a, target);
-                        break;
-				    case "Hunt":
-					    newOrder = new HuntOrder(a, target.GetComponentInParent<Herd>());
-					    break;
-                    case "Fish":
-                        newOrder = new FishOrder(a, target);
-                        break;
-                    case "Construct":
-                        newOrder = new ConstructOrder(a, target);
-                        break;
-                    case "TearDown":
-                        newOrder = new TearDownOrder(a, target);
-                        break;
-                    case "ForestGarden":
-                        var prefab = (GameObject)Resources.Load("Buildings/ForestGarden");
-                        if (prefab == null) {
-                            throw new InvalidOperationException("Can't find prefab");
-                        }
-                        newOrder = Factory.InjectObject(
-                           new UpgradeReservoirOrder(a, target, prefab)
-                        );
-                        break;
-                    default:
-                        throw new InvalidOperationException("Unrecognized order tag " + orderTag);
-                }
+	public void IssueOrder(CommandType orderTag, NeolithicObject target) {
+	    var actors = selected.Select(go => go.GetComponent<ActorController>()).Where(a => a != null);
+	    foreach (var actor in actors) {
+            BaseOrder newOrder = null;
+            switch (orderTag) {
+                case CommandType.ChopWood:
+                case CommandType.MineGold:
+                case CommandType.MineStone:
+                case CommandType.Forage:
+                    newOrder = new HarvestFromReservoirOrder(actor, target);
+                    break;
+                case CommandType.ChuckWood:
+                    newOrder = new TransmuteOrder(actor, target, Resource.Type.Wood, Resource.Type.Gold);
+                    break;
+                case CommandType.Meditate:
+                    newOrder = new MeditateOrder(actor, target);
+                    break;
+                case CommandType.Hunt:
+                    newOrder = new HuntOrder(actor, target.GetComponentInParent<Herd>());
+                    break;
+                case CommandType.Fish:
+                    newOrder = new FishOrder(actor, target);
+                    break;
+                case CommandType.Construct:
+                    newOrder = new ConstructOrder(actor, target);
+                    break;
+                case CommandType.TearDown:
+                    newOrder = new TearDownOrder(actor, target);
+                    break;
+                case CommandType.ForestGarden:
+                    var prefab = (GameObject)Resources.Load("Buildings/ForestGarden");
+                    if (prefab == null) {
+                        throw new InvalidOperationException("Can't find prefab");
+                    }
+                    newOrder = Factory.InjectObject(
+                       new UpgradeReservoirOrder(actor, target, prefab)
+                    );
+                    break;
+                default:
+                    throw new InvalidOperationException("Unrecognized order tag " + orderTag);
+            }
 
-				if (newOrder != null) {
-					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
-						a.EnqueueOrder(newOrder);
-					} else {
-						a.OverrideOrder(newOrder);
-					}
-				}
-			}
-		}
+	        if (newOrder == null) throw new InvalidOperationException("No order created!");
+	        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+	            actor.EnqueueOrder(newOrder);
+	        }
+	        else {
+	            actor.OverrideOrder(newOrder);
+	        }
+	    }
 	}
 
     /// <summary>

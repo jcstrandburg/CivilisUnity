@@ -15,7 +15,7 @@ public class Reservoir : MonoBehaviour {
     [Inject]
     public StatManager statManager;
     [Inject]
-    public GameController GameController { get; set; }
+    public GameFactory Factory { get; set; }
 
     // Handles Start event
     void Start() {
@@ -109,7 +109,7 @@ public class Reservoir : MonoBehaviour {
     /// <param name="amount"></param>
     /// <returns>The reservation</returns>
 	public ResourceReservation NewReservation(GameObject go, double amount) {
-        var r = GameController.Factory.AddComponent<ResourceReservation>(go);
+        var r = Factory.AddComponent<ResourceReservation>(go);
         r.type = this.resourceType;
         r.amount = amount;
         r.source = this.gameObject;

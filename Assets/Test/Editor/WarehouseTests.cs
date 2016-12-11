@@ -14,7 +14,7 @@ public class WarehouseTests : NeolithicTest {
     /// </summary>
     [Test]
     public void TestContentsMissingFromLimits1() {
-        Warehouse w = MakePlainComponent<Warehouse>();
+        Warehouse w = MakeTestComponent<Warehouse>();
 
         var resourceLimits = new ResourceProfile[] {
             new ResourceProfile(Resource.Type.Wood, 2),
@@ -58,7 +58,7 @@ public class WarehouseTests : NeolithicTest {
     /// </summary>
     [Test]
     public void TestContentsMissingFromLimits2() {
-        Warehouse w = MakePlainComponent<Warehouse>();
+        Warehouse w = MakeTestComponent<Warehouse>();
 
         var resourceLimits = new ResourceProfile[] {
             new ResourceProfile(Resource.Type.Wood, 2),
@@ -96,7 +96,7 @@ public class WarehouseTests : NeolithicTest {
 
     [Test]
     public void TestContentsAndSpaceAvailability() {
-        Warehouse w = MakePlainComponent<Warehouse>();
+        Warehouse w = MakeTestComponent<Warehouse>();
         w.SetLimits(new ResourceProfile[] {
             new ResourceProfile(Resource.Type.Stone, 10),
         });

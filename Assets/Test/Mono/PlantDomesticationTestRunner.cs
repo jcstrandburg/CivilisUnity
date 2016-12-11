@@ -19,11 +19,11 @@ public class PlantDomesticationTestRunner : MonoBehaviour {
         var order = new HarvestFromReservoirOrder(testActor, testReservoir);
         testActor.OverrideOrder(order);
 
-        Assert.IsTrue(gameController.ForbiddenActions.Contains("ForestGarden"));
+        Assert.IsTrue(gameController.ForbiddenActions.Contains(CommandType.ForestGarden));
 	}
 
     public void FixedUpdate() {
         vegetablesHarvested = (float)stats.Stat("vegetables-harvested").Value;
-        forestGardenForbidden = gameController.ForbiddenActions.Contains("ForestGarden");        
+        forestGardenForbidden = gameController.ForbiddenActions.Contains(CommandType.ForestGarden);        
     }
 }

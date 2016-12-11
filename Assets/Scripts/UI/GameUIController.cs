@@ -74,20 +74,20 @@ public class GameUIController : MonoBehaviour {
     /// </summary>
     /// <param name="options"></param>
     /// <param name="target"></param>
-	public void ShowContextMenu(string[] options, NeolithicObject target) {
+	public void ShowContextMenu(CommandType[] options, NeolithicObject target) {
 		contextMenu.SetActive(true);
 		foreach (Transform child in contextMenu.transform) {
 			Destroy(child.gameObject);
 		}
 
-		foreach (string o in options) {
-            var prefab = Resources.Load("ContextTextButton") as GameObject;
-            var temp = GameController.Factory.Instantiate(prefab);
-			Button button = temp.GetComponent<Button>();
-			string capture = o;
-			button.onClick.AddListener( () => ExecuteContextAction(capture, target));
-			temp.GetComponent<Text>().text = o;
-			temp.transform.SetParent (contextMenu.transform);
+        var prefab = Resources.Load("ContextTextButton") as GameObject;
+        foreach (CommandType option in options) {
+            var contextButton = GameController.Factory.Instantiate(prefab);
+			var button = contextButton.GetComponent<Button>();
+            var command = option;
+			button.onClick.AddListener( () => ExecuteContextAction(command, target));
+			contextButton.GetComponent<Text>().text = option.ToString() ;
+			contextButton.transform.SetParent (contextMenu.transform);
 		}
 		contextMenu.transform.position = Input.mousePosition;
 	}
@@ -118,7 +118,7 @@ public class GameUIController : MonoBehaviour {
 	/// Forwards a command to the game controller to issue the given order to the current 
 	/// selected units against the target, and then hides the context menu
 	/// </summary>
-	public void ExecuteContextAction(string action, NeolithicObject target) {
+	public void ExecuteContextAction(CommandType action, NeolithicObject target) {
         GameController.IssueOrder(action, target);
 		HideContextMenu();
 	}

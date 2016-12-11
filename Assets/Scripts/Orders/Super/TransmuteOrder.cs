@@ -18,16 +18,15 @@ public class TransmuteOrder : StatefulSuperOrder {
 
     public override void Initialize() {
         Resource r = actor.GetCarriedResource();
-        if (r != null) {
-            if (r.type == fromType) {
-                GoToState("gotoWorkspace");
-            }
-            else if (r.type == toType) {
-                GoToState("storeProduct");
-            }
-            else {
-                actor.DropCarriedResource();
-            }
+        if (r == null) return;
+        if (r.type == fromType) {
+            GoToState("gotoWorkspace");
+        }
+        else if (r.type == toType) {
+            GoToState("storeProduct");
+        }
+        else {
+            actor.DropCarriedResource();
         }
     }
 

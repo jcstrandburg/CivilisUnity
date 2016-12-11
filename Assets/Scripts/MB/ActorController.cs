@@ -150,11 +150,10 @@ public class ActorController : NeolithicObject {
     /// <returns>A Resource object</returns>
     public Resource GetCarriedResource(Resource.Type? type=null) {
         foreach (Transform t in transform) {
-            if (t.gameObject != null && t.tag == "Resource") {
-                Resource r = t.GetComponent<Resource>();
-                if (type == null || r.type == type) {
-                    return r;
-                }
+            if (t.gameObject == null || t.tag != "Resource") continue;
+            Resource r = t.GetComponent<Resource>();
+            if (type == null || r.type == type) {
+                return r;
             }
         }
         return null;
