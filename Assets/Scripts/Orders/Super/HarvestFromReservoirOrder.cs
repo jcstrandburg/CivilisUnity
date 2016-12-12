@@ -28,7 +28,7 @@ public class HarvestFromReservoirOrder : StatefulSuperOrder {
         CreateState("seekTarget",
             () => new SimpleMoveOrder(
                     actor, 
-                    GameController.Instance.SnapToGround(targetObj.transform.position)),
+                    actor.GameController.SnapToGround(targetObj.transform.position)),
             () => GoToState("reservationWait"),
             null);
         CreateState("reservationWait",
@@ -55,7 +55,6 @@ public class HarvestFromReservoirOrder : StatefulSuperOrder {
         base.Cancel();
         if (resourceReservation) {
             resourceReservation.Released = true;
-            GameObject.Destroy(resourceReservation);
         }
     }
 }

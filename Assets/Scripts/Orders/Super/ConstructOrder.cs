@@ -6,8 +6,7 @@ public class GetConstructionJobOrder : BaseOrder {
     private Vector3 center, targetPosition;
     ConstructionManager manager;
 
-    public GetConstructionJobOrder(ActorController a,
-                                    ConstructionManager manager): base(a) 
+    public GetConstructionJobOrder(ActorController a, ConstructionManager manager): base(a) 
     {
         center = a.transform.position;
         targetPosition = center;

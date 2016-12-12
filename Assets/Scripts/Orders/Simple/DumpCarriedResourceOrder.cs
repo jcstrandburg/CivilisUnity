@@ -21,7 +21,7 @@ public class DumpCarriedResourceOrder : BaseOrder {
 
     public override void DoStep() {
         try {
-            if (actor.MoveTowards(target, 1.1f)) {
+            if (actor.MoveTowards(target)) {
                 actor.DropCarriedResource();
                 this.completed = true;
             }

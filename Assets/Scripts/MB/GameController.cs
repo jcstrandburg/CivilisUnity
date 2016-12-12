@@ -18,7 +18,7 @@ public class GameControllerEditor : Editor {
 
     public override void OnInspectorGUI() {
         DrawDefaultInspector();
-        GameController gc = (GameController)target;
+        var gc = (GameController)target;
         if (GUILayout.Button("TestResources")) {
             var x = gc.GetAllAvailableResources();
             foreach (var y in x) {
@@ -466,15 +466,13 @@ public class GameController : MonoBehaviour {
                     if (prefab == null) {
                         throw new InvalidOperationException("Can't find prefab");
                     }
-                    newOrder = Factory.InjectObject(
-                       new UpgradeReservoirOrder(actor, target, prefab)
-                    );
+                    newOrder = new UpgradeReservoirOrder(actor, target, prefab);
                     break;
                 default:
                     throw new InvalidOperationException("Unrecognized order tag " + orderTag);
             }
 
-	        if (newOrder == null) throw new InvalidOperationException("No order created!");
+	        Factory.InjectObject(newOrder);
 	        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
 	            actor.EnqueueOrder(newOrder);
 	        }
