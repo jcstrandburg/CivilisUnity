@@ -3,15 +3,22 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-
+using Debug = UnityEngine.Debug;
 #if UNITY_EDITOR
 using UnityEditor;
 
 [CustomEditor(typeof(GameController))]
 public class GameControllerEditor : Editor {
+
+    public void OnEnable() {
+        Debug.Log("Wat");
+        var gc = (GameController) target;
+        gc.InitializeAllObjects();
+    }
+
     public override void OnInspectorGUI() {
         DrawDefaultInspector();
-        GameController gc = (GameController)target;
+        var gc = (GameController)target;
         if (GUILayout.Button("TestResources")) {
             var x = gc.GetAllAvailableResources();
             foreach (var y in x) {
@@ -38,11 +45,11 @@ public class GameController : MonoBehaviour {
     /// <summary>List of resource pile prefabs</summary>
     public List<Resource> resourcePrefabs;
     /// <summary>Manages technology tree</summary>
-    public TechManager techManager;
+    public TechManager TechManager;
     /// <summary>Manages creation of objects, dependency injection, etc</summary>
-    public GameFactory factory = new GameFactory();
+    public GameFactory Factory = new GameFactory();
     /// <summary>Actions that no actor can currently take</summary>
-    public List<string> forbiddenActions;
+    public List<CommandType> ForbiddenActions;
 
     private static GameController _instance = null;
     /// <summary>"Singleton" instance getter. Only one of these objects is expected to exists in any scene.</summary>
@@ -55,106 +62,24 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    private GameUIController guiController;
-    /// <summary>Manages the GuiController object. If no other controller is provided one will be found in the scene.</summary>
-    public GameUIController GuiController {
-        get {
-            if (guiController == null) {
-                guiController = FindObjectOfType<GameUIController>();
-            }
-            return guiController;
-        }
-        set {
-            guiController = value;
-        }
-    }
-
-    private GroundController groundController;
-    /// <summary>Manages the GroundController object. If no other controller is provided one will be found in the scene.</summary>
-    public GroundController GroundController {
-        get {
-            if (groundController == null) {
-                groundController = FindObjectOfType<GroundController>();
-            }
-            return groundController;
-        }
-        set {
-            groundController = value;
-        }
-    }
-
-    private StatManager statManager;
-    /// <summary>Manages the StatManager object. If no other manager is provided one will be found in the scene.</summary>
-    public StatManager StatManager {
-        get {
-            if (statManager == null) {
-                statManager = FindObjectOfType<StatManager>();
-            }
-            return statManager;
-        }
-        set {
-            statManager = value;
-        }
-    }
-
-    private SaverLoader saverLoader;
-    /// <summary>Manages the SaverLoader object. If no other SaverLoader is provided one will be found in the scene.</summary>
-    public SaverLoader SaverLoader {
-        get {
-            if (saverLoader == null) {
-                saverLoader = FindObjectOfType<SaverLoader>();
-            }
-            return saverLoader;
-        }
-        set {
-            saverLoader = value;
-        }
-    }
-
-    private MenuManager menuManager;
-    /// <summary>Manages the MenuManager object. If no other manager is provided one will be found in the scene.</summary>
-    public MenuManager MenuManager {
-        get {
-            if (menuManager == null) {
-                menuManager = FindObjectOfType<MenuManager>();
-            }
-            return menuManager;
-        }
-        set {
-            menuManager = value;
-        }
-    }
-
-    private LogisticsManager logisticsManager;
-    /// <summary>Manages the LogisticsManager object. If no other manager is provided one will be found in the scene.</summary>
-    public LogisticsManager LogisticsManager {
-        get {
-            if (logisticsManager == null) {
-                logisticsManager = FindObjectOfType<LogisticsManager>();
-            }
-            return logisticsManager;
-        }
-        set {
-            logisticsManager = value;
-        }
-    }
-
-    private DayCycleController dayCycleController;
-    /// <summary>Manages the DayCycleController object. If no other controller is provided one will be found in the scene.</summary>
-    public DayCycleController DayCycleController {
-        get {
-            if (dayCycleController == null) {
-                dayCycleController = FindObjectOfType<DayCycleController>();
-            }
-            return dayCycleController;
-        }
-        set {
-            dayCycleController = value;
-        }
-    }
+    [Inject]
+    public GameUIController GuiController { get; set; }
+    [Inject]
+    public GroundController GroundController { get; set; }
+    [Inject]
+    public StatManager StatManager { get; set; }
+    [Inject]
+    public SaverLoader SaverLoader { get; set; }
+    [Inject]
+    public MenuManager MenuManager { get; set; }
+    [Inject]
+    public LogisticsManager LogisticsManager { get; set; }
+    [Inject]
+    public DayCycleController DayCycleController { get; set; }
 
     public float Spirit { get; set; }
 
+    [Inject]
     public BuildingBlueprint buildingPlacer;
     /// <summary>Manages the BuildingPlueprint object. If no other placer is provided one will be found in the scene.</summary>
     private BuildingBlueprint BuildingPlacer {
@@ -170,10 +95,10 @@ public class GameController : MonoBehaviour {
     }
 
     // Handles Awake event
-    void Awake() {
+    public void Awake() {
         var techs = Resources.LoadAll("Techs", typeof(Technology)).Select(t => (Technology)t).ToArray();
-        techManager = new TechManager();
-        techManager.LoadArray(techs);
+        TechManager = new TechManager();
+        TechManager.LoadArray(techs);
 
         resourcePrefabs = new List<Resource>();
         var allFiles = Resources.LoadAll<UnityEngine.Object>("");
@@ -186,36 +111,34 @@ public class GameController : MonoBehaviour {
     }
 
     // Handles Start event
-    void Start () {
+    public void Start () {
     }
 
     public void InitializeAllObjects() {
+        var gameObjects = FindObjectsOfType<GameObject>().Where(x => x.activeInHierarchy && x.transform.parent == null).ToArray();
+        foreach (var go in gameObjects) {
+            go.BroadcastMessage("BeforeInject", SendMessageOptions.DontRequireReceiver);
+        }
+
         var monoBehaviors = FindObjectsOfType<MonoBehaviour>();
         foreach (var b in monoBehaviors) {
-            factory.InjectObject(b);
+            Factory.InjectObject(b);
+        }
+
+        foreach (var go in gameObjects) {
+            go.BroadcastMessage("AfterInject", SendMessageOptions.DontRequireReceiver);
         }
     }
 
     // Handles FixedUpdate event
-    void FixedUpdate() {
+    public void FixedUpdate() {
         //remove destroyed objects from selection list
         selected.RemoveAll((s) => (s == null));
         additiveSelect = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
     }
 
     // Handles Update event
-    void Update() {
-        if (Input.GetKeyDown(KeyCode.F5)) {
-            string[] ab = getSelectedAbilities();
-            if (ab.Length > 0) {
-                Debug.Log(string.Join(", ", getSelectedAbilities()));
-            }
-            else {
-                Debug.Log("No abilities");
-            }
-
-        }
-
+    public void Update() {
         if (boxActive) {
             UpdateBoxSelect();
         }
@@ -258,7 +181,7 @@ public class GameController : MonoBehaviour {
     /// </summary>
     /// <returns></returns>
     public Technology[] GetAvailableTechs() {
-        return techManager.GetEligibleTechs();
+        return TechManager.GetEligibleTechs();
     }
 
     /// <summary>
@@ -269,7 +192,7 @@ public class GameController : MonoBehaviour {
         Debug.Log("Researching tech: " + t.techName);
 		if (t.cost <= this.Spirit) {
 			this.Spirit -= t.cost;
-			techManager.Research(t);
+			TechManager.Research(t);
 		}
         GuiController.subMenu.ClearMenu();
     }
@@ -331,10 +254,10 @@ public class GameController : MonoBehaviour {
     public bool WithdrawFromAnyWarehouse(ResourceProfile rp) {
         var warehouses = FindObjectsOfType<Warehouse>();
         foreach (var w in warehouses) {
-            double avail = w.GetAvailableContents(rp.resourceTag);
+            double avail = w.GetAvailableContents(rp.type);
             double amount = (rp.amount < avail ? rp.amount : avail);
             if (amount > 0) {
-                w.WithdrawContents(rp.resourceTag, amount);
+                w.WithdrawContents(rp.type, amount);
                 rp.amount -= amount;
             }
 
@@ -349,8 +272,8 @@ public class GameController : MonoBehaviour {
     /// Gets all available contents in all warehouses in game total
     /// </summary>
     /// <returns></returns>
-    public Dictionary<string, double> GetAllAvailableResources() {
-        var d = new Dictionary<string, double>();
+    public Dictionary<Resource.Type, double> GetAllAvailableResources() {
+        var d = new Dictionary<Resource.Type, double>();
         var warehouses = FindObjectsOfType<Warehouse>();
         foreach (var w in warehouses) {
             var x = w.GetAllAvailableContents();
@@ -400,21 +323,14 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-	private string[] getSelectedAbilities() {
-		IEnumerable<string> sharedAbilities = null;
-
-		if (selected.Count == 0) {
-			return new string[] {};
-		}
-		foreach (NeolithicObject s in selected) {
-			if (sharedAbilities == null) {
-				sharedAbilities = s.actionProfile.abilities;
-			} else {
-				sharedAbilities = s.actionProfile.abilities.Intersect(sharedAbilities);
-			}
-		}
-		return sharedAbilities.ToArray();
-	}
+	private CommandType[] getSelectedAbilities() {
+	    if (!selected.Any()) {
+	        return new CommandType[] {};
+	    }
+	    var abilities = selected.Select(s => s.actionProfile.abilities);
+	    var sharedAbilities = abilities.Skip(1).Aggregate((IEnumerable<CommandType>)abilities.First(), (current, a) => a.Intersect(current));
+	    return sharedAbilities.ToArray();
+    }
 
     /// <summary>
     /// Gets all buildable building from the Buildings resource folder
@@ -424,7 +340,7 @@ public class GameController : MonoBehaviour {
         var constructionManagers = from o in Resources.LoadAll("Buildings", typeof(ConstructionManager))
                                    select (ConstructionManager)o;
         return (from cmgr in constructionManagers
-                where cmgr.RequirementsMet(StatManager, techManager)
+                where cmgr.RequirementsMet(StatManager, TechManager)
                 select cmgr.gameObject)
                 .ToArray();
     }
@@ -502,10 +418,10 @@ public class GameController : MonoBehaviour {
     /// </summary>
     /// <param name="clickee"></param>
 	public void DoContextMenu(NeolithicObject clickee) {
-        var forbidden = new HashSet<string>(forbiddenActions);
+        var forbidden = new HashSet<CommandType>(ForbiddenActions);
 
-		string[] selectedActions = getSelectedAbilities();
-		string[] availableActions = selectedActions
+		var selectedActions = getSelectedAbilities();
+		var availableActions = selectedActions
             .Intersect(clickee.actionProfile.targetActions)
             .Where((a) => !forbidden.Contains(a))
             .ToArray();
@@ -516,58 +432,54 @@ public class GameController : MonoBehaviour {
     /// Constructs an order from the orderTag against the given target, 
     /// and assigns it to all selected actors
     /// </summary>
-	public void IssueOrder(string orderTag, NeolithicObject target) {
-		foreach (NeolithicObject s in selected) {
-			ActorController a = s.GetComponent<ActorController>();
-			if (a) {
-				BaseOrder newOrder = null;
-				switch (orderTag) {
-				    case "ChopWood":
-				    case "MineGold":
-				    case "MineStone":
-				    case "Forage":
-					    newOrder = new HarvestFromReservoirOrder(a, target);
-					    break;
-                    case "ChuckWood":
-                        newOrder = new TransmuteOrder(a, target, "wood", "gold");
-                        break;
-                    case "Meditate":
-                        newOrder = new MeditateOrder(a, target);
-                        break;
-				    case "Hunt":
-					    newOrder = new HuntOrder(a, target.GetComponentInParent<Herd>());
-					    break;
-                    case "Fish":
-                        newOrder = new FishOrder(a, target);
-                        break;
-                    case "Construct":
-                        newOrder = new ConstructOrder(a, target);
-                        break;
-                    case "TearDown":
-                        newOrder = new TearDownOrder(a, target);
-                        break;
-                    case "ForestGarden":
-                        var prefab = (GameObject)Resources.Load("Buildings/ForestGarden");
-                        if (prefab == null) {
-                            throw new InvalidOperationException("Can't find prefab");
-                        }
-                        newOrder = factory.InjectObject(
-                           new UpgradeReservoirOrder(a, target, prefab)
-                        );
-                        break;
-                    default:
-                        throw new InvalidOperationException("Unrecognized order tag " + orderTag);
-                }
+	public void IssueOrder(CommandType orderTag, NeolithicObject target) {
+	    var actors = selected.Select(go => go.GetComponent<ActorController>()).Where(a => a != null);
+	    foreach (var actor in actors) {
+            BaseOrder newOrder = null;
+            switch (orderTag) {
+                case CommandType.ChopWood:
+                case CommandType.MineGold:
+                case CommandType.MineStone:
+                case CommandType.Forage:
+                    newOrder = new HarvestFromReservoirOrder(actor, target);
+                    break;
+                case CommandType.ChuckWood:
+                    newOrder = new TransmuteOrder(actor, target, Resource.Type.Wood, Resource.Type.Gold);
+                    break;
+                case CommandType.Meditate:
+                    newOrder = new MeditateOrder(actor, target);
+                    break;
+                case CommandType.Hunt:
+                    newOrder = new HuntOrder(actor, target.GetComponentInParent<Herd>());
+                    break;
+                case CommandType.Fish:
+                    newOrder = new FishOrder(actor, target);
+                    break;
+                case CommandType.Construct:
+                    newOrder = new ConstructOrder(actor, target);
+                    break;
+                case CommandType.TearDown:
+                    newOrder = new TearDownOrder(actor, target);
+                    break;
+                case CommandType.ForestGarden:
+                    var prefab = (GameObject)Resources.Load("Buildings/ForestGarden");
+                    if (prefab == null) {
+                        throw new InvalidOperationException("Can't find prefab");
+                    }
+                    newOrder = new UpgradeReservoirOrder(actor, target, prefab);
+                    break;
+                default:
+                    throw new InvalidOperationException("Unrecognized order tag " + orderTag);
+            }
 
-				if (newOrder != null) {
-					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
-						a.EnqueueOrder(newOrder);
-					} else {
-						a.OverrideOrder(newOrder);
-					}
-				}
-			}
-		}
+	        Factory.InjectObject(newOrder);
+	        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+	            actor.EnqueueOrder(newOrder);
+	        }
+	        else {
+	            actor.OverrideOrder(newOrder);
+	        }
+	    }
 	}
 
     /// <summary>
@@ -612,16 +524,16 @@ public class GameController : MonoBehaviour {
     /// Gets a resource reservation from any available warehouse and attaches it to the given actor
     /// </summary>
     /// <param name="a"></param>
-    /// <param name="tag"></param>
+    /// <param name="type"></param>
     /// <param name="amount"></param>
     /// <returns>The reservation created, or null on failure</returns>
-    public ResourceReservation ReserveWarehouseResources(ActorController a, string tag, double amount) {
+    public ResourceReservation ReserveWarehouseResources(ActorController a, Resource.Type type, double amount) {
         var la = a.GetComponent<LogisticsActor>();
         var network = la.logisticsManager.FindNearestNetwork(a.transform.position);
 
         Warehouse[] warehouses = network.FindComponents<Warehouse>();
         foreach (Warehouse w in warehouses) {
-            if (w.ReserveContents(a.gameObject, tag, amount)) {
+            if (w.ReserveContents(a.gameObject, type, amount)) {
                 return a.resourceReservation;
             }
         }
@@ -632,17 +544,17 @@ public class GameController : MonoBehaviour {
     /// Gets a storage reservation and attaches it to the given actor.
     /// </summary>
     /// <param name="a"></param>
-    /// <param name="tag"></param>
+    /// <param name="type"></param>
     /// <param name="amount"></param>
     /// <returns>The reservaton created, or null on failure</returns>
-    public StorageReservation ReserveStorage(ActorController a, string tag, double amount) {
+    public StorageReservation ReserveStorage(ActorController a, Resource.Type type, double amount) {
         var la = a.GetComponent<LogisticsActor>();
         var manager = la.logisticsManager;
         var network = manager.FindNearestNetwork(a.transform.position);
         if (network != null) {
             Warehouse[] warehouses = network.FindComponents<Warehouse>();
             foreach (Warehouse w in warehouses) {
-                if (w.ReserveStorage(a.gameObject, tag, amount)) {
+                if (w.ReserveStorage(a.gameObject, type, amount)) {
                     return a.GetComponent<StorageReservation>();
                 }
             }
@@ -655,19 +567,19 @@ public class GameController : MonoBehaviour {
     /// <summary>
     /// Creates a new resource pile
     /// </summary>
-    /// <param name="typeTag"></param>
+    /// <param name="type"></param>
     /// <param name="amount"></param>
     /// <returns>A reference to the new pile's GameObject</returns>
-    public Resource CreateResourcePile(string typeTag, double amount) {
+    public Resource CreateResourcePile(Resource.Type type, double amount) {
         foreach (Resource g in resourcePrefabs) {
-            if (g.typeTag == typeTag) {
-                GameObject pile = factory.Instantiate(g.gameObject);
+            if (g.type == type) {
+                GameObject pile = Factory.Instantiate(g.gameObject);
                 Resource r = pile.GetComponent<Resource>();
                 r.amount = amount;
                 return r;
             }
         }
-        throw new ArgumentException("Unable to location prefab for resource tag " + typeTag);
+        throw new ArgumentException("Unable to location prefab for resource tag " + type);
     }
 
     /// <summary>
@@ -691,7 +603,7 @@ public class GameController : MonoBehaviour {
     /// <param name="message"></param>
     public void MakeToast(Vector3 pos, string message) {
         var prefab = Resources.Load("Toast") as GameObject;
-        var toast = factory.Instantiate(prefab);
+        var toast = Factory.Instantiate(prefab);
         toast.GetComponent<Toast>().Init(pos, message);
     }
 }

@@ -2,11 +2,14 @@
 using System.Collections;
 
 public class PlayGameSceneController : MonoBehaviour {
-    public void Awake() {
-        GameController.Instance.UnpauseGame();
+    [Inject]
+    public GameController GameController { get; set; }
+
+    public void Start() {
+        GameController.UnpauseGame();
     }
 
     public void UnpauseGame() {
-        GameController.Instance.UnpauseGame();
+        GameController.UnpauseGame();
     }
 }

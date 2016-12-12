@@ -13,13 +13,13 @@ public class ReservoirHarvestStatTest : MonoBehaviour {
     [Inject]
     public GameController gameController;
 
-	void Start () {
+	public void Start () {
         GameController.Instance.InitializeAllObjects();
         var order = new HarvestFromReservoirOrder(testActor, testReservoir);
         testActor.OverrideOrder(order);
     }
 
-    void FixedUpdate() {
+    public void FixedUpdate() {
         vegetablesHarvested = (float)stats.Stat("vegetables-harvested").Value;
     }
 }

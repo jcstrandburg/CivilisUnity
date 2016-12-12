@@ -2,32 +2,28 @@
 using System.Collections;
 
 public class Resource : MonoBehaviour {
+    public enum Type {
+        Meat,
+        Wood,
+        Gold,
+        Fish,
+        Vegetables,
+        Stone,
+    }
+
     public const float lifeTime = 60.0f;
 	public float timer;
-    public string typeTag;
+    public Type type;
     public double amount = 0;
     public bool preserved;
 
-    //[DontSaveField]
-    //private NeolithicObject neolithicObject;
-
-    private GameController _gameController;
     [Inject]
-    public GameController gameController {
-        get {
-            if (_gameController == null) {
-                _gameController = GameController.Instance;
-            }
-            return _gameController;
-        }
-        set { _gameController = value; }
+    public GameController GameController { get; set; }
+
+    public void Awake() {
     }
 
-    void Awake() {
-        //neolithicObject = GetComponent<NeolithicObject>();
-    }
-
-	void Start() {
+    public void Start() {
         if (timer == 0.0) {
             timer = lifeTime;
         }
@@ -35,7 +31,7 @@ public class Resource : MonoBehaviour {
         //preserved = true;
 	}
 
-	void FixedUpdate() {
+    public void FixedUpdate() {
         if (!preserved) {
             timer -= Time.fixedDeltaTime;
             if (timer <= 0) {
@@ -43,10 +39,6 @@ public class Resource : MonoBehaviour {
                 Destroy(gameObject);
             }
         }
-
-        //if (neolithicObject) {
-        //    neolithicObject.statusString = string.Format("{0} {1} {2:0.0}", amount, typeTag, timer);
-        //}
 	}
 
     public void Pickup() {
@@ -66,17 +58,16 @@ public class Resource : MonoBehaviour {
         neoObject.snapToGround = true;
         neoObject.selectable = true;
         neoObject.SnapToGround();
-        //GetComponent<NeolithicObject>().selectable = true;
 
         gameObject.AddComponent<LogisticsNode>();
         Warehouse w = gameObject.AddComponent<Warehouse>();
         ResourceProfile[] rp = new ResourceProfile[] {
-            new ResourceProfile(typeTag, amount)
+            new ResourceProfile(type, amount)
         };
 
         w.SetLimits(rp);
         w.SetContents(rp);
-        gameController.factory.InjectGameobject(gameObject);
+        GameController.Factory.InjectGameobject(gameObject);
     }
 
     public void OnResourceWithdrawn() {

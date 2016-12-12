@@ -2,15 +2,19 @@
 using System.Collections;
 
 public class MenuController: MonoBehaviour {
+
+    [Inject]
+    public MenuManager MenuManager { get; set; }
+
 	public void PushMenuPrefab(GameObject prefab) {
-        MenuManager.instance.PushMenuPrefab(prefab);
+        MenuManager.Instance.PushMenuPrefab(prefab);
     }
 
     public void PushMenuName(string name) {
-        MenuManager.instance.PushMenuName(name);
+        MenuManager.Instance.PushMenuName(name);
     }
 
     public void PopMenu() {
-        MenuManager.instance.PopMenu();
+        MenuManager.Instance.PopMenu();
     }
 }

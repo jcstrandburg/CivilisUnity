@@ -10,19 +10,31 @@ public class MenuManager : MonoBehaviour {
 
     private Stack<GameObject> menuStack = new Stack<GameObject>();
 
-    private static MenuManager _instance = null;
-
-    public static MenuManager instance {
+    private static MenuManager instance = null;
+    public static MenuManager Instance {
         get {
-            if (_instance == null) {
-                _instance = FindObjectOfType<MenuManager>();
+            if (instance == null) {
+                instance = FindObjectOfType<MenuManager>();
             }
-            return _instance;
+            return instance;
+        }
+    }
+
+    [Inject]
+    public GameController GameController { get; set; }
+
+    private Canvas _canvas;
+    private Canvas canvas {
+        get {
+            if (_canvas == null) {
+                _canvas = FindObjectOfType<Canvas>();
+            }
+            return _canvas;
         }
     }
 
     public void Start() {
-        if (startMenu != null && startMenu.Length > 0) {
+        if (!String.IsNullOrEmpty(startMenu)) {
             PushMenuName(startMenu);
         }
     }
@@ -32,11 +44,11 @@ public class MenuManager : MonoBehaviour {
             GameObject currentMenu = menuStack.Peek();
             currentMenu.SetActive(false);
         }
-        GameObject newMenu = Instantiate(prefab);
+        var newMenu = GameController.Factory.Instantiate(prefab);
         Canvas c = FindObjectOfType<Canvas>();
         newMenu.SetActive(true);
         newMenu.transform.SetParent(c.transform);
-        newMenu.transform.position = new Vector3(Screen.width / 2, Screen.height / 2);
+        newMenu.transform.position = new Vector3((float)Screen.width / 2, (float)Screen.height / 2);
         menuStack.Push(newMenu);
     }
 

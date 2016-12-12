@@ -74,10 +74,11 @@ public class LogisticsNetwork : MonoBehaviour {
     }
 
     public T[] FindComponents<T>() {
+        //I don't recall why I did this....
         if (strategy==1) {
             return GetComponentsInChildren<T>();
         } else if (strategy==2) {
-            List<T> components = new List<T>();
+            var components = new List<T>();
 
             components.AddRange(GetComponents<T>());
             foreach (var n in nodes) {
@@ -104,26 +105,25 @@ public class LogisticsNetwork : MonoBehaviour {
     void KeepFoodBufferFilled() {
         if (foodbuffer < 3.0) {
             var warehouses = FindComponents<Warehouse>();
-            var tags = new List<string> { "meat", "vegetables", "fish" };
-            var tagsToRemove = new List<string>();
+            var types = new List<Resource.Type> { Resource.Type.Meat, Resource.Type.Vegetables, Resource.Type.Fish};
+            var typesToRemove = new List<Resource.Type>();
             var resources = new List<ResourceProfile>();
 
             foreach (var w in warehouses) {
-                foreach (var t in tags) {
-                    if (w.GetAvailableContents(t) >= 1) {
-                        tagsToRemove.Add(t);
-                        w.WithdrawContents(t, 1);
-                        resources.Add(new ResourceProfile(t, 1));
+                foreach (var t in types) {
+                    if (!(w.GetAvailableContents(t) >= 1)) continue;
+                    typesToRemove.Add(t);
+                    w.WithdrawContents(t, 1);
+                    resources.Add(new ResourceProfile(t, 1));
 
-                        gameController.MakeToast(w.transform.position, "Food Consumed");
-                    }
+                    gameController.MakeToast(w.transform.position, "Food Consumed");
                 }
-                foreach (var t in tagsToRemove) {
-                    tags.Remove(t);
+                foreach (var t in typesToRemove) {
+                    types.Remove(t);
                 }
-                tagsToRemove.Clear();
+                typesToRemove.Clear();
 
-                if (tags.Count == 0) {
+                if (types.Count == 0) {
                     break;
                 }
             }

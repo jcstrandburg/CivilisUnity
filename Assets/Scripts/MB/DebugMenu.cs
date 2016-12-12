@@ -3,18 +3,8 @@ using System.Collections;
 
 public class DebugMenu : MonoBehaviour {
 
-    public bool test = false;
-
-    private GameController _gameController;
-    public GameController gameController {
-        get {
-            if (_gameController == null) {
-                _gameController = GameController.Instance;
-            }
-            return _gameController;
-        }
-        set { _gameController = value; }
-    }
+    [Inject]
+    public GameController GameController { get; set; }
 
     // Use this for initialization
     void Start () {	
@@ -25,16 +15,16 @@ public class DebugMenu : MonoBehaviour {
 	}
 
     public void QuickSave() {
-        gameController.QuickSave();
+        GameController.QuickSave();
     }
 
     public void QuickLoad() {
-        gameController.QuickLoad();
+        GameController.QuickLoad();
     }
 
     public void AddWorker() {
         GameObject prefab = Resources.Load("Units/Worker") as GameObject;
-        GameObject newWorker = gameController.factory.Instantiate(prefab);
+        GameObject newWorker = GameController.Factory.Instantiate(prefab);
         newWorker.transform.position = Camera.main.transform.position;
     }
 
@@ -47,11 +37,11 @@ public class DebugMenu : MonoBehaviour {
     }
 
     public void PauseGame() {
-        gameController.PauseGame();
+        GameController.PauseGame();
     }
 
     public void ShowSaveGames() {
-        string[] games = gameController.GetComponent<SaverLoader>().GetSaveGames();
+        string[] games = GameController.GetComponent<SaverLoader>().GetSaveGames();
         Debug.Log("Found " + games.Length + " save games");
         foreach (string s in games) {
             Debug.Log(s);

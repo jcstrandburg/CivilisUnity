@@ -10,98 +10,117 @@ using System;
 /// </summary>
 public class GameFactory {
 
-    private GameController _gameController = null;
     [Injectable]
-    public GameController gameController {
+    public GameFactory Factory {
+        get { return this; }
+    }
+
+    private GameController gameController = null;
+    [Injectable]
+    public GameController GameController {
         get {
-            if (_gameController == null) {
-                _gameController = GameObject.FindObjectOfType<GameController>();
+            if (gameController == null) {
+                gameController = GameObject.FindObjectOfType<GameController>();
             }
-            return _gameController;
+            return gameController;
         }
     }
 
-    private GameUIController _guiController;
+    private GameUIController guiController;
     [Injectable]
-    public GameUIController guiController {
+    public GameUIController GuiController {
         get {
-            if (_guiController == null) {
-                _guiController = GameObject.FindObjectOfType<GameUIController>();
+            if (guiController == null) {
+                guiController = GameObject.FindObjectOfType<GameUIController>();
             }
-            return _guiController;
+            return guiController;
         }
         set {
-            _guiController = value;
+            guiController = value;
         }
     }
 
-    private GroundController _groundController;
+    private GroundController groundController;
     [Injectable]
-    public GroundController groundController {
+    public GroundController GroundController {
         get {
-            if (_groundController == null) {
-                _groundController = GameObject.FindObjectOfType<GroundController>();
+            if (groundController == null) {
+                groundController = GameObject.FindObjectOfType<GroundController>();
             }
-            return _groundController;
+            return groundController;
         }
         set {
-            _groundController = value;
+            groundController = value;
         }
     }
 
-    private StatManager _statManager;
+    private StatManager statManager;
     [Injectable]
-    public StatManager statManager {
+    public StatManager StatManager {
         get {
-            if (_statManager == null) {
-                _statManager = GameObject.FindObjectOfType<StatManager>();
+            if (statManager == null) {
+                statManager = GameObject.FindObjectOfType<StatManager>();
             }
-            return _statManager;
+            return statManager;
         }
         set {
-            _statManager = value;
+            statManager = value;
         }
     }
 
-    private SaverLoader _saverLoader;
+    private SaverLoader saverLoader;
     [Injectable]
-    public SaverLoader saverLoader {
+    public SaverLoader SaverLoader {
         get {
-            if (_saverLoader == null) {
-                _saverLoader = GameObject.FindObjectOfType<SaverLoader>();
+            if (saverLoader == null) {
+                saverLoader = GameObject.FindObjectOfType<SaverLoader>();
             }
-            return _saverLoader;
+            return saverLoader;
         }
         set {
-            _saverLoader = value;
+            saverLoader = value;
         }
     }
 
-    private MenuManager _menuManager;
+    private MenuManager menuManager;
     [Injectable]
-    public MenuManager menuManager {
+    public MenuManager MenuManager {
         get {
-            if (_menuManager == null) {
-                _menuManager = GameObject.FindObjectOfType<MenuManager>();
+            if (menuManager == null) {
+                menuManager = GameObject.FindObjectOfType<MenuManager>();
             }
-            return _menuManager;
+            return menuManager;
         }
         set {
-            _menuManager = value;
+            menuManager = value;
         }
     }
 
-    private LogisticsManager _logisticsManager;
+    private LogisticsManager logisticsManager;
     [Injectable]
-    public LogisticsManager logisticsManager {
+    public LogisticsManager LogisticsManager {
         get {
-            if (_logisticsManager == null) {
-                _logisticsManager = GameObject.FindObjectOfType<LogisticsManager>();
+            if (logisticsManager == null) {
+                logisticsManager = GameObject.FindObjectOfType<LogisticsManager>();
             }
-            return _logisticsManager;
+            return logisticsManager;
         }
         set {
-            _logisticsManager = value;
+            logisticsManager = value;
+        }
+    }
+
+    private DayCycleController dayCycleController;
+    [Injectable]
+    public DayCycleController DayCycleController {
+        get {
+            if (dayCycleController == null) {
+                dayCycleController = GameObject.FindObjectOfType<DayCycleController>();
+            }
+            return dayCycleController;
+        }
+        set {
+            dayCycleController = value;
         }
     }
 
@@ -110,9 +129,9 @@ public class GameFactory {
     /// <summary>Injectable properties from this class</summary>
     private Dictionary<Type, PropertyInfo> myProps;
     /// <summary>Injectable fields by object type</summary>
-    private Dictionary<Type, FieldInfo[]> fieldInfoCache = new Dictionary<Type, FieldInfo[]>();
+    private readonly Dictionary<Type, FieldInfo[]> fieldInfoCache = new Dictionary<Type, FieldInfo[]>();
     /// <summary>Injectable properties by object type</summary>
-    private Dictionary<Type, PropertyInfo[]> propInfoCache = new Dictionary<Type, PropertyInfo[]>();
+    private readonly Dictionary<Type, PropertyInfo[]> propInfoCache = new Dictionary<Type, PropertyInfo[]>();
 
     public GameFactory() {
         myFields = GetType()
@@ -146,7 +165,7 @@ public class GameFactory {
     /// <param name="t"></param>
     /// <returns></returns>
     private FieldInfo[] GetInjectableFields(Type t) {
-        var flags = BindingFlags.Public | BindingFlags.Instance;
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
 
         if (!fieldInfoCache.ContainsKey(t)) {
             fieldInfoCache[t] = t
@@ -163,7 +182,7 @@ public class GameFactory {
     /// <param name="t"></param>
     /// <returns></returns>
     private PropertyInfo[] GetInjectableProps(Type t) {
-        var flags = BindingFlags.Public | BindingFlags.Instance;
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
 
         if (!propInfoCache.ContainsKey(t)) {
             propInfoCache[t] = t
@@ -180,6 +199,9 @@ public class GameFactory {
     /// <param name="injectme"></param>
     /// <returns>The object passed in</returns>
     public T InjectObject<T>(T injectme) {
+        if (injectme == null) {
+            throw new ArgumentException("Given null object to inject");
+        }
         var compType = injectme.GetType();
 
         //get fields and properties to be injected
@@ -225,7 +247,6 @@ public class GameFactory {
     /// <param name="obj">The object to be injected</param>
     public void InjectGameobject(GameObject obj) {
         var components = obj.GetComponentsInChildren<Component>();
-
         foreach (var component in components) {
             InjectObject(component);
         }
@@ -242,18 +263,4 @@ public class GameFactory {
         InjectObject(t);
         return t;
     }
-
-    /// <summary>
-    /// Makes a component for an editor test, which involved instantiating a 
-    /// temporary GameObject to add the component to
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <returns>The instantiated component</returns>
-    //public T MakeTestComponent<T>() where T : MonoBehaviour {
-    //    var tempGo = new GameObject();
-    //    tempGo.name = String.Format("Temp_{0}_object", typeof(T).Name);
-    //    var t = tempGo.AddComponent<T>();
-    //    InjectObject(t);
-    //    return t;
-    //}
 }

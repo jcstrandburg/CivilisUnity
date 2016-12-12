@@ -15,7 +15,7 @@ public class IdleOrder : BaseOrder {
         if (diff.magnitude <= actor.moveSpeed) {
             float r = 5.0f;
             targetPosition = center + new Vector3(UnityEngine.Random.Range(-r, r), 0, UnityEngine.Random.Range(-r, r));
-            targetPosition = actor.gameController.SnapToGround(targetPosition);
+            targetPosition = actor.GameController.SnapToGround(targetPosition);
             diff = targetPosition - actor.transform.position;
         }
         actor.transform.position += diff * 0.08f * (actor.moveSpeed / diff.magnitude);

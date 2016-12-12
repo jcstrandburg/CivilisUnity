@@ -6,8 +6,7 @@ public class GetConstructionJobOrder : BaseOrder {
     private Vector3 center, targetPosition;
     ConstructionManager manager;
 
-    public GetConstructionJobOrder(ActorController a,
-                                    ConstructionManager manager): base(a) 
+    public GetConstructionJobOrder(ActorController a, ConstructionManager manager): base(a) 
     {
         center = a.transform.position;
         targetPosition = center;
@@ -25,7 +24,7 @@ public class GetConstructionJobOrder : BaseOrder {
             }
             float r = 5.0f;
             targetPosition = center + new Vector3(UnityEngine.Random.Range(-r, r), 0, UnityEngine.Random.Range(-r, r));
-            targetPosition = actor.gameController.SnapToGround(targetPosition);
+            targetPosition = actor.GameController.SnapToGround(targetPosition);
             diff = targetPosition - actor.transform.position;
         }
         actor.transform.position += diff * 0.08f * (actor.moveSpeed / diff.magnitude);
@@ -43,7 +42,7 @@ public class CompleteConstructionReservation : BaseOrder {
     public override void DoStep() {
         if (actor.MoveTowards(manager.transform.position)) {
             ConstructionReservation res = actor.GetComponent<ConstructionReservation>();
-            UnityEngine.Object.Destroy(actor.GetCarriedResource(res.resourceTag).gameObject);
+            UnityEngine.Object.Destroy(actor.GetCarriedResource(res.resourceType).gameObject);
             manager.FillReservation(res);
             completed = true;
         }
@@ -80,7 +79,7 @@ public class ConstructOrder : StatefulSuperOrder {
         CreateState("fetchResource",
             () => {
                 var res = actor.GetComponent<ConstructionReservation>();
-                return new FetchAvailableResourceOrder(actor, res.resourceTag, 1);
+                return new FetchAvailableResourceOrder(actor, res.resourceType, 1);
             },
             () => GoToState("depositResource"),
             null);

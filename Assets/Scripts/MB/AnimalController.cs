@@ -21,7 +21,7 @@ public class AnimalController : ActorController {
     public override void Start() {
         base.Start();
         SnapToGround();
-        targetLocation = gameController.SnapToGround(transform.position);
+        targetLocation = GameController.SnapToGround(transform.position);
 
         if (IsAdult) {
             babyVersion.SetActive(false);
@@ -40,7 +40,7 @@ public class AnimalController : ActorController {
                 Herd herd = GetComponentInParent<Herd>();
 
                 targetLocation = herd.GetRabbitLocation();
-                targetLocation = gameController.SnapToGround(targetLocation + wanderRange * (Quaternion.Euler(0, Random.Range(-180, 180), 0) * transform.forward));
+                targetLocation = GameController.SnapToGround(targetLocation + wanderRange * (Quaternion.Euler(0, Random.Range(-180, 180), 0) * transform.forward));
             }
 
             transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetLocation - transform.position), 0.2f);

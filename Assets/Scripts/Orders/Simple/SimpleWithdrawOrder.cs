@@ -9,9 +9,9 @@ public class SimpleWithdrawOrder : BaseOrder {
     public override void DoStep() {
         Warehouse w = actor.resourceReservation.source.GetComponent<Warehouse>();
         try {
-            string tag = actor.resourceReservation.resourceTag;
+            var resourceType = actor.resourceReservation.type;
             w.WithdrawReservation(actor.resourceReservation);            
-            Resource r = actor.gameController.CreateResourcePile(tag, 1);
+            Resource r = actor.GameController.CreateResourcePile(resourceType, 1);
             actor.PickupResource(r);
             this.completed = true;
         }

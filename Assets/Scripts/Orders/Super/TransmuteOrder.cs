@@ -5,35 +5,34 @@ using System.Collections;
 /// Testing order to transmute one resource to another
 /// </summary>
 public class TransmuteOrder : StatefulSuperOrder {
-    string fromTag;
-    string toTag;
+    Resource.Type fromType;
+    Resource.Type toType;
     NeolithicObject target;
 
-    public TransmuteOrder(ActorController a, NeolithicObject target, string fromTag, string toTag) : base(a) {
-        this.fromTag = fromTag;
-        this.toTag = toTag;
+    public TransmuteOrder(ActorController a, NeolithicObject target, Resource.Type fromType, Resource.Type toType) : base(a) {
+        this.fromType = fromType;
+        this.toType = toType;
         this.target = target;
         GoToState("getSourceMaterial");
     }
 
     public override void Initialize() {
         Resource r = actor.GetCarriedResource();
-        if (r != null) {
-            if (r.typeTag == fromTag) {
-                GoToState("gotoWorkspace");
-            }
-            else if (r.typeTag == toTag) {
-                GoToState("storeProduct");
-            }
-            else {
-                actor.DropCarriedResource();
-            }
+        if (r == null) return;
+        if (r.type == fromType) {
+            GoToState("gotoWorkspace");
+        }
+        else if (r.type == toType) {
+            GoToState("storeProduct");
+        }
+        else {
+            actor.DropCarriedResource();
         }
     }
 
     protected override void CreateStates() {
         CreateState("getSourceMaterial",
-            () => new FetchAvailableResourceOrder(actor, fromTag, 1),
+            () => new FetchAvailableResourceOrder(actor, fromType, 1),
             () => GoToState("gotoWorkspace"),
             null);
         CreateState("gotoWorkspace",
@@ -41,7 +40,7 @@ public class TransmuteOrder : StatefulSuperOrder {
             () => GoToState("doTransmute"),
             null);
         CreateState("doTransmute",
-            () => new ConvertResourceOrder(actor, fromTag, toTag),
+            () => new ConvertResourceOrder(actor, fromType, toType),
             () => GoToState("storeProduct"),
             null);
         CreateState("storeProduct",

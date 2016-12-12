@@ -6,20 +6,20 @@ using System.Collections;
 /// </summary>
 public class ConvertResourceOrder : BaseOrder {
     Resource sourceResource;
-    string toTag;
+    Resource.Type toType;
 
-    public ConvertResourceOrder(ActorController a, string fromTag, string toTag) : base(a) {
+    public ConvertResourceOrder(ActorController a, Resource.Type fromType, Resource.Type toType) : base(a) {
         Resource r = a.GetCarriedResource();
-        if (r.typeTag != fromTag) {
-            Debug.Log("Actor does not have resource " + fromTag + " to convert");
+        if (r.type != fromType) {
+            Debug.Log("Actor does not have resource " + fromType + " to convert");
             this.failed = true;
         }
         sourceResource = r;
-        this.toTag = toTag;
+        this.toType = toType;
     }
 
     public override void DoStep() {
-        Resource newResource = actor.gameController.CreateResourcePile(toTag, 1);
+        Resource newResource = actor.GameController.CreateResourcePile(toType, 1);
         newResource.amount = sourceResource.amount;
         actor.PickupResource(newResource);
         sourceResource.transform.SetParent(null);

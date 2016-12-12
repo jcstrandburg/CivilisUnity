@@ -78,27 +78,10 @@ public class ConstructionManager : MonoBehaviour {
     [SerializeField]
     private List<MonoBehaviour> cachedComponents;
 
-    private GameController gameController;
-    public GameController GameController {
-        get {
-            if (gameController == null) {
-                gameController = GameController.Instance;
-            }
-            return gameController;
-        }
-        set { gameController = value; }
-    }
-
-    private GroundController groundController;
-    public GroundController GroundController {
-        get {
-            if (groundController == null) {
-                groundController = GameController.GroundController;
-            }
-            return groundController;
-        }
-        set { groundController = value; }
-    }
+    [Inject]
+    public GameController GameController { get; set; }
+    [Inject]
+    public GroundController GroundController { get; set; }
 
     // Handles Start event
     public void Start() {
@@ -183,8 +166,9 @@ public class ConstructionManager : MonoBehaviour {
         if (instabuild) {
             var availResources = GameController.GetAllAvailableResources();
             foreach (var r in resourceRequirements) {
-                if (  !availResources.ContainsKey(r.name) 
-                    || availResources[r.name] < r.amount) 
+                var type = (Resource.Type) Enum.Parse(typeof(Resource.Type), r.name);
+                if (  !availResources.ContainsKey(type) 
+                    || availResources[type] < r.amount) 
                 {
                     return false;
                 }
@@ -222,7 +206,8 @@ public class ConstructionManager : MonoBehaviour {
     public void StartConstruction() {
         if (instabuild) {
             foreach (var r in resourceRequirements) {
-                var rp = new ResourceProfile(r.name, r.amount);
+                var resourceType = (Resource.Type)Enum.Parse(typeof(Resource.Type), r.name);
+                var rp = new ResourceProfile(resourceType, r.amount);
                 if (!GameController.WithdrawFromAnyWarehouse(rp)) {
                     throw new InvalidOperationException("Failed to build building, unable to withdraw "+r.name);
                 }
@@ -258,16 +243,16 @@ public class ConstructionManager : MonoBehaviour {
     public bool GetJobReservation(ActorController actor) {
         var avails = GameController.GetAllAvailableResources();
         foreach (var kvp in avails) {
-            string resourceTag = kvp.Key;
+            var resourceType = kvp.Key;
             double amount = kvp.Value;
-            Debug.Log("Checking if I need " + amount + " " + resourceTag);
-            double needed = GetNeededResource(resourceTag);
-            Debug.Log("I need " + needed + " " + resourceTag);
+            Debug.Log("Checking if I need " + amount + " " + resourceType);
+            double needed = GetNeededResource(resourceType);
+            Debug.Log("I need " + needed + " " + resourceType);
             if (needed > 0) {
                 Debug.Log("Making a ConstructionReservation");
                 var res = actor.gameObject.AddComponent<ConstructionReservation>();
                 reservations.Add(res);
-                res.resourceTag = resourceTag;
+                res.resourceType = resourceType;
                 res.amount = 1;
                 return true;
             }
@@ -278,17 +263,17 @@ public class ConstructionManager : MonoBehaviour {
     /// <summary>
     /// Gets the total resources still needed to complete construction
     /// </summary>
-    /// <param name="resourceTag"></param>
+    /// <param name="resourceType"></param>
     /// <returns>Resources needed to complete construction</returns>
-    public double GetNeededResource(string resourceTag) {
+    public double GetNeededResource(Resource.Type resourceType) {
         double needed = 0;
         foreach (var requirement in unfilledResourceReqs) {
-            if (requirement.name == resourceTag) {
+            if (requirement.name == resourceType.ToString()) {
                 needed += requirement.amount;
             }
         }
         foreach (var res in reservations) {
-            if (    res.resourceTag == resourceTag 
+            if (    res.resourceType == resourceType 
                 && !res.Released 
                 && !res.Cancelled)
             {
@@ -306,14 +291,20 @@ public class ConstructionManager : MonoBehaviour {
         if (!reservations.Contains(res)) {
             throw new ArgumentException("Reservation does not belong to this construction object");
         }
-        foreach (var requirement in unfilledResourceReqs) {
-            if (requirement.name == res.resourceTag) {
-                res.Released = true;
-                requirement.amount -= res.amount;
-                reservations.Remove(res);
-                break;
-            }
-        }
+
+        var requirement = unfilledResourceReqs.Single(r => r.name == res.resourceType.ToString());
+        res.Released = true;
+        requirement.amount -= res.amount;
+        reservations.Remove(res);
+
+        //foreach (var requirement in unfilledResourceReqs) {
+        //    if (requirement.name == res.resourceType.ToString()) {
+        //        res.Released = true;
+        //        requirement.amount -= res.amount;
+        //        reservations.Remove(res);
+        //        break;
+        //    }
+        //}
 
         if (ConstructionFinished()) {
             FinishContruction();

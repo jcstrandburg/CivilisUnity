@@ -14,7 +14,7 @@ public class PlantDomesticationTests : NeolithicTest {
         stats = MakeDummyStatManager();
         pdm = MakeTestComponent<PlantDomesticationManager>();
 
-        Assert.IsNotNull(pdm.stats);
+        Assert.IsNotNull(pdm.Stats);
         stats.Awake();
         pdm.Start();
     }
