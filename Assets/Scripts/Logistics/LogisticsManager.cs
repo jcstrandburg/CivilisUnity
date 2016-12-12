@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 public class LogisticsManager : MonoBehaviour {
 
@@ -54,8 +55,8 @@ public class LogisticsManager : MonoBehaviour {
     /// Reassigns all logistics nodes to the nearest network
     /// </summary>
     public void RebuildNetworks() {
-        foreach (LogisticsNode n in nodes) {
-            n.LogisticsNetwork = FindNearestNetwork(n.transform.position);
+        foreach (var node in nodes.Where(n => n != null)) {
+            node.LogisticsNetwork = FindNearestNetwork(node.transform.position);
         }
     }
 
