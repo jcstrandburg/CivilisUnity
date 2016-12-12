@@ -10,8 +10,7 @@ public class CatchFishOrder : BaseOrder {
     public override void DoStep() {
         progress += Time.fixedDeltaTime;
         if (progress >= 1.25f) {
-            string rtag = "fish";
-            Resource res = actor.GameController.CreateResourcePile(rtag, 1.0);
+            Resource res = actor.GameController.CreateResourcePile(Resource.Type.Fish, 1.0);
             actor.PickupResource(res);
             this.completed = true;
         }

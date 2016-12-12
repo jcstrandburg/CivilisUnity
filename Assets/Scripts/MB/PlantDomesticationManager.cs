@@ -37,7 +37,7 @@ public class PlantDomesticationManager : MonoBehaviour {
     public void EnableForestGardens() {
         forestGardensEnabled = true;
         if (GameController != null) {
-            GameController.ForbiddenActions.Remove("ForestGarden");
+            GameController.ForbiddenActions.Remove(CommandType.ForestGarden);
         }
     }
 }

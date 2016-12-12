@@ -5,10 +5,10 @@ using System.Collections;
 /// Order to fetch the given resource from any available warehouse
 /// </summary>
 public class FetchAvailableResourceOrder : StatefulSuperOrder {
-    string resourceType;
+    Resource.Type resourceType;
     double amount;
 
-    public FetchAvailableResourceOrder(ActorController a, string resourceType, double amount) : base(a) {
+    public FetchAvailableResourceOrder(ActorController a, Resource.Type resourceType, double amount) : base(a) {
         this.resourceType = resourceType;
         this.amount = amount;
         GoToState("getReservation");
@@ -17,7 +17,7 @@ public class FetchAvailableResourceOrder : StatefulSuperOrder {
     public override void Initialize() {
         Resource r = actor.GetCarriedResource();
         if (r != null) {
-            if (r.typeTag == resourceType) {
+            if (r.type == resourceType) {
                 this.completed = true;
             } else {
                 actor.DropCarriedResource();

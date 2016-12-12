@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 
 public class Reservoir : MonoBehaviour {
-    public string resourceTag;
+    public Resource.Type resourceType;
     public double amount;
     public float regenRate;
     public double max;
@@ -14,6 +14,8 @@ public class Reservoir : MonoBehaviour {
 
     [Inject]
     public StatManager statManager;
+    [Inject]
+    public GameFactory Factory { get; set; }
 
     // Handles Start event
     void Start() {
@@ -24,7 +26,7 @@ public class Reservoir : MonoBehaviour {
     void FixedUpdate() {
         Regen(Time.fixedDeltaTime);
         UpdateReservations();
-        nobject.statusString = string.Format("{0} reservations, {1} {2}", reservations.Count, amount.ToString("F1"), resourceTag);
+        nobject.statusString = string.Format("{0} reservations, {1} {2}", reservations.Count, amount.ToString("F1"), resourceType);
     }
 
     /// <summary>
@@ -107,8 +109,8 @@ public class Reservoir : MonoBehaviour {
     /// <param name="amount"></param>
     /// <returns>The reservation</returns>
 	public ResourceReservation NewReservation(GameObject go, double amount) {
-        ResourceReservation r = go.AddComponent<ResourceReservation>();
-        r.resourceTag = this.resourceTag;
+        var r = Factory.AddComponent<ResourceReservation>(go);
+        r.type = this.resourceType;
         r.amount = amount;
         r.source = this.gameObject;
 		reservations.Add(r);

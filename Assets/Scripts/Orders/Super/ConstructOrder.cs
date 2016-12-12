@@ -43,7 +43,7 @@ public class CompleteConstructionReservation : BaseOrder {
     public override void DoStep() {
         if (actor.MoveTowards(manager.transform.position)) {
             ConstructionReservation res = actor.GetComponent<ConstructionReservation>();
-            UnityEngine.Object.Destroy(actor.GetCarriedResource(res.resourceTag).gameObject);
+            UnityEngine.Object.Destroy(actor.GetCarriedResource(res.resourceType).gameObject);
             manager.FillReservation(res);
             completed = true;
         }
@@ -80,7 +80,7 @@ public class ConstructOrder : StatefulSuperOrder {
         CreateState("fetchResource",
             () => {
                 var res = actor.GetComponent<ConstructionReservation>();
-                return new FetchAvailableResourceOrder(actor, res.resourceTag, 1);
+                return new FetchAvailableResourceOrder(actor, res.resourceType, 1);
             },
             () => GoToState("depositResource"),
             null);

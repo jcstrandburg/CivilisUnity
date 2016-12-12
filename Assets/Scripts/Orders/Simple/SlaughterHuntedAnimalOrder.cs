@@ -2,8 +2,8 @@
 using System.Collections;
 
 public class SlaughterHuntedAnimalOrder : BaseOrder {
-    float progress = 0;
-    Herd herd;
+    private float progress = 0;
+    private Herd herd;
 
     public SlaughterHuntedAnimalOrder(ActorController a, Herd targetHerd) : base(a) {
         a.GetComponent<NeolithicObject>().statusString = "Killing snorgle";
@@ -14,8 +14,8 @@ public class SlaughterHuntedAnimalOrder : BaseOrder {
         progress += Time.fixedDeltaTime;
         if (progress > 1.25f) {
             if (herd.KillAnimal()) {
-                string rtag = herd.resourceTag;
-                Resource res = actor.GameController.CreateResourcePile(rtag, 1);
+                var resourceType = herd.resourceType;
+                var res = actor.GameController.CreateResourcePile(resourceType, 1);
                 actor.PickupResource(res);
                 this.completed = true;
             }

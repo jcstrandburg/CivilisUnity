@@ -15,7 +15,7 @@ public class DoBuildingUpgrade : BaseOrder {
         replacement.transform.position = myTargetObj.transform.position;
         replacement.transform.rotation = myTargetObj.transform.rotation;
         Object.Destroy(myTargetObj.gameObject);
-        GameController.Instance.StatManager.Stat("forest-gardens").Add(1);
+        actor.GameController.StatManager.Stat("forest-gardens").Add(1);
 
         completed = true;
     }

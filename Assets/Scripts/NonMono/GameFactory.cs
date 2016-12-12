@@ -10,6 +10,11 @@ using System;
 /// </summary>
 public class GameFactory {
 
+    [Injectable]
+    public GameFactory Factory {
+        get { return this; }
+    }
+
     private GameController gameController = null;
     [Injectable]
     public GameController GameController {

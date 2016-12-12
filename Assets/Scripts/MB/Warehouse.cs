@@ -44,7 +44,7 @@ public class Warehouse : MonoBehaviour {
             throw new Exception("Reservation is not ready");
         }
         foreach (ResourceProfile rp in resourceContents) {
-            if (rp.resourceTag == res.resourceTag) {
+            if (rp.type == res.resourceType) {
                 res.Released = true;
                 rp.amount += res.amount;
                 storageReservations.Remove(res);
@@ -60,13 +60,15 @@ public class Warehouse : MonoBehaviour {
     /// Creates ResourceProfiles for any resource tags that are present in limits but not in 
     /// </summary>
     public void FillInContentsGaps() {
-        var diff = (from rp in resourceLimits select rp.resourceTag)
-                    .Except(from rp in resourceContents select rp.resourceTag);
-        var toAdd = new List<ResourceProfile>();
-        foreach (String resourceTag in diff) {
-            toAdd.Add(new ResourceProfile(resourceTag, 0));
-        }
+        //var diff = resourceLimits.Select(rp => rp.type).Except(resourceContents.Select(rp => rp.type));
+        //var toAdd = diff.Select(resourceType => new ResourceProfile(resourceType, 0)).ToList();
+        var toAdd = resourceLimits
+            .Select(rp => rp.type)
+            .Except(resourceContents.Select(rp => rp.type))
+            .Select(type => new ResourceProfile(type, 0));
         resourceContents = resourceContents.Union(toAdd).ToArray();
+
+
     }
 
     /// <summary>
@@ -107,12 +109,12 @@ public class Warehouse : MonoBehaviour {
     /// <summary>
     /// Gets the amount of the given resource, whether reserved or not
     /// </summary>
-    /// <param name="resourceTag"></param>
+    /// <param name="type"></param>
     /// <returns>Total deposited resources for the given tag</returns>
-    public double GetTotalContents(string resourceTag) {
+    public double GetTotalContents(Resource.Type type) {
         if (!enabled) { return 0; }
         foreach (ResourceProfile rp in resourceContents) {
-            if (rp.resourceTag == resourceTag) {
+            if (rp.type == type) {
                 return rp.amount;
             }
         }
@@ -122,13 +124,13 @@ public class Warehouse : MonoBehaviour {
     /// <summary>
     /// Get the total reserved content
     /// </summary>
-    /// <param name="resourceTag"></param>
+    /// <param name="type"></param>
     /// <returns></returns>
-    public double GetReservedContents(string resourceTag) {
+    public double GetReservedContents(Resource.Type type) {
         double amount = 0 ;
 
         foreach (ResourceReservation r in resourceReservations) {
-            if (r.resourceTag == resourceTag) {
+            if (r.type == type) {
                 amount += r.amount;
             }
         }
@@ -139,11 +141,11 @@ public class Warehouse : MonoBehaviour {
     /// Gets total available contents for this warehouse
     /// </summary>
     /// <returns>Available contents in a dictionary</returns>
-    public Dictionary<string, double> GetAllAvailableContents() {
-        var d = new Dictionary<string, double>();
+    public Dictionary<Resource.Type, double> GetAllAvailableContents() {
+        var d = new Dictionary<Resource.Type, double>();
         if (!enabled) { return d; }
         foreach (var r in resourceContents) {
-            d[r.resourceTag] = GetAvailableContents(r.resourceTag);
+            d[r.type] = GetAvailableContents(r.type);
         }
         return d;
     }
@@ -151,11 +153,11 @@ public class Warehouse : MonoBehaviour {
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="resourceTag"></param>
+    /// <param name="type"></param>
     /// <returns></returns>
-    public double GetAvailableContents(string resourceTag) {
+    public double GetAvailableContents(Resource.Type type) {
         if (!enabled) { return 0; }
-        return GetTotalContents(resourceTag) - GetReservedContents(resourceTag);
+        return GetTotalContents(type) - GetReservedContents(type);
     }
 
     /// <summary>
@@ -163,11 +165,11 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
-    public double GetClaimedContents(string resourceTag) {
+    public double GetClaimedContents(Resource.Type type) {
         if (!enabled) { return 0; }
         double amount = 0;
         foreach (ResourceReservation r in resourceReservations) {
-            if (r.resourceTag == resourceTag && r.Ready) {
+            if (r.type == type && r.Ready) {
                 amount += r.amount;
             }
         }
@@ -179,9 +181,9 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
-    public double GetUnclaimedContents(string resourceTag) {
+    public double GetUnclaimedContents(Resource.Type type) {
         if (!enabled) { return 0; }
-        return GetTotalContents(resourceTag) - GetClaimedContents(resourceTag);
+        return GetTotalContents(type) - GetClaimedContents(type);
     }
 
     /// <summary>
@@ -189,11 +191,11 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
-    public double GetTotalStorage(string resourceTag) {
+    public double GetTotalStorage(Resource.Type type) {
         if (!enabled) { return 0; }
         double amount = 0;
         foreach (ResourceProfile p in resourceLimits) {
-            if (p.resourceTag == resourceTag) {
+            if (p.type == type) {
                 amount += p.amount;
             }
         }
@@ -203,9 +205,9 @@ public class Warehouse : MonoBehaviour {
     /// <summary>
 	/// Gets the total amount of space currently reserved (but not occupied) for the given resource tag
     /// </summary>
-    /// <param name="resourceTag"></param>
+    /// <param name="type"></param>
     /// <returns></returns>
-    public double GetReservedStorage(string resourceTag) {
+    public double GetReservedStorage(Resource.Type type) {
         if (!enabled) { return 0; }
         double amount = 0;
         foreach (StorageReservation r in storageReservations) {
@@ -221,19 +223,19 @@ public class Warehouse : MonoBehaviour {
     /// </summary>
     /// <param name="resourceTag"></param>
     /// <returns></returns>
-    public double GetAvailableStorage(string resourceTag) {
+    public double GetAvailableStorage(Resource.Type type) {
         if (!enabled) { return 0; }
-        return GetTotalStorage(resourceTag) - GetTotalContents(resourceTag) - GetReservedStorage(resourceTag);
+        return GetTotalStorage(type) - GetTotalContents(type) - GetReservedStorage(type);
     }
 
     /// <summary>
     /// Directly withdraws the specified resource without a reservation
     /// </summary>
-    /// <param name="resTag"></param>
+    /// <param name="type"></param>
     /// <param name="amount"></param>
-    public void WithdrawContents(string resTag, double amount) {
+    public void WithdrawContents(Resource.Type type, double amount) {
         foreach (ResourceProfile rp in resourceContents) {
-            if (rp.resourceTag == resTag && rp.amount >= amount) {
+            if (rp.type == type && rp.amount >= amount) {
                 rp.amount -= amount;
                 SendMessage("OnResourceWithdrawn", SendMessageOptions.DontRequireReceiver);
                 return;
@@ -258,7 +260,7 @@ public class Warehouse : MonoBehaviour {
 		}
 
         foreach (ResourceProfile rp in resourceContents) {
-            if (rp.resourceTag == res.resourceTag && rp.amount >= res.amount) {
+            if (rp.type == res.type && rp.amount >= res.amount) {
                 rp.amount -= res.amount;
                 res.Released = true;
                 resourceReservations.Remove(res);
@@ -274,17 +276,17 @@ public class Warehouse : MonoBehaviour {
     /// Attempts to reserve the resource contents of this warehouse, returning a boolean indicating whether the operation was successful
     /// </summary>
     /// <param name="reserver">Gameobject to which this reservation should be attached</param>
-    /// <param name="resourceTag">Resource type tag</param>
+    /// <param name="type">Resource type tag</param>
     /// <param name="amount">Amount to reserve</param>
     /// <returns>true on success, false on failure</returns>
-    public bool ReserveContents(GameObject reserver, string resourceTag, double amount) {
-        double avail = GetAvailableContents(resourceTag);
+    public bool ReserveContents(GameObject reserver, Resource.Type type, double amount) {
+        double avail = GetAvailableContents(type);
         if (avail < amount) {
             return false;
         }
         ResourceReservation r = reserver.AddComponent<ResourceReservation>();
         r.amount = amount;
-        r.resourceTag = resourceTag;
+        r.type = type;
         r.Ready = true;
         r.source = this.gameObject;
         //Debug.Log(r.resourceTag + " " + r.amount);
@@ -298,17 +300,17 @@ public class Warehouse : MonoBehaviour {
     /// Attempts to reserve resource storage in this warehouse, returning a boolean indicating whether the operation was successful
     /// </summary>
     /// <param name="reserver">GameObject to which this reservation should be attached</param>
-    /// <param name="resourceTag">Resource type tag</param>
+    /// <param name="type">Resource type tag</param>
     /// <param name="amount">Amount to reserve</param>
     /// <returns>true on success, false on failure</returns>
-    public bool ReserveStorage(GameObject reserver, string resourceTag, double amount) {
-        if (GetAvailableStorage(resourceTag) < amount) {
+    public bool ReserveStorage(GameObject reserver, Resource.Type type, double amount) {
+        if (GetAvailableStorage(type) < amount) {
             return false;
         }
-        StorageReservation r = reserver.AddComponent<StorageReservation>();
+        StorageReservation r = GameController.Factory.AddComponent<StorageReservation>(reserver);
         r.warehouse = this;
         r.amount = amount;
-        r.resourceTag = resourceTag;
+        r.resourceType = type;
         r.Ready = true;
         storageReservations.Add(r);
         return true;
@@ -330,7 +332,7 @@ public class Warehouse : MonoBehaviour {
             while (rc.amount > 0) {
                 rc.amount -= 1;
 
-                var resource = GameController.CreateResourcePile(rc.resourceTag, Math.Min(rc.amount, 1.0));
+                var resource = GameController.CreateResourcePile(rc.type, Math.Min(rc.amount, 1.0));
                 resource.transform.position = transform.position;
                 resource.GetComponent<Resource>().SetDown();
             }
