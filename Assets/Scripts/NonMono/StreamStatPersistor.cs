@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
 
-public class StreamStatPersistor : IStatPersistor {
-    private Dictionary<string, decimal> values = new Dictionary<string, decimal>();
+public class StreamStatPersistor : StatPersistor {
     private Stream sourceStream;
 
     public StreamStatPersistor(Stream source) {
@@ -11,19 +9,7 @@ public class StreamStatPersistor : IStatPersistor {
         ImportValues();
     }
 
-    public decimal GetValue(string name) {
-        if (values.ContainsKey(name)) {
-            return values[name];
-        } else {
-            return 0m;
-        }
-    }
-
-    public void SetValue(string name, decimal value) {
-        values[name] = value;
-    }
-
-    public void ImportValues() {
+    public override void ImportValues() {
         sourceStream.Seek(0, SeekOrigin.Begin);
         var r = new StreamReader(sourceStream);
 
@@ -35,7 +21,7 @@ public class StreamStatPersistor : IStatPersistor {
         }
     }
 
-    public void ExportValues() {
+    public override void ExportValues() {
         sourceStream.Seek(0, SeekOrigin.Begin);
         var w = new StreamWriter(sourceStream);        
         foreach (var kvp in values) {
@@ -45,7 +31,7 @@ public class StreamStatPersistor : IStatPersistor {
         w.Flush();
     }
 
-    public void Destroy() {
+    public override void Destroy() {
         sourceStream.Close();
         sourceStream.Dispose();
     }

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System;
 
 public class DayCycleController : MonoBehaviour {
@@ -40,21 +39,21 @@ public class DayCycleController : MonoBehaviour {
 
     // Handles Update event
     void Update() {
-        if (nightLight) {
-            float a = 1.0f - Mathf.Sin((float)(daytime * Math.PI));
-            nightLight.GetComponent<Light>().intensity = Mathf.Pow(a, 2.0f);
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            int layerMask = 1 << LayerMask.NameToLayer("Terrain");
-            if (Physics.Raycast(Camera.main.transform.position, ray.direction, out hit, Mathf.Infinity, layerMask)) {
-                Vector3 targetPoint = new Vector3(
-                    hit.point.x,
-                    Mathf.Max(0.0f, hit.point.y),
-                    hit.point.z
-                );
-                nightLight.transform.position = targetPoint + new Vector3(0, 35.0f, 0);
-            }
+        if (!nightLight) return;
+        float a = 1.0f - Mathf.Sin((float)(daytime * Math.PI));
+        nightLight.GetComponent<Light>().intensity = Mathf.Pow(a, 2.0f);
+
+        if (Camera.main == null) {
+            return;
         }
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        int layerMask = 1 << LayerMask.NameToLayer("Terrain");
+        if (!Physics.Raycast(Camera.main.transform.position, ray.direction, out hit, Mathf.Infinity, layerMask))
+            return;
+
+        Vector3 targetPoint = new Vector3(hit.point.x, Mathf.Max(0.0f, hit.point.y), hit.point.z);
+        nightLight.transform.position = targetPoint + new Vector3(0, 35.0f, 0);
     }
 
     private void UpdateLighting() {

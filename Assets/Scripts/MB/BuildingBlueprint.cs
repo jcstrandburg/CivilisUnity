@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using UnityEngine.EventSystems;
 
 public class BuildingBlueprint : MonoBehaviour { //, IPointerDownHandler {
 

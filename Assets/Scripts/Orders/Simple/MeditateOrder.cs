@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-/// <summary>
+﻿/// <summary>
 /// Order to generate spirit
 /// </summary>
 public class MeditateOrder : BaseOrder {

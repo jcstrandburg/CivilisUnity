@@ -11,12 +11,11 @@ public class GameStat {
 
     private decimal value;
     private decimal persistantValue;
-    [DontSaveField]
     [NonSerialized]
-    private IStatPersistor persistor;
+    private StatPersistor persistor;
 
     public delegate void GameStatChangeListener(GameStat s);
-    [field: DontSaveField]
+    [field:NonSerialized]
     public event GameStatChangeListener OnChange;
 
     public GameStat(string name, bool persist, bool monotonic) {
@@ -25,7 +24,7 @@ public class GameStat {
         this.monotonic = monotonic;
     }
 
-    public void SetPersistor(IStatPersistor p) {
+    public void SetPersistor(StatPersistor p) {
         persistor = p;
         if (persist) {
             persistantValue = p.GetValue(name);

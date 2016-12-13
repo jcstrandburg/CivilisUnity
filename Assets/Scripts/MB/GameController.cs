@@ -10,20 +10,24 @@ using UnityEditor;
 [CustomEditor(typeof(GameController))]
 public class GameControllerEditor : Editor {
 
+    private GameController Controller {
+        get { return (GameController) target; }
+    }
+
     public void OnEnable() {
-        Debug.Log("Wat");
-        var gc = (GameController) target;
-        gc.InitializeAllObjects();
+        Controller.InitializeAllObjects();
     }
 
     public override void OnInspectorGUI() {
         DrawDefaultInspector();
-        var gc = (GameController)target;
         if (GUILayout.Button("TestResources")) {
-            var x = gc.GetAllAvailableResources();
+            var x = Controller.GetAllAvailableResources();
             foreach (var y in x) {
                 Debug.Log(y.Key + " " + y.Value);
             }
+        }
+        if (GUILayout.Button("Initialize All Objects")) {
+            Controller.InitializeAllObjects();
         }
     }
 }

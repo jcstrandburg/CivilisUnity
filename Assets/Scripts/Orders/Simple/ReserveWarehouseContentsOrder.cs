@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-/// <summary>
+﻿/// <summary>
 /// Order to reserve the given resrouces from any available warehouse
 /// </summary>
 public class ReserveWarehouseContentsOrder : BaseOrder {

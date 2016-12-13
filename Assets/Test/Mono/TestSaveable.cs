@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class TestSaveable : MonoBehaviour {
     public TestContainer tc;

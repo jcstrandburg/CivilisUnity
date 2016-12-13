@@ -2,8 +2,6 @@
 using UnityEngine.UI;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using System;
-using System.Collections;
 
 public class SubMenuController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 

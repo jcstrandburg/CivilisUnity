@@ -39,12 +39,12 @@ public class StatTests : NeolithicTest {
     [Test]
     public void StreamPersistorTest() {
         var stream = new MemoryStream();
-        IStatPersistor p1 = new StreamStatPersistor(stream);
+        StatPersistor p1 = new StreamStatPersistor(stream);
         p1.SetValue("value1", 12);
         p1.SetValue("value2", 14m);
         p1.ExportValues();
 
-        IStatPersistor p2 = new StreamStatPersistor(stream);
+        StatPersistor p2 = new StreamStatPersistor(stream);
         p2.ImportValues();
         Assert.AreEqual(12m, p2.GetValue("value1"));
         Assert.AreEqual(14m, p2.GetValue("value2"));

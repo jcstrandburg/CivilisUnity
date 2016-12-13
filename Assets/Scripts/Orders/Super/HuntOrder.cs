@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class HuntOrder : StatefulSuperOrder {
+﻿public class HuntOrder : StatefulSuperOrder {
     Herd herd;
 
     public HuntOrder(ActorController a, Herd herd) : base(a) {
