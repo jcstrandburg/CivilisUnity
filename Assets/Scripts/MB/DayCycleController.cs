@@ -6,7 +6,6 @@ public class DayCycleController : MonoBehaviour {
     public float daytime = 0.5f;
     public float daylength = 10.0f;
     public GameObject mainLight;
-    public GameObject moonLight;
     public GameObject nightLight;
 
     public float x;
@@ -75,12 +74,5 @@ public class DayCycleController : MonoBehaviour {
         light.color = new Color(1.0f, y, y);
         light.intensity = x2 * sunIntensity;
         mainLight.transform.eulerAngles = new Vector3((daytime - 0.25f) * 360.0f, 0, 0);
-
-        x3 = Mathf.Cos((float)((daytime) * Math.PI));
-        //Debug.Log(x3);
-        var light2 = moonLight.GetComponent<Light>();
-        light2.color = new Color(1.0f, 1.0f, 1.0f);
-        light2.intensity = x3 * moonIntensity;
-        moonLight.transform.eulerAngles = new Vector3((daytime + 0.25f) * 360.0f, 0, 0);
     }
 }

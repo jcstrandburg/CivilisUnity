@@ -6,6 +6,7 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters;
 using UnityEngine.SceneManagement;
 
 
@@ -273,13 +274,7 @@ public class SaverLoader : MonoBehaviour {
                                       BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic |
                                       BindingFlags.SetField);
                 if (fld != null) {
-                    object value = p.Value;
-                    // This may not work as intended, for example if this object is a collection or enumeration of serialiazables
-                    //MethodInfo method = fld.FieldType.GetMethod("OnDeserialize", new Type[] { });
-                    //if (method != null) {
-                    //    method.Invoke(value, new object[] { });
-                    //}
-                    fld.SetValue(component, value);
+                    fld.SetValue(component, (object)p.Value);
                 }
             }
 
@@ -368,7 +363,7 @@ public class SaverLoader : MonoBehaviour {
             string parentId = identifier.idParent;
             if (string.IsNullOrEmpty(parentId) == false) {
                 ObjectIdentifier oid = saveLoadContext.oidReferences[parentId];
-                //localscale is already where we want it after setting parent, so store it and reset it after setting parent
+                //localscale is already where we want it before setting parent, so store it and reset it after setting parent
                 Vector3 storedScale = go.transform.localScale;
                 go.transform.parent = oid.transform;
                 go.transform.localScale = storedScale;
@@ -384,24 +379,16 @@ public class SaverLoader : MonoBehaviour {
         }
     }
 
-    public SaveGame DeserializeSaveGame(IFormatter formatter, Stream stream) {
-        return (SaveGame)formatter.Deserialize(stream);
-    }
-
-    public void SerializeSaveGame(IFormatter formatter, Stream stream, SaveGame sgame) {
-        formatter.Serialize(stream, sgame);
-    }
-
     public void SaveGame(string name="Quick") {
         try {
             StreamingContext ctx = new StreamingContext(StreamingContextStates.All, saveLoadContext);
             SurrogateSelector ss = GetSurrogateSelector(ctx);
-            IFormatter bf = new BinaryFormatter(ss, ctx);
-            //bf.AssemblyFormat = FormatterAssemblyStyle.Simple; //this isn't doing what I think it should
+            var bf = new BinaryFormatter(ss, ctx);
+            bf.AssemblyFormat = FormatterAssemblyStyle.Simple; //this isn't doing what I think it should
             var path = Application.persistentDataPath + "/Saved Games/" + name + ".sav";
             SaveGame game = PackSaveGame(name);
             using (Stream stream = File.Create(path)) {
-                SerializeSaveGame(bf, stream, game);
+                bf.Serialize(stream, game);
             }
         } catch (Exception e) {
             Debug.Log(e);
@@ -409,25 +396,25 @@ public class SaverLoader : MonoBehaviour {
     }
 
     public void LoadGame(string name="Quick") {
+        var path = Application.persistentDataPath + "/Saved Games/" + name + ".sav";
         if (string.IsNullOrEmpty(loadIntoScene)) {
             try {
+                SaveGame saveGame;
                 saveLoadContext = new SaveLoadContext();
                 StreamingContext ctx = new StreamingContext(StreamingContextStates.All, saveLoadContext);
                 SurrogateSelector ss = GetSurrogateSelector(ctx);
-                IFormatter bf = new BinaryFormatter(ss, ctx);
-                //bf.AssemblyFormat = FormatterAssemblyStyle.Simple; //this isn't doing what I think it should
-                var path = Application.persistentDataPath + "/Saved Games/" + name + ".sav";
+
                 using (Stream stream = File.Open(path, FileMode.Open)) {
-                    SaveGame game = DeserializeSaveGame(bf, stream);
-                    var sw = System.Diagnostics.Stopwatch.StartNew();
-                    UnpackSaveGame(game);
-                    Debug.Log(sw.ElapsedMilliseconds);
+                    var bf = new BinaryFormatter(ss, ctx);
+                    bf.AssemblyFormat = FormatterAssemblyStyle.Simple; //this isn't doing what I think it should
+                    saveGame = (SaveGame)bf.Deserialize(stream);
                 }
+                UnpackSaveGame(saveGame);
             }
             catch (Exception e) {
                 Debug.Log(e);
             }
-        } else {
+    } else {
             GameObject go = new GameObject();
             var transition = go.AddComponent<GameSceneTransitioner>();
             transition.InitLoadGame(name);

@@ -94,8 +94,9 @@ public class StatManager : MonoBehaviour {
     /// Loads the default stat profiles from the resources folder
     /// </summary>
     public void LoadDefaultStats() {
-        UnityEngine.Object[] allstats = Resources.LoadAll("Stats", typeof(StatProfile));
-        StatProfile[] profiles = (from r in allstats select (StatProfile)r).ToArray();
+        StatProfile[] profiles = Resources.LoadAll("Stats", typeof(StatProfile))
+            .Select(r => (StatProfile) r)
+            .ToArray();
         SetStats(profiles);
     }
 
