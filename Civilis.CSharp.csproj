@@ -163,6 +163,7 @@
     <Compile Include="Assets\Scripts\MB\Warehouse.cs" />
     <Compile Include="Assets\Scripts\NonMono\CommandType.cs" />
     <Compile Include="Assets\Scripts\NonMono\Comparison.cs" />
+    <Compile Include="Assets\Scripts\NonMono\FilePathStatPersistor.cs" />
     <Compile Include="Assets\Scripts\NonMono\GameFactory.cs" />
     <Compile Include="Assets\Scripts\NonMono\GameStat.cs" />
     <Compile Include="Assets\Scripts\NonMono\NewGameSettings.cs" />
@@ -235,6 +236,7 @@
     <Compile Include="Assets\Scripts\UI\TextBinding.cs" />
     <Compile Include="Assets\Test\Mono\PlantDomesticationTestRunner.cs" />
     <Compile Include="Assets\Test\Mono\ReservoirHarvestStatTest.cs" />
+    <Compile Include="Assets\Test\Mono\SaveLoadTestRunner.cs" />
     <Compile Include="Assets\Test\Mono\TestSaveable.cs" />
     <Compile Include="Assets\Test\NonMono\TestContainer.cs" />
     <Compile Include="Assets\Test\Scripts\LogisticsDropResourceTest.cs" />

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class SlaughterHuntedAnimalOrder : BaseOrder {
     private float progress = 0;

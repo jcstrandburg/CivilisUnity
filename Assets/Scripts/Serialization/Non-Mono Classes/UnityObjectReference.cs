@@ -1,6 +1,4 @@
-﻿using System;
-
-/// <summary>
+﻿/// <summary>
 /// Stores a reference to a GameObject or MonoBehaviour with an associated
 /// ObjectIdentifier component so we can rebuild the original reference after deserialization
 /// </summary>

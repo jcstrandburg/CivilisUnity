@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-/// <summary>
+﻿/// <summary>
 /// Super order to find, seek, and utilize storage for the currently carried resource
 /// </summary>
 public class StoreCarriedResourceOrder : StatefulSuperOrder {
