@@ -83,7 +83,9 @@ namespace UnityTest
                     remain -= bytesRead;
                     index += bytesRead;
                 } while (remain > 0);
+#if !UNITY_WSA
                 val = Encoding.BigEndianUnicode.GetString(bytes);
+#endif
             }
         }
         
@@ -130,9 +132,13 @@ namespace UnityTest
         
         public object Deserialize (Stream stream)
         {
+#if !UNITY_WSA
             var result = (ResultDTO)FormatterServices.GetSafeUninitializedObject(typeof(ResultDTO));
             Transfer (result, new Reader(stream));
             return result;
+#else
+            return null;
+#endif
         }
     }
 
