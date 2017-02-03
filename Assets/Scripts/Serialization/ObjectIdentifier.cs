@@ -7,9 +7,6 @@
 //To clarify again: A GameObject's (and thus, prefab's) name should be the same as prefabName, while the varialbe "name" in this script can be anything you want (or nothing at all).
 
 using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-
 #if UNITY_EDITOR
 using UnityEditor;
 

@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-/// <summary>
+﻿/// <summary>
 /// Simple order to seek, reserve, and extract resources from the given target
 /// </summary>
 public class HarvestFromReservoirOrder : StatefulSuperOrder {

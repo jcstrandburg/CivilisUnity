@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class CatchFishOrder : BaseOrder {
     float progress = 0.0f;

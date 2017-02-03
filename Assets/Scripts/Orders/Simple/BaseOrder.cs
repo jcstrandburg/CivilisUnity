@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-/// <summary>
+﻿/// <summary>
 /// The base for all actor orders
 /// </summary>
 [CustomSerialize]

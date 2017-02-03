@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 using System.Linq;
-using UnityEngine.Events;
 
 public class SelectList : MonoBehaviour {
     private GameObject selectedItem;

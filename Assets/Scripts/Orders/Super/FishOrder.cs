@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class FishOrder : StatefulSuperOrder {
+﻿public class FishOrder : StatefulSuperOrder {
     NeolithicObject target;
 
     public FishOrder(ActorController a, NeolithicObject target) : base(a) {

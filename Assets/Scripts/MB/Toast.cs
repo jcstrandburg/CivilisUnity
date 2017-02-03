@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Toast : MonoBehaviour {
     float lifetime = 2.5f;

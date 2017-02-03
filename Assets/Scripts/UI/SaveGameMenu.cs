@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class SaveGameMenu : MonoBehaviour {
     public InputField saveNameField;

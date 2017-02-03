@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Resource : MonoBehaviour {
     public enum Type {
@@ -54,20 +53,20 @@ public class Resource : MonoBehaviour {
 
     public void SetDown() {
         preserved = false;
-        NeolithicObject neoObject = GetComponent<NeolithicObject>();
+        var neoObject = GetComponent<NeolithicObject>();
         neoObject.snapToGround = true;
         neoObject.selectable = true;
         neoObject.SnapToGround();
 
-        gameObject.AddComponent<LogisticsNode>();
-        Warehouse w = gameObject.AddComponent<Warehouse>();
+        transform.parent = transform.parent ? transform.parent.parent : null;
+        GameController.Factory.AddComponent<LogisticsNode>(gameObject);
+        Warehouse w = GameController.Factory.AddComponent<Warehouse>(gameObject);
         ResourceProfile[] rp = new ResourceProfile[] {
             new ResourceProfile(type, amount)
         };
 
         w.SetLimits(rp);
         w.SetContents(rp);
-        GameController.Factory.InjectGameobject(gameObject);
     }
 
     public void OnResourceWithdrawn() {

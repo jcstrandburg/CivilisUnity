@@ -1,5 +1,4 @@
 using System.Runtime.Serialization;
-using UnityEngine;
 
 /// <summary>
 /// Part of the SerializeHelper package by Cherno.

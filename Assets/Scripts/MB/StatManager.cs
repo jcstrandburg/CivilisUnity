@@ -29,10 +29,10 @@ public class StatManager : MonoBehaviour {
     public Dictionary<string, GameStat> stats = new Dictionary<string, GameStat>();
     [DontSaveField]
     [NonSerialized]
-    private IStatPersistor persistor;
+    private StatPersistor persistor;
 
     //dummy stat persistor for testing purposes
-    public static IStatPersistor DummyPersistor {
+    public static StatPersistor DummyPersistor {
         get {
             return new StreamStatPersistor(Stream.Null);
         }
@@ -41,15 +41,14 @@ public class StatManager : MonoBehaviour {
     /// <summary>
     /// Stat persistor property, will create a default StreamStatPersistor if no other persistor is supplied
     /// </summary>
-    private IStatPersistor Persistor {
+    private StatPersistor Persistor {
         set {
             SetPersistor(value);
         }
         get {
             if (persistor == null) {
                 var path = Application.persistentDataPath + "/Saved Games/stats";
-                var stream = new FileStream(path, FileMode.Create);
-                SetPersistor(new StreamStatPersistor(stream));
+                SetPersistor(new FilePathStatPersistor(path));
             }
             return persistor;
         }
@@ -59,7 +58,7 @@ public class StatManager : MonoBehaviour {
     /// Sets the stat persistor
     /// </summary>
     /// <param name="p"></param>
-    public void SetPersistor(IStatPersistor p) {
+    public void SetPersistor(StatPersistor p) {
         persistor = p;
         foreach (var kvp in stats) {
             kvp.Value.SetPersistor(p);
@@ -95,8 +94,9 @@ public class StatManager : MonoBehaviour {
     /// Loads the default stat profiles from the resources folder
     /// </summary>
     public void LoadDefaultStats() {
-        UnityEngine.Object[] allstats = Resources.LoadAll("Stats", typeof(StatProfile));
-        StatProfile[] profiles = (from r in allstats select (StatProfile)r).ToArray();
+        StatProfile[] profiles = Resources.LoadAll("Stats", typeof(StatProfile))
+            .Select(r => (StatProfile) r)
+            .ToArray();
         SetStats(profiles);
     }
 

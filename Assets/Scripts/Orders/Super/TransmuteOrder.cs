@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-/// <summary>
+﻿/// <summary>
 /// Testing order to transmute one resource to another
 /// </summary>
 public class TransmuteOrder : StatefulSuperOrder {

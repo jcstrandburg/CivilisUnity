@@ -10,20 +10,24 @@ using UnityEditor;
 [CustomEditor(typeof(GameController))]
 public class GameControllerEditor : Editor {
 
+    private GameController Controller {
+        get { return (GameController) target; }
+    }
+
     public void OnEnable() {
-        Debug.Log("Wat");
-        var gc = (GameController) target;
-        gc.InitializeAllObjects();
+        Controller.InitializeAllObjects();
     }
 
     public override void OnInspectorGUI() {
         DrawDefaultInspector();
-        var gc = (GameController)target;
         if (GUILayout.Button("TestResources")) {
-            var x = gc.GetAllAvailableResources();
+            var x = Controller.GetAllAvailableResources();
             foreach (var y in x) {
                 Debug.Log(y.Key + " " + y.Value);
             }
+        }
+        if (GUILayout.Button("Initialize All Objects")) {
+            Controller.InitializeAllObjects();
         }
     }
 }
@@ -359,7 +363,8 @@ public class GameController : MonoBehaviour {
     /// </summary>
 	public void UpdateBoxSelect() {
 		boxEnd = Input.mousePosition;
-		NeolithicObject[] allObjects = FindObjectsOfType(typeof(NeolithicObject)) as NeolithicObject[];
+        var selectableObjects = (FindObjectsOfType(typeof(NeolithicObject)) as NeolithicObject[])
+            .Where(n => n.selectability != NeolithicObject.Selectability.Unselectable);
 		Vector2 start = boxStart;
 		Vector2 end = boxEnd;
 		
@@ -369,14 +374,14 @@ public class GameController : MonoBehaviour {
 			start = new Vector2(temp, start.y);
 		}
 		if ( end.y > start.y ) {
-			float temp = end.y;
+			var temp = end.y;
 			end = new Vector2(end.x, start.y);
 			start = new Vector2(start.x, temp);
 		}
 		Rect r = new Rect (start.x, Screen.height-start.y, end.x-start.x, start.y-end.y);
 
 		List<NeolithicObject> selectables = new List<NeolithicObject>();
-		foreach (NeolithicObject no in allObjects) {
+		foreach (NeolithicObject no in selectableObjects) {
 			Vector2 loc = Camera.main.WorldToScreenPoint(no.transform.position);
 			loc = new Vector2(loc.x, Screen.height-loc.y);
 			no.HoverEnd();

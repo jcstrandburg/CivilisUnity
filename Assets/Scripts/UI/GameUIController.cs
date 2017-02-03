@@ -1,10 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 using System.Reflection;
-using System.Collections.Generic;
 using System;
-using System.Globalization;
+using System.Linq;
 
 [assembly: AssemblyVersion("0.2.3.*")]
 
@@ -75,6 +73,11 @@ public class GameUIController : MonoBehaviour {
     /// <param name="options"></param>
     /// <param name="target"></param>
 	public void ShowContextMenu(CommandType[] options, NeolithicObject target) {
+        if (!options.Any()) {
+            contextMenu.SetActive(false);
+            return;
+        }
+
 		contextMenu.SetActive(true);
 		foreach (Transform child in contextMenu.transform) {
 			Destroy(child.gameObject);

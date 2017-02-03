@@ -4,7 +4,6 @@
 //The methods IsEnumerableType and IsCollectionType were added by myself (Cherno). Use them to find out wether a Type is a collection (array, List,...)
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 /// <summary>

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Reservation : MonoBehaviour {
 
@@ -28,13 +27,12 @@ public class Reservation : MonoBehaviour {
 		set { 
 			released = value; 
 			if (released) {
-#if UNITY_EDITOR
-                if (this != null) {
-                    DestroyImmediate(this);
-                }
-#else
-                Destroy(this);
-#endif
+			    if (Application.isPlaying) {
+			        Destroy(this);
+			    }
+			    else {
+			        DestroyImmediate(this);
+			    }
             }
 		}
 	}

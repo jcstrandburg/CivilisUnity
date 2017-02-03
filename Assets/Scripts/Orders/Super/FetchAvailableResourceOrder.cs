@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-/// <summary>
+﻿/// <summary>
 /// Order to fetch the given resource from any available warehouse
 /// </summary>
 public class FetchAvailableResourceOrder : StatefulSuperOrder {

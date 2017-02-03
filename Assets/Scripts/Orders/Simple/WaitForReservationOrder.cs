@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class WaitForReservationOrder : IdleOrder {
+﻿public class WaitForReservationOrder : IdleOrder {
     private Reservation reservation;
 
     public WaitForReservationOrder(ActorController a, Reservation r) : base(a) {

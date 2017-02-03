@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System;
 
 [CreateAssetMenu]
 public class Technology : ScriptableObject {
