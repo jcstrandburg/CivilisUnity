@@ -1,0 +1,103 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Neolithica.ScriptableObjects;
+using Neolithica.Serialization.Attributes;
+using UnityEngine;
+
+namespace Neolithica.MonoBehaviours {
+    /// <summary>
+    /// Manages values and persistence of stats
+    /// </summary>
+    public class StatManager : MonoBehaviour {
+
+        [SerializeField]
+        public Dictionary<string, GameStat> stats = new Dictionary<string, GameStat>();
+        [DontSaveField]
+        [NonSerialized]
+        private StatPersistor persistor;
+
+        //dummy stat persistor for testing purposes
+        public static StatPersistor DummyPersistor {
+            get {
+                return new StreamStatPersistor(Stream.Null);
+            }
+        }
+
+        /// <summary>
+        /// Stat persistor property, will create a default StreamStatPersistor if no other persistor is supplied
+        /// </summary>
+        private StatPersistor Persistor {
+            set {
+                SetPersistor(value);
+            }
+            get {
+                if (persistor == null) {
+                    var path = Application.persistentDataPath + "/Saved Games/stats";
+                    SetPersistor(new FilePathStatPersistor(path));
+                }
+                return persistor;
+            }
+        }
+
+        /// <summary>
+        /// Sets the stat persistor
+        /// </summary>
+        /// <param name="p"></param>
+        public void SetPersistor(StatPersistor p) {
+            persistor = p;
+            foreach (var kvp in stats) {
+                kvp.Value.SetPersistor(p);
+            }
+        }
+
+        /// <summary>
+        /// Gets the GameStat object with the given name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public GameStat Stat(string name) {
+            if (stats.ContainsKey(name)) {
+                return stats[name];
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Creates GameStat objects for all of the given StatProfile objects
+        /// </summary>
+        /// <param name="statProfiles"></param>
+        public void SetStats(IEnumerable<StatProfile> statProfiles) {
+            stats.Clear();
+            foreach (var profile in statProfiles) {
+                var s = new GameStat(profile.statname, profile.persist, profile.monotonic);
+                s.SetPersistor(Persistor);
+                stats[profile.statname] = s;
+            }
+        }
+
+        /// <summary>
+        /// Loads the default stat profiles from the resources folder
+        /// </summary>
+        public void LoadDefaultStats() {
+            StatProfile[] profiles = Resources.LoadAll("Stats", typeof(StatProfile))
+                .Select(r => (StatProfile) r)
+                .ToArray();
+            SetStats(profiles);
+        }
+
+        // Handles Awake event
+        public void Awake() {
+            LoadDefaultStats();
+        }
+
+        // Handles OnDestroy event
+        public void OnDestroy() {
+            //this is kinda hacky, probably need to rewrite the interface for persistor
+            if (persistor != null) {
+                persistor.Destroy();
+            }
+        }
+    }
+}

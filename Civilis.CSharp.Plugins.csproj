@@ -166,20 +166,20 @@
     <None Include="Assets\Imports\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ToonShading\Shaders\ToonBasicOutline.shader" />
     <None Include="Assets\Imports\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ToonShading\Shaders\ToonLit.shader" />
     <None Include="Assets\Imports\Cartoon Trees &amp; Rocks Pack\Standard Assets\Effects\ToonShading\Shaders\ToonLitOutline.shader" />
+    <None Include="Assets\Imports\UnityTestTools\LICENSE.txt" />
+    <None Include="Assets\Imports\UnityTestTools\changelog.txt" />
     <None Include="Assets\Imports\nnj3de_crucarp\README.txt" />
     <None Include="Assets\Resources\Buildings\Blueprint.shader" />
     <None Include="Assets\Resources\Buildings\BuildingGhost.shader" />
     <None Include="Assets\Resources\Buildings\Outlineable.shader" />
     <None Include="Assets\Resources\Buildings\Outlined-Silhouette Only.shader" />
     <None Include="Assets\Resources\SelectionProjector\ProjectorShader.shader" />
-    <None Include="Assets\Scripts\Serialization\Surrogates\SurrogatesReadMe.txt" />
+    <None Include="Assets\Scripts\Neolithica\Serialization\Surrogates\SurrogatesReadMe.txt" />
     <None Include="Assets\Standard Assets\Environment\Water (Basic)\Shaders\FXWaterBasic.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water\Shaders\FXWaterPro.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\FXWater4Advanced.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\FXWater4Simple.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\WaterInclude.cginc" />
-    <None Include="Assets\UnityTestTools\LICENSE.txt" />
-    <None Include="Assets\UnityTestTools\changelog.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>
