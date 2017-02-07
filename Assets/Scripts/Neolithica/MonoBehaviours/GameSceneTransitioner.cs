@@ -54,16 +54,14 @@ namespace Neolithica.MonoBehaviours {
         /// <param name="scene"></param>
         /// <param name="mode"></param>
         void DoSceneTransition(Scene scene, LoadSceneMode mode) {
-            //Debug.Log("Level was loaded");
             if (loadGameName != null) {
-                //Debug.Log("I wanna load " + loadGameName);
                 GameController.Instance.SaverLoader.LoadGame(loadGameName);
             }
             else {
-                //Debug.Log("I don't know what to do here");
                 var groundController = GameController.Instance.GroundController;
                 groundController.ApplySettings(newGameSettings);
                 groundController.GenerateMap();
+                groundController.GenerateResourcesAndDoodads();
             }
             Destroy(gameObject);
         }

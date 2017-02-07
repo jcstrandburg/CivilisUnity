@@ -11,7 +11,6 @@ namespace Neolithica.MonoBehaviours {
         public double max;
         public string harvestStat=null;
         public List<Reservation> reservations = new List<Reservation>();
-        private NeolithicObject nobject;
 
         [Inject]
         public StatManager statManager;
@@ -20,14 +19,13 @@ namespace Neolithica.MonoBehaviours {
 
         // Handles Start event
         void Start() {
-            nobject = GetComponent<NeolithicObject>();
+            GetComponent<NeolithicObject>();
         }
 
         // Handles FixedUpdate event
         void FixedUpdate() {
             Regen(Time.fixedDeltaTime);
             UpdateReservations();
-            nobject.statusString = string.Format("{0} reservations, {1} {2}", reservations.Count, amount.ToString("F1"), resourceType);
         }
 
         /// <summary>

@@ -24,9 +24,6 @@ namespace Neolithica.MonoBehaviours {
         public virtual void Start() {
             SnapToGround();
             halo = GetComponentInChildren<SelectHalo>();
-            if (actionProfile == null) {
-                //Debug.Log(name);
-            }
         }
 
         // Handles OnDeserialize event
@@ -84,16 +81,6 @@ namespace Neolithica.MonoBehaviours {
             if (snapToGround || force) {
                 transform.position = GameController.SnapToGround(transform.position);
             }
-        }
-
-        // Temporary selection dialog generator
-        public virtual string[] GetPrimativeSelectionDialog() {
-            return new string[] {"Dihydrogen monoxide"};
-        }
-	
-        // Temporary selection dialog generator
-        public virtual string[] UpdatePrimativeSelectionDialog() {
-            return new string[] {"No selection menu"};
         }
     }
 }

@@ -16,7 +16,8 @@ namespace Neolithica.MonoBehaviours {
                 return projector.enabled;
             }
             set {
-                projector.enabled = value;
+                if (projector.enabled != value)
+                    projector.enabled = value;
             }
         }
 

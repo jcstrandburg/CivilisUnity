@@ -19,7 +19,7 @@ namespace Neolithica.MonoBehaviours {
         }
 
         public void FixedUpdate() {
-            agentStatus.text = selected.statusString;
+            agentStatus.text = selected != null ? selected.statusString : "";
         }
     }
 }

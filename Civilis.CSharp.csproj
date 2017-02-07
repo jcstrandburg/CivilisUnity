@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows:5</UnityBuildTarget>
     <UnityVersion>5.5.1f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion Condition=" '$(VisualStudioVersion)' != '10.0' ">4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -161,8 +163,10 @@
     <Compile Include="Assets\Imports\UnityTestTools\IntegrationTestsFramework\TestRunner\TestRunnerCallbackList.cs" />
     <Compile Include="Assets\Imports\UnityTestTools\IntegrationTestsFramework\TestRunner\TestRunnerConfigurator.cs" />
     <Compile Include="Assets\Imports\UnityTestTools\IntegrationTestsFramework\TestingAssets\CallTesting.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\BuildingRequirement.cs" />
     <Compile Include="Assets\Scripts\Neolithica\CommandType.cs" />
     <Compile Include="Assets\Scripts\Neolithica\Comparison.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\Extensions\UnityExtensions.cs" />
     <Compile Include="Assets\Scripts\Neolithica\FilePathStatPersistor.cs" />
     <Compile Include="Assets\Scripts\Neolithica\GameFactory.cs" />
     <Compile Include="Assets\Scripts\Neolithica\GameStat.cs" />
@@ -186,6 +190,7 @@
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\Editors\NeolithicObjectEditor.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\Editors\StatManagerEditor.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\Editors\WarehouseEditor.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\Extensions\EnumerableExtensions.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\FishingHole.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\GameController.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\GameSceneTransitioner.cs" />
@@ -274,7 +279,7 @@
     <Compile Include="Assets\Scripts\Neolithica\Test\Scripts\SpamLogisticNodes.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\DataBindingSource.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\FrontScreenController.cs" />
-    <Compile Include="Assets\Scripts\Neolithica\UI\GameUIController.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\UI\GameUiController.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\InputFieldBinding.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\LoadGameMenu.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\MenuController.cs" />

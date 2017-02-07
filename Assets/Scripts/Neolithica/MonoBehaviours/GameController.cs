@@ -342,7 +342,7 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         public void UpdateBoxSelect() {
             boxEnd = Input.mousePosition;
-            var selectableObjects = (FindObjectsOfType(typeof(NeolithicObject)) as NeolithicObject[])
+            var selectableObjects = FindObjectsOfType<NeolithicObject>()
                 .Where(n => n.selectability != NeolithicObject.Selectability.Unselectable);
             Vector2 start = boxStart;
             Vector2 end = boxEnd;

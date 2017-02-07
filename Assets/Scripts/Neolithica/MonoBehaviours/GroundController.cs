@@ -4,35 +4,18 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+namespace Neolithica.Extensions {
+}
+
 namespace Neolithica.MonoBehaviours {
     public class GroundController : MonoBehaviour, IPointerDownHandler {
-        public float snowThreshold = 0.75f, stoneThreshhold = 0.5f, grassThreshold = 0.25f, waterLevel=10.0f;
-        public float floatSeed = 0.0f;
-        public float distExponent = 0.4f;
-        public float heightMultiplier = 20.0f;
-        public float heightBiasExponent = 3.0f;
+        public TerrainSettings terrainSettings;
+        public NewGameSettings settings;
 
-        public bool cosineTerrain = true;
-        public float mountainExponent = 2.0f;
-        public float mountainFrequency = 0.1f;
-        public float mountainHeight = 15.0f;
-        public float mountainSharpness = 2.0f;
-        public float mountainFalloff = 0.5f;
-        public float bumpFrequency = 1.0f;
-        public float bumpHeight = 1.0f;
-        public float riverFrequency = 1.0f;
-        public float riverHeight = 1.0f;
-        public float riverExponent = 3.0f;
-        public float hillFrequency = 1.0f;
-        public float hillHeight = 1.0f;
-        public float hillBaseOffset = 0.2f;
-
-        public float treeThinning = 150.0f;
-        public float treeMultiplier = 1 / 100.0f;
-        public float berryMultiplier = 1 / 150.0f;
-        public float stoneRate = 0.17f;
-        public float fishRate = 0.2f;
-        public float doodadRate = 0.35f;
+        public float snowThreshold = 150.0f;
+        public float stoneThreshhold = 130.0f;
+        public float grassThreshold = 105.0f;
+        public float waterLevel = 20.0f;
 
         private List<GameObject> trees = new List<GameObject>();
         private List<GameObject> berries = new List<GameObject>();
@@ -41,33 +24,32 @@ namespace Neolithica.MonoBehaviours {
         public GameController GameController { get; set; }
 
         public void ApplySettings(NewGameSettings settings) {
-            this.floatSeed = settings.seed;
-            this.treeMultiplier = settings.treeMultiplier;
-            this.berryMultiplier = settings.berryMultiplier;
-            this.stoneRate = settings.stoneRate;
-            this.fishRate = settings.fishRate;
-            this.doodadRate = settings.doodadRate;       
+            this.settings = settings;
         }
 
-        [Obsolete("This should come from new game settings now")]
-        public void RandomizeSeed() {
-            floatSeed = UnityEngine.Random.Range(0.0f, 100.0f);
-        }
-
-        //get height in range 0..1, 0..1
+        /// <summary>
+        /// Gets prodecural terrain height at the given coords
+        /// </summary>
+        /// <param name="x">(0...1)</param>
+        /// <param name="y">(0...1)</param>
+        /// <returns></returns>
         protected float GetHeight(float x, float y) {
-            float xOffset = floatSeed * 1.2f;
-            float yOffset = floatSeed * 0.9f;
+            if (x < 0 || x > 1)
+
+                throw new ArgumentException(string.Format("Invalid value for x {0}", x));
+            if (y < 0 || y > 1)
+                throw new ArgumentException(string.Format("Invalid value for y {0}", y));
+
+            float xOffset = settings.seed * 1.2f;
+            float yOffset = settings.seed * 0.9f;
             float dist = Mathf.Min(1.0f, Mathf.Sqrt((x - 0.5f) * (x - 0.5f) + (y - 0.5f) * (y - 0.5f))); //normalized distance from center in range 0..1.414
 
-            float hHeight = (hillBaseOffset + Mathf.PerlinNoise(xOffset + x * hillFrequency, yOffset + y * hillFrequency)) * hillHeight;
-            float bHeight = Mathf.PerlinNoise(xOffset + x * bumpFrequency, yOffset + y * bumpFrequency) * bumpHeight;
-            //float rHeight = riverHeight * Mathf.Pow(Mathf.Abs(Mathf.PerlinNoise(xOffset + x * riverFrequency, yOffset + y * riverFrequency) - 0.5f), riverExponent);
+            float hHeight = (terrainSettings.hillBaseOffset + Mathf.PerlinNoise(xOffset + x * terrainSettings.hillFrequency, yOffset + y * terrainSettings.hillFrequency)) * terrainSettings.hillHeight;
+            float bHeight = Mathf.PerlinNoise(xOffset + x * terrainSettings.bumpFrequency, yOffset + y * terrainSettings.bumpFrequency) * terrainSettings.bumpHeight;
 
-            float rHeight = riverHeight * Mathf.Pow(2*Mathf.Abs(Mathf.PerlinNoise(xOffset + x * riverFrequency, yOffset + y * riverFrequency) - 0.5f), riverExponent);
-            float mHeight = mountainHeight * Mathf.Pow(Mathf.PerlinNoise(xOffset + x * mountainFrequency, yOffset + y * mountainFrequency), mountainSharpness) * Mathf.Pow(dist, mountainFalloff);
+            float rHeight = terrainSettings.riverHeight * Mathf.Pow(2*Mathf.Abs(Mathf.PerlinNoise(xOffset + x * terrainSettings.riverFrequency, yOffset + y * terrainSettings.riverFrequency) - 0.5f), terrainSettings.riverExponent);
+            float mHeight = terrainSettings.mountainHeight * Mathf.Pow(Mathf.PerlinNoise(xOffset + x * terrainSettings.mountainFrequency, yOffset + y * terrainSettings.mountainFrequency), terrainSettings.mountainSharpness) * Mathf.Pow(dist, terrainSettings.mountainFalloff);
 
-            //return mHeight;
             return Mathf.Min(mHeight+hHeight, rHeight)+bHeight;
         }
 
@@ -76,6 +58,9 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         public void GenerateMap() {
             Terrain terrain = GetComponent<Terrain>();
+            terrain.terrainData = Instantiate(terrain.terrainData);
+            GetComponent<TerrainCollider>().terrainData = terrain.terrainData;
+
             float[,] heights = new float[terrain.terrainData.heightmapWidth, terrain.terrainData.heightmapHeight];
 
             for (int i = 0; i < terrain.terrainData.heightmapWidth; i++) { 
@@ -89,8 +74,14 @@ namespace Neolithica.MonoBehaviours {
 
             terrain.terrainData.SetHeights(0, 0, heights);
             GenerateSplatMap();
-            GenerateResources();
+        }
 
+        /// <summary>
+        /// Clears current resources (and doodads) and regenerates new ones
+        /// </summary>
+        public void GenerateResourcesAndDoodads() {
+            ClearResources();
+            SpawnResourcesAndDoodads();
             ClusterResources(trees, 200.0f, 3.0f);
             ClusterResources(berries, 400.0f, 12.0f);
         }
@@ -101,7 +92,7 @@ namespace Neolithica.MonoBehaviours {
         /// <param name="objects"></param>
         /// <param name="maxDist">The maximum distance on the XZ plane to consider objects at</param>
         /// <param name="bias"></param>
-        public void ClusterResources(IEnumerable<GameObject> objects, float maxDist, float bias) {
+        public void ClusterResources(ICollection<GameObject> objects, float maxDist, float bias) {
 
             //put the XZ coordinates in a dictionary by InstanceID so that we
             //can tell which object we are comparing with
@@ -141,7 +132,7 @@ namespace Neolithica.MonoBehaviours {
         public float interp(float a, float b, float c) {
             float t = (c - a) / (b - a);//linear interpolation
 
-            if (cosineTerrain) {
+            if (terrainSettings.cosineTerrain) {
                 t = 0.5f - Mathf.Cos(Mathf.PI * t) / 2.0f;//convert to cosine interpolation
             }
 
@@ -149,18 +140,18 @@ namespace Neolithica.MonoBehaviours {
         }
 
         private Vector3 randomizePosition(float x, float y, TerrainData terrainData) {
-            float angle = Mathf.PerlinNoise(floatSeed + 65 * x, floatSeed + 65 * y);
-            float amplitutue = Mathf.PerlinNoise(floatSeed + 25 * x, floatSeed + 25 * y);
+            float angle = Mathf.PerlinNoise(settings.seed + 65 * x, settings.seed + 65 * y);
+            float amplitutue = Mathf.PerlinNoise(settings.seed + 25 * x, settings.seed + 25 * y);
             return    transform.position
                       + new Vector3(x * terrainData.size.x, 30.0f, y * terrainData.size.z)
                       + Quaternion.Euler(0, 720 * angle, 0) * new Vector3(0, 0, amplitutue * 24);
         }
 
         private GameObject AttemptPlaceTrees(float x, float y, GameObject prefab, float waterLevel, TerrainData terrainData) {
-            float noise = Mathf.PerlinNoise(floatSeed + 9 * x, floatSeed + 9 * y);
+            float noise = Mathf.PerlinNoise(settings.seed + 9 * x, settings.seed + 9 * y);
             float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth),
                 Mathf.RoundToInt(y * terrainData.heightmapHeight));
-            if (height > waterLevel && noise > height*treeMultiplier) {
+            if (height > waterLevel && noise > height*settings.treeMultiplier) {
                 Vector3 newPosition = randomizePosition(x, y, terrainData);
                 GameObject newTree = GameController.Factory.Instantiate(prefab);
                 newTree.transform.position = newPosition;
@@ -171,10 +162,10 @@ namespace Neolithica.MonoBehaviours {
         }
 
         private GameObject AttemptPlaceBerries(float x, float y, GameObject prefab, float waterLevel, TerrainData terrainData) {
-            float noise = Mathf.PerlinNoise(floatSeed + 17.5f * x, floatSeed + 17.5f * y);
+            float noise = Mathf.PerlinNoise(settings.seed + 17.5f * x, settings.seed + 17.5f * y);
             float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth),
                 Mathf.RoundToInt(y * terrainData.heightmapHeight));
-            if (height > waterLevel && noise > height * berryMultiplier) {
+            if (height > waterLevel && noise > height * settings.berryMultiplier) {
                 Vector3 newPosition = randomizePosition(x, y, terrainData);
                 GameObject newObject = GameController.Factory.Instantiate(prefab);
                 newObject.transform.position = newPosition;
@@ -185,11 +176,11 @@ namespace Neolithica.MonoBehaviours {
         }
 
         private GameObject AttemptPlaceStoneOrGold(float x, float y, GameObject[] prefabs, float waterLevel, TerrainData terrainData) {
-            float noise = Mathf.PerlinNoise(floatSeed + 29.5f * x, floatSeed*2 + 29.5f * y);
-            float noise2 = Mathf.PerlinNoise(floatSeed*2 + 29.5f * x, floatSeed * 3 + 29.5f * y);
+            float noise = Mathf.PerlinNoise(settings.seed + 29.5f * x, settings.seed*2 + 29.5f * y);
+            float noise2 = Mathf.PerlinNoise(settings.seed*2 + 29.5f * x, settings.seed * 3 + 29.5f * y);
             float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth),
                 Mathf.RoundToInt(y * terrainData.heightmapHeight));
-            if (height > waterLevel && noise < stoneRate) {
+            if (height > waterLevel && noise < settings.stoneRate) {
                 Vector3 newPosition = randomizePosition(x, y, terrainData);
                 int index = (int)(noise2 * prefabs.Length)%prefabs.Length;
                 GameObject newObject = GameController.Factory.Instantiate(prefabs[index]);
@@ -201,10 +192,10 @@ namespace Neolithica.MonoBehaviours {
         }
 
         private GameObject AttemptPlaceFish(float x, float y, GameObject prefab, float waterLevel, TerrainData terrainData) {
-            float noise = Mathf.PerlinNoise(floatSeed*2 + 25.5f * x, floatSeed + 25.5f * y);
+            float noise = Mathf.PerlinNoise(settings.seed*2 + 25.5f * x, settings.seed + 25.5f * y);
             float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth),
                 Mathf.RoundToInt(y * terrainData.heightmapHeight));
-            if (height < waterLevel && noise < fishRate) {
+            if (height < waterLevel && noise < settings.fishRate) {
                 Vector3 newPosition = randomizePosition(x, y, terrainData);
                 GameObject newObject = GameController.Factory.Instantiate(prefab);
                 newObject.transform.position = new Vector3(newPosition.x, waterLevel, newPosition.z);
@@ -215,11 +206,11 @@ namespace Neolithica.MonoBehaviours {
         }
 
         private GameObject AttemptPlaceDoodad(float x, float y, GameObject[] prefabs, float waterLevel, TerrainData terrainData) {
-            float noise = Mathf.PerlinNoise(floatSeed * 5 + 70f * x, floatSeed * 4 + 70f * y);
-            float noise2 = Mathf.PerlinNoise(floatSeed * 6 + 70f * x, floatSeed * 7 + 70f * y);
+            float noise = Mathf.PerlinNoise(settings.seed * 5 + 70f * x, settings.seed * 4 + 70f * y);
+            float noise2 = Mathf.PerlinNoise(settings.seed * 6 + 70f * x, settings.seed * 7 + 70f * y);
             float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth),
                 Mathf.RoundToInt(y * terrainData.heightmapHeight));
-            if (height > waterLevel && noise < doodadRate) {
+            if (height > waterLevel && noise < settings.doodadRate) {
                 Vector3 newPosition = randomizePosition(x, y, terrainData);
                 int index = (int)(noise2 * prefabs.Length) % prefabs.Length;
                 GameObject newObject = GameController.Factory.Instantiate(prefabs[index]);
@@ -247,7 +238,7 @@ namespace Neolithica.MonoBehaviours {
 #if UNITY_EDITOR
                 DestroyImmediate(go);
 #else
-            Destroy(go);
+                Destroy(go);
 #endif
             }
 
@@ -256,12 +247,12 @@ namespace Neolithica.MonoBehaviours {
         }
 
 
-        public void GenerateResources() {
+        public void SpawnResourcesAndDoodads() {
             Transform resources = transform.Find("Resources");
             Transform doodads = transform.Find("Doodads");
             ClearResources();
 
-            //load prefabs
+            //locate prefabs and scene objects
             GameObject water = GameObject.Find("Water4Simple");
             GameObject tree = (GameObject)Resources.Load("Buildings/WoodSource");
             GameObject stoneRocks = (GameObject)Resources.Load("Buildings/StoneRocks");
@@ -269,7 +260,7 @@ namespace Neolithica.MonoBehaviours {
             GameObject fish = (GameObject)Resources.Load("Prefabs/FishingHole");
             GameObject berriesPrefab = (GameObject)Resources.Load("Buildings/ForagingGround");
 
-            GameObject[] doodadPrefabs = new GameObject[] {
+            GameObject[] doodadPrefabs = {
                 (GameObject)Resources.Load("Doodads/DeadTree6"),
                 (GameObject)Resources.Load("Doodads/DeadTree7"),
                 (GameObject)Resources.Load("Doodads/Smallbush4"),
@@ -306,8 +297,8 @@ namespace Neolithica.MonoBehaviours {
         public void GenerateSplatMap() {
             Terrain terrain = GetComponent<Terrain>();
             TerrainData terrainData = terrain.terrainData;
+            const bool c_doInterpolation = true;
 
-            // Splatmap data is stored internally as a 3d array of floats, so declare a new empty array ready for your custom splatmap data:
             float[,,] splatmapData = new float[terrainData.alphamapWidth, terrainData.alphamapHeight, terrainData.alphamapLayers];
 
             for (int y = 0; y < terrainData.alphamapHeight; y++) {
@@ -328,29 +319,27 @@ namespace Neolithica.MonoBehaviours {
                     splatWeights[2] = 0.0f;
                     splatWeights[3] = 0.0f;
 
-                    bool doInterpolation = true;
-
                     splatWeights[0] = splatWeights[1] = splatWeights[2] = splatWeights[3] = 0.0f;
                     float h = height;
                     if (h > snowThreshold) {
                         splatWeights[3] = 1.0f;
                     } else if (h > stoneThreshhold) {
                         splatWeights[2] = 1.0f;
-                        if (doInterpolation) {
+                        if (c_doInterpolation) {
                             float factor = interp(stoneThreshhold, snowThreshold, h);
                             splatWeights[3] = factor;
                             splatWeights[2] = 1.0f - factor;
                         }
                     } else if (h > grassThreshold || h < waterLevel) {
                         splatWeights[1] = 1.0f;
-                        if (doInterpolation) {
+                        if (c_doInterpolation) {
                             float factor = interp(grassThreshold, stoneThreshhold, h);
                             splatWeights[2] = factor;
                             splatWeights[1] = 1.0f - factor;
                         }
                     } else {
                         splatWeights[0] = 1.0f;
-                        if (doInterpolation) {
+                        if (c_doInterpolation) {
                             float factor = interp(waterLevel, grassThreshold, h);
                             splatWeights[1] = factor;
                             splatWeights[0] = 1.0f - factor;
@@ -372,10 +361,6 @@ namespace Neolithica.MonoBehaviours {
 
             // Finally assign the new splatmap to the terrainData:
             terrainData.SetAlphamaps(0, 0, splatmapData);
-        }
-
-        void Start() {
-            //RandomizeTerrain();
         }
 
         public void OnPointerDown(PointerEventData eventData) {
