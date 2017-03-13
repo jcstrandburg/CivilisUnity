@@ -1,29 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using AqlaSerializer;
 using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
-using Neolithica.Serialization.Attributes;
 using UnityEngine;
 
 namespace Neolithica.Orders.Super {
     /// <summary>
     /// Base class for stateful orders with multiple steps
     /// </summary>
+    [SerializableType]
+    [SerializeDerivedType(10, typeof(ConstructOrder))]
+    [SerializeDerivedType(11, typeof(FetchAvailableResourceOrder))]
+    [SerializeDerivedType(12, typeof(FishOrder))]
+    [SerializeDerivedType(13, typeof(HarvestFromReservoirOrder))]
+    [SerializeDerivedType(14, typeof(HuntOrder))]
+    [SerializeDerivedType(15, typeof(StoreCarriedResourceOrder))]
+    [SerializeDerivedType(16, typeof(TransmuteOrder))]
+    [SerializeDerivedType(17, typeof(UpgradeReservoirOrder))]
     public abstract class StatefulSuperOrder : BaseOrder {
-        public BaseOrder currentOrder = null;
-        public string currentState;
-        [DontSaveField]
-        private IDictionary<string, OrderStateInfo> states = null;
-
-        protected IDictionary<string, OrderStateInfo> States {
-            get {
-                if (states == null) {
-                    states = new Dictionary<string, OrderStateInfo>();
-                    CreateStates();
-                }
-                return states;
-            }
-        }
+        [SerializableMember(1)] public BaseOrder currentOrder = null;
+        [SerializableMember(2)] public string currentState;
 
         public StatefulSuperOrder(ActorController a) : base(a) {
         }
@@ -42,32 +39,32 @@ namespace Neolithica.Orders.Super {
                 //check to see if order is done somehow
                 if (currentOrder.Done) {
                     OrderStateInfo info = States[currentState];
-                    if (currentOrder.completed) {
+                    if (currentOrder.Completed) {
                         if (info.completeState != null) {
                             info.completeState();
                         }
                         else {
-                            this.failed = true;
+                            this.Failed = true;
                             Debug.Log("No complete transition available for state: " + currentState);
                         }
                     }
-                    else if (currentOrder.failed) {
+                    else if (currentOrder.Failed) {
                         if (info.failState != null) {
                             info.failState();
                         }
                         else {
-                            this.failed = true;
+                            this.Failed = true;
                             Debug.Log("No failure transition available for state: " + currentState);
                         }
                     }
-                    else if (currentOrder.cancelled) {
+                    else if (currentOrder.Cancelled) {
                         throw new Exception("Order exectution cannot continue when sub order is cancelled!");
                     }
                 }
             }
             else {
                 Debug.Log("currentOrder is null!");
-                this.failed = true;
+                this.Failed = true;
             }
         }
 
@@ -82,5 +79,17 @@ namespace Neolithica.Orders.Super {
                 throw new ArgumentOutOfRangeException("Nonexistant order state: " + state);
             }
         }
+
+        protected Dictionary<string, OrderStateInfo> States {
+            get {
+                if (states == null) {
+                    states = new Dictionary<string, OrderStateInfo>();
+                    CreateStates();
+                }
+                return states;
+            }
+        }
+
+        private Dictionary<string, OrderStateInfo> states = null;
     }
 }

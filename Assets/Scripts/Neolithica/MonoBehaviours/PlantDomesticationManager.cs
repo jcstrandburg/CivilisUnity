@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using Tofu.Serialization;
+using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(8)]
     public class PlantDomesticationManager : MonoBehaviour {
 
         private bool forestGardensEnabled = false;
@@ -28,7 +30,7 @@ namespace Neolithica.MonoBehaviours {
         /// Event handler for when the vegetables harvested stat changes
         /// </summary>
         /// <param name="s"></param>
-        public void OnVegetablesHarvestedChange(GameStat s) {
+        public void OnVegetablesHarvestedChange(IGameStat s) {
             if ((double)s.Value >= forestGardenThreshold) {
                 EnableForestGardens();
             }

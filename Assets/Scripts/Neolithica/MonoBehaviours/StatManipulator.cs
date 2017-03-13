@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using Tofu.Serialization;
+using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(5)]
     public class StatManipulator : MonoBehaviour {
 
         public enum TriggerType {

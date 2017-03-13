@@ -106,7 +106,6 @@ namespace Neolithica.Test.Editor {
 
         [Test]
         public void TestDestroyNetworkPreservesNodes() {
-            var manager = MakeTestComponent<LogisticsManager>();
             var network = MakeTestComponent<LogisticsNetwork>();
             var node = MakeTestComponent<LogisticsNode>();
 

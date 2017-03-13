@@ -3,35 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using Neolithica.MonoBehaviours.Reservations;
 using Neolithica.ScriptableObjects;
-using Neolithica.Serialization.Attributes;
+using Tofu.Serialization;
 using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(14)]
     public class ConstructionManager : MonoBehaviour {
-        [SerializeField]
-        private bool instabuild = false;
-        [SerializeField]
-        private List<string> techRequirements = new List<string>();
-        [SerializeField]
-        private BuildingRequirement[] statRequirements;
-        [SerializeField]
-        private BuildingRequirement[] resourceRequirements;
-        [SerializeField]
-        private List<ConstructionReservation> reservations;
-        [SerializeField]
-        private BuildingRequirement[] unfilledResourceReqs;
+        [SerializeField] private bool instabuild = false;
+        [SerializeField] private List<string> techRequirements = new List<string>();
+        [SerializeField] private BuildingRequirement[] statRequirements;
+        [SerializeField] private BuildingRequirement[] resourceRequirements;
+        [SerializeField] private List<ConstructionReservation> reservations;
+        [SerializeField] private BuildingRequirement[] unfilledResourceReqs;
 
-        [SerializeField]
-        [DontSaveField]
-        private ActionProfile cachedActionProfile;
+        [SerializeField] private ActionProfile cachedActionProfile;
+        [SerializeField] private List<MonoBehaviour> cachedComponents;
 
-        [SerializeField]
-        private List<MonoBehaviour> cachedComponents;
-
-        [Inject]
-        public GameController GameController { get; set; }
-        [Inject]
-        public GroundController GroundController { get; set; }
+        [Inject] public GameController GameController { get; set; }
+        [Inject] public GroundController GroundController { get; set; }
 
         // Handles Start event
         public void Start() {
@@ -116,7 +105,7 @@ namespace Neolithica.MonoBehaviours {
             if (instabuild) {
                 var availResources = GameController.GetAllAvailableResources();
                 foreach (var r in resourceRequirements) {
-                    var type = (Resource.Type) Enum.Parse(typeof(Resource.Type), r.name);
+                    var type = (ResourceKind) Enum.Parse(typeof(ResourceKind), r.name);
                     if (  !availResources.ContainsKey(type) 
                           || availResources[type] < r.amount) 
                     {
@@ -156,7 +145,7 @@ namespace Neolithica.MonoBehaviours {
         public void StartConstruction() {
             if (instabuild) {
                 foreach (var r in resourceRequirements) {
-                    var resourceType = (Resource.Type)Enum.Parse(typeof(Resource.Type), r.name);
+                    var resourceType = (ResourceKind)Enum.Parse(typeof(ResourceKind), r.name);
                     var rp = new ResourceProfile(resourceType, r.amount);
                     if (!GameController.WithdrawFromAnyWarehouse(rp)) {
                         throw new InvalidOperationException("Failed to build building, unable to withdraw "+r.name);
@@ -202,7 +191,7 @@ namespace Neolithica.MonoBehaviours {
                     Debug.Log("Making a ConstructionReservation");
                     var res = actor.gameObject.AddComponent<ConstructionReservation>();
                     reservations.Add(res);
-                    res.resourceType = resourceType;
+                    res.resourceResourceKind = resourceType;
                     res.amount = 1;
                     return true;
                 }
@@ -213,17 +202,17 @@ namespace Neolithica.MonoBehaviours {
         /// <summary>
         /// Gets the total resources still needed to complete construction
         /// </summary>
-        /// <param name="resourceType"></param>
+        /// <param name="resourceResourceKind"></param>
         /// <returns>Resources needed to complete construction</returns>
-        public double GetNeededResource(Resource.Type resourceType) {
+        public double GetNeededResource(ResourceKind resourceResourceKind) {
             double needed = 0;
             foreach (var requirement in unfilledResourceReqs) {
-                if (requirement.name == resourceType.ToString()) {
+                if (requirement.name == resourceResourceKind.ToString()) {
                     needed += requirement.amount;
                 }
             }
             foreach (var res in reservations) {
-                if (    res.resourceType == resourceType 
+                if (    res.resourceResourceKind == resourceResourceKind 
                         && !res.Released 
                         && !res.Cancelled)
                 {
@@ -242,7 +231,7 @@ namespace Neolithica.MonoBehaviours {
                 throw new ArgumentException("Reservation does not belong to this construction object");
             }
 
-            var requirement = unfilledResourceReqs.Single(r => r.name == res.resourceType.ToString());
+            var requirement = unfilledResourceReqs.Single(r => r.name == res.resourceResourceKind.ToString());
             res.Released = true;
             requirement.amount -= res.amount;
             reservations.Remove(res);

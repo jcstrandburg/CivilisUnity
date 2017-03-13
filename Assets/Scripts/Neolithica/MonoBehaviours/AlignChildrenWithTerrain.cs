@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using Tofu.Serialization;
+using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
+    [DontSave]
     public class AlignChildrenWithTerrain : MonoBehaviour {
 
         private Vector3 origin;//our current position as snapped to ground

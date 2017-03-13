@@ -1,20 +1,21 @@
 ﻿using System;
+using AqlaSerializer;
 using Neolithica.MonoBehaviours;
 
 namespace Neolithica {
-    [Serializable]
+    [SerializableType]
     public class ResourceProfile : ICloneable {
 
-        public ResourceProfile(Resource.Type type, double a) {
-            this.type = type;
-            amount = a;
+        public ResourceProfile(ResourceKind resourceKind, double amount) {
+            ResourceKind = resourceKind;
+            Amount = amount;
         }
 
         public object Clone() {
             return MemberwiseClone();
         }
 
-        public Resource.Type type;
-        public double amount;
+        [SerializableMember(1)] public ResourceKind ResourceKind;
+        [SerializableMember(2)] public double Amount;
     }
 }

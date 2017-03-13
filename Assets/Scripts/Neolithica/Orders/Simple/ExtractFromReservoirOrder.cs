@@ -1,4 +1,5 @@
-﻿using Neolithica.MonoBehaviours;
+﻿using AqlaSerializer;
+using Neolithica.MonoBehaviours;
 using Neolithica.MonoBehaviours.Reservations;
 using UnityEngine;
 
@@ -6,10 +7,12 @@ namespace Neolithica.Orders.Simple {
     /// <summary>
     /// Order to extract resources from the given target object
     /// </summary>
+    [SerializableType]
     public class ExtractFromReservoirOrder : BaseOrder {
-        float progress;
-        NeolithicObject target;
-        ResourceReservation reservation;
+        [SerializableMember(1)]
+        private float progress;
+        [SerializableMember(2)]
+        private readonly ResourceReservation reservation;
 
         public ExtractFromReservoirOrder(ActorController a, ResourceReservation res) : base(a) {
             a.GetComponent<NeolithicObject>().statusString = "Extracting resource";
@@ -21,9 +24,9 @@ namespace Neolithica.Orders.Simple {
             if (progress >= 1.0f) {
                 Reservoir reservoir = reservation.source.GetComponent<Reservoir>();
                 reservoir.WithdrawReservation(reservation);
-                Resource res = actor.GameController.CreateResourcePile(reservoir.resourceType, 1);
-                actor.PickupResource(res);
-                completed = true;
+                Resource res = Actor.GameController.CreateResourcePile(reservoir.resourceResourceKind, 1);
+                Actor.PickupResource(res);
+                Completed = true;
             }
         }
     }

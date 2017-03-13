@@ -7,13 +7,11 @@ using Neolithica.ScriptableObjects;
 using UnityEngine;
 using UnityEngine.UI;
 
-[assembly: AssemblyVersion("0.2.3.*")]
-
 namespace Neolithica.UI {
     /// <summary>
     /// Manages game UI functionality
     /// </summary>
-    public class GameUiController : MonoBehaviour {
+    public class GameUIController : MonoBehaviour {
 
         GameObject contextMenu;
         public SelectionMenuController selectionMenu;

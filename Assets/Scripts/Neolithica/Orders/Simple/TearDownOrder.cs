@@ -1,12 +1,15 @@
-﻿using Neolithica.MonoBehaviours;
+﻿using AqlaSerializer;
+using Neolithica.MonoBehaviours;
 using UnityEngine;
 
 namespace Neolithica.Orders.Simple {
     /// <summary>
     /// Order to tear down the base camp (or any other building)
     /// </summary>
+    [SerializableType]
     public class TearDownOrder : BaseOrder {
-        NeolithicObject target;
+        [SerializableMember(1)]
+        private NeolithicObject target;
 
         public TearDownOrder(ActorController a, NeolithicObject target) : base(a) {
             a.GetComponent<NeolithicObject>().statusString = "Tearing down "+target.name;
@@ -14,10 +17,10 @@ namespace Neolithica.Orders.Simple {
         }
 
         public override void DoStep() {
-            if (actor.MoveTowards(target.transform.position)) {
+            if (Actor.MoveTowards(target.transform.position)) {
                 target.gameObject.SendMessage("OnTearDown");
                 Object.Destroy(target.gameObject);
-                this.completed = true;
+                this.Completed = true;
             }
         }
     }

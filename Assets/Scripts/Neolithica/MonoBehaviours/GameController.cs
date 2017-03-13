@@ -1,26 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Neolithica.DependencyInjection;
 using Neolithica.MonoBehaviours.Logistics;
 using Neolithica.MonoBehaviours.Reservations;
 using Neolithica.Orders.Simple;
 using Neolithica.Orders.Super;
 using Neolithica.ScriptableObjects;
-using Neolithica.Serialization;
 using Neolithica.UI;
+using Tofu.Serialization;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Debug = UnityEngine.Debug;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(11)]
     public class GameController : MonoBehaviour {
         /// <summary>A list containing all selected NeolithicObjects</summary>
         public List<NeolithicObject> selected = new List<NeolithicObject>();
-
-        /// <summary>Marquee select start</summary>
-        Vector2 boxStart;
-        /// <summary>Marquee select end</summary>
-        Vector2 boxEnd;
         /// <summary>Is marquee select active</summary>
         public bool boxActive = false;
         /// <summary>Should current selection remain when new objects are selected</summary>
@@ -30,7 +27,7 @@ namespace Neolithica.MonoBehaviours {
         /// <summary>Manages technology tree</summary>
         public TechManager TechManager;
         /// <summary>Manages creation of objects, dependency injection, etc</summary>
-        public GameFactory Factory = new GameFactory();
+        public GameFactoryBase Factory;
         /// <summary>Actions that no actor can currently take</summary>
         public List<CommandType> ForbiddenActions;
 
@@ -45,33 +42,24 @@ namespace Neolithica.MonoBehaviours {
             }
         }
 
-        [Inject]
-        public GameUiController GuiController { get; set; }
-        [Inject]
-        public GroundController GroundController { get; set; }
-        [Inject]
-        public StatManager StatManager { get; set; }
-        [Inject]
-        public SaverLoader SaverLoader { get; set; }
-        [Inject]
-        public MenuManager MenuManager { get; set; }
-        [Inject]
-        public LogisticsManager LogisticsManager { get; set; }
-        [Inject]
-        public DayCycleController DayCycleController { get; set; }
+        [Inject] public GameUIController GuiController { get; set; }
+        [Inject] public GroundController GroundController { get; set; }
+        [Inject] public StatManager StatManager { get; set; }
+        [Inject] public SaverLoader SaverLoader { get; set; }
+        [Inject] public MenuManager MenuManager { get; set; }
+        [Inject] public LogisticsManager LogisticsManager { get; set; }
+        [Inject] public DayCycleController DayCycleController { get; set; }
 
         public float Spirit { get; set; }
 
+        // TODO this should probably just be an injected auto-property but I don't want to test it right now
         [Inject]
         public BuildingBlueprint buildingPlacer;
         /// <summary>Manages the BuildingPlueprint object. If no other placer is provided one will be found in the scene.</summary>
         private BuildingBlueprint BuildingPlacer {
             get {
                 if (buildingPlacer == null) {
-                    BuildingBlueprint[] bbps = FindObjectsOfType<BuildingBlueprint>();
-                    if (bbps.Length > 0) {
-                        buildingPlacer = bbps[0];
-                    }
+                    buildingPlacer = FindObjectsOfType<BuildingBlueprint>().Single();
                 }
                 return buildingPlacer;
             }
@@ -79,25 +67,20 @@ namespace Neolithica.MonoBehaviours {
 
         // Handles Awake event
         public void Awake() {
+            Factory = new MainGameFactory(gameObject);
             var techs = Resources.LoadAll("Techs", typeof(Technology)).Select(t => (Technology)t).ToArray();
             TechManager = new TechManager();
-            TechManager.LoadArray(techs);
+            TechManager.LoadTechs(techs);
 
-            resourcePrefabs = new List<Resource>();
-            var allFiles = Resources.LoadAll<UnityEngine.Object>("");
-            resourcePrefabs = allFiles
-                .Where(obj => (obj is GameObject && ((GameObject)obj).GetComponent<Resource>() != null))
-                .Select(obj => ((GameObject)obj).GetComponent<Resource>())
-                .ToList<Resource>();
-
-            InitializeAllObjects();
+            resourcePrefabs = Resources.LoadAll<Resource>("").ToList();
+            InjectAllObjects();
         }
 
         // Handles Start event
         public void Start () {
         }
 
-        public void InitializeAllObjects() {
+        public void InjectAllObjects() {
             var gameObjects = FindObjectsOfType<GameObject>().Where(x => x.activeInHierarchy && x.transform.parent == null).ToArray();
             foreach (var go in gameObjects) {
                 go.BroadcastMessage("BeforeInject", SendMessageOptions.DontRequireReceiver);
@@ -237,14 +220,14 @@ namespace Neolithica.MonoBehaviours {
         public bool WithdrawFromAnyWarehouse(ResourceProfile rp) {
             var warehouses = FindObjectsOfType<Warehouse>();
             foreach (var w in warehouses) {
-                double avail = w.GetAvailableContents(rp.type);
-                double amount = (rp.amount < avail ? rp.amount : avail);
+                double avail = w.GetAvailableContents(rp.ResourceKind);
+                double amount = (rp.Amount < avail ? rp.Amount : avail);
                 if (amount > 0) {
-                    w.WithdrawContents(rp.type, amount);
-                    rp.amount -= amount;
+                    w.WithdrawContents(rp.ResourceKind, amount);
+                    rp.Amount -= amount;
                 }
 
-                if (rp.amount <= 0) {
+                if (rp.Amount <= 0) {
                     return true;
                 }
             }
@@ -255,9 +238,10 @@ namespace Neolithica.MonoBehaviours {
         /// Gets all available contents in all warehouses in game total
         /// </summary>
         /// <returns></returns>
-        public Dictionary<Resource.Type, double> GetAllAvailableResources() {
-            var d = new Dictionary<Resource.Type, double>();
+        public Dictionary<ResourceKind, double> GetAllAvailableResources() {
+            var d = new Dictionary<ResourceKind, double>();
             var warehouses = FindObjectsOfType<Warehouse>();
+
             foreach (var w in warehouses) {
                 var x = w.GetAllAvailableContents();
                 foreach (var kvp in x) {
@@ -428,7 +412,7 @@ namespace Neolithica.MonoBehaviours {
                         newOrder = new HarvestFromReservoirOrder(actor, target);
                         break;
                     case CommandType.ChuckWood:
-                        newOrder = new TransmuteOrder(actor, target, Resource.Type.Wood, Resource.Type.Gold);
+                        newOrder = new TransmuteOrder(actor, target, ResourceKind.Wood, ResourceKind.Gold);
                         break;
                     case CommandType.Meditate:
                         newOrder = new MeditateOrder(actor, target);
@@ -508,16 +492,16 @@ namespace Neolithica.MonoBehaviours {
         /// Gets a resource reservation from any available warehouse and attaches it to the given actor
         /// </summary>
         /// <param name="a"></param>
-        /// <param name="type"></param>
+        /// <param name="resourceKind"></param>
         /// <param name="amount"></param>
         /// <returns>The reservation created, or null on failure</returns>
-        public ResourceReservation ReserveWarehouseResources(ActorController a, Resource.Type type, double amount) {
+        public ResourceReservation ReserveWarehouseResources(ActorController a, ResourceKind resourceKind, double amount) {
             var la = a.GetComponent<LogisticsActor>();
             var network = la.logisticsManager.FindNearestNetwork(a.transform.position);
 
             Warehouse[] warehouses = network.FindComponents<Warehouse>();
             foreach (Warehouse w in warehouses) {
-                if (w.ReserveContents(a.gameObject, type, amount)) {
+                if (w.ReserveContents(a.gameObject, resourceKind, amount)) {
                     return a.resourceReservation;
                 }
             }
@@ -528,17 +512,17 @@ namespace Neolithica.MonoBehaviours {
         /// Gets a storage reservation and attaches it to the given actor.
         /// </summary>
         /// <param name="a"></param>
-        /// <param name="type"></param>
+        /// <param name="resourceKind"></param>
         /// <param name="amount"></param>
         /// <returns>The reservaton created, or null on failure</returns>
-        public StorageReservation ReserveStorage(ActorController a, Resource.Type type, double amount) {
+        public StorageReservation ReserveStorage(ActorController a, ResourceKind resourceKind, double amount) {
             var la = a.GetComponent<LogisticsActor>();
             var manager = la.logisticsManager;
             var network = manager.FindNearestNetwork(a.transform.position);
             if (network != null) {
                 Warehouse[] warehouses = network.FindComponents<Warehouse>();
                 foreach (Warehouse w in warehouses) {
-                    if (w.ReserveStorage(a.gameObject, type, amount)) {
+                    if (w.ReserveStorage(a.gameObject, resourceKind, amount)) {
                         return a.GetComponent<StorageReservation>();
                     }
                 }
@@ -551,33 +535,33 @@ namespace Neolithica.MonoBehaviours {
         /// <summary>
         /// Creates a new resource pile
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="resourceKind"></param>
         /// <param name="amount"></param>
         /// <returns>A reference to the new pile's GameObject</returns>
-        public Resource CreateResourcePile(Resource.Type type, double amount) {
+        public Resource CreateResourcePile(ResourceKind resourceKind, double amount) {
             foreach (Resource g in resourcePrefabs) {
-                if (g.type == type) {
+                if (g.resourceKind == resourceKind) {
                     GameObject pile = Factory.Instantiate(g.gameObject);
                     Resource r = pile.GetComponent<Resource>();
                     r.amount = amount;
                     return r;
                 }
             }
-            throw new ArgumentException("Unable to location prefab for resource tag " + type);
+            throw new ArgumentException(string.Format("Unable to locate prefab for resource tag {0}", resourceKind), "resourceKind");
         }
 
         /// <summary>
         /// Saves the game to the default quickload save file
         /// </summary>
         public void QuickSave() {
-            GetComponent<SaverLoader>().SaveGame();
+            SaverLoader.SaveGame();
         }
 
         /// <summary>
         /// Loades the game from the default quickload save file
         /// </summary>
         public void QuickLoad() {
-            GetComponent<SaverLoader>().LoadGame();
+            SaverLoader.LoadGame();
         }
 
         /// <summary>
@@ -590,5 +574,10 @@ namespace Neolithica.MonoBehaviours {
             var toast = Factory.Instantiate(prefab);
             toast.GetComponent<Toast>().Init(pos, message);
         }
+
+        /// <summary>Marquee select start</summary>
+        private Vector2 boxStart;
+        /// <summary>Marquee select end</summary>
+        private Vector2 boxEnd;
     }
 }

@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using Tofu.Serialization;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(4)]
     public class SubMenuController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
         public GameObject buttonPrefab;

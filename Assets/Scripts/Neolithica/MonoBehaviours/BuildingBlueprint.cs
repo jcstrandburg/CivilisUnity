@@ -3,12 +3,8 @@
 namespace Neolithica.MonoBehaviours {
     public class BuildingBlueprint : MonoBehaviour {
 
-        ConstructionManager constructMe;
-
-        GameObject prefab;
-
         // Use this for initialization
-        void Start () {
+        public void Start () {
             constructMe = null;
         }
 
@@ -22,9 +18,9 @@ namespace Neolithica.MonoBehaviours {
             GameObject go = GameController.Instance.Factory.Instantiate(prefab);
 
             constructMe = go.GetComponent<ConstructionManager>();
-            constructMe.transform.position = transform.position;
             constructMe.StartPlacement();
             go.transform.SetParent(transform);
+            constructMe.transform.localPosition = Vector3.zero;
         }
 
         public void Deactivate() {
@@ -33,7 +29,7 @@ namespace Neolithica.MonoBehaviours {
 
 
         // Update is called once per frame
-        void Update() {
+        public void Update() {
             if (constructMe == null) {
                 return;
             }
@@ -47,23 +43,26 @@ namespace Neolithica.MonoBehaviours {
 
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
-            if (Physics.Raycast(Camera.main.transform.position, ray.direction, out hit, Mathf.Infinity, 1 << LayerMask.NameToLayer("Terrain"))) {
-                transform.position = hit.point;
-                bool elligible = constructMe.IsBuildable(transform.position);
-                if (elligible) {
-                    constructMe.GhostGood();
-                    if (Input.GetMouseButtonDown(0)) {
-                        constructMe.transform.SetParent(null);
-                        constructMe.StartConstruction();
-                        Deactivate();
-                    }
-                } else {
-                    constructMe.GhostBad();
-                }
-            }
-            else {
 
+            if (!Physics.Raycast(Camera.main.transform.position, ray.direction, out hit, Mathf.Infinity,1 << LayerMask.NameToLayer("Terrain")))
+                return;
+
+            transform.position = hit.point;
+            constructMe.transform.localPosition = Vector3.zero;
+
+            if (constructMe.IsBuildable(transform.position)) {
+                constructMe.GhostGood();
+
+                if (Input.GetMouseButtonDown(0)) {
+                    constructMe.transform.SetParent(GameController.Instance.transform);
+                    constructMe.StartConstruction();
+                    Deactivate();
+                }
+            } else {
+                constructMe.GhostBad();
             }
         }
+
+        private ConstructionManager constructMe;
     }
 }

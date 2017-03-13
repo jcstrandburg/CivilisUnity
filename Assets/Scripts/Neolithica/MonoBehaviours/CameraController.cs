@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using Tofu.Serialization;
+using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(15)]
     public class CameraController : MonoBehaviour {
         //scroll speed dampener
         public float transformSpeed; 

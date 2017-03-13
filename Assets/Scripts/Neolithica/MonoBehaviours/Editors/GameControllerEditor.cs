@@ -11,7 +11,7 @@ namespace Neolithica.MonoBehaviours.Editors {
         }
 
         public void OnEnable() {
-            Controller.InitializeAllObjects();
+            Controller.InjectAllObjects();
         }
 
         public override void OnInspectorGUI() {
@@ -23,7 +23,7 @@ namespace Neolithica.MonoBehaviours.Editors {
                 }
             }
             if (GUILayout.Button("Initialize All Objects")) {
-                Controller.InitializeAllObjects();
+                Controller.InjectAllObjects();
             }
         }
     }

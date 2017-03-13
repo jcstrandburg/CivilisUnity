@@ -1,9 +1,12 @@
-﻿using Neolithica.MonoBehaviours;
+﻿using AqlaSerializer;
+using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
 
 namespace Neolithica.Orders.Super {
+    [SerializableType]
     public class FishOrder : StatefulSuperOrder {
-        NeolithicObject target;
+        [SerializableMember(1)]
+        private NeolithicObject target;
 
         public FishOrder(ActorController a, NeolithicObject target) : base(a) {
             this.target = target;
@@ -11,23 +14,23 @@ namespace Neolithica.Orders.Super {
         }
 
         public override void Initialize() {
-            actor.DropCarriedResource();
+            Actor.DropCarriedResource();
         }
 
         protected override void CreateStates() {
             CreateState(
                 "seekTarget", 
-                () => new SimpleMoveOrder(actor, target.transform.position, 20.0f), 
+                () => new SimpleMoveOrder(Actor, target.transform.position, 20.0f), 
                 () => GoToState("getResource"), 
                 null);
             CreateState(
                 "getResource", 
-                () => new CatchFishOrder(actor, target),
+                () => new CatchFishOrder(Actor, target),
                 () => GoToState("storeResource"),
                 null);
             CreateState(
                 "storeResource",
-                () => new StoreCarriedResourceOrder(actor),
+                () => new StoreCarriedResourceOrder(Actor),
                 () => GoToState("seekTarget"),
                 null);
         }

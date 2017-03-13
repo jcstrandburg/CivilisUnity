@@ -1,7 +1,6 @@
 ﻿using System;
 using Neolithica.MonoBehaviours;
 using Neolithica.ScriptableObjects;
-using Neolithica.Serialization;
 using UnityEngine;
 
 namespace Neolithica.Test.Mono {
@@ -9,24 +8,6 @@ namespace Neolithica.Test.Mono {
     /// Tests that certain objects are getting serialized correctly given the standard object heirarchy.
     /// </summary>
     public class SaveLoadTestRunner : MonoBehaviour {
-
-        private decimal expectedStatValue;
-        private int updateCount = 0;
-
-        private StatManager stats { get { return FindObjectOfType<StatManager>(); } }
-        private GameController gameController { get { return FindObjectOfType<GameController>(); } }
-        private SaverLoader saverLoader { get { return FindObjectOfType<SaverLoader>(); } }
-
-        private void Pass(object msg) {
-            Debug.Log(msg);
-            Debug.Break();
-        }
-
-        private void Fail(object msg) {
-            Debug.Log(msg);
-            Debug.Break();
-        }
-
         public void Start() {
 
             stats.SetStats(new StatProfile[] {
@@ -76,5 +57,22 @@ namespace Neolithica.Test.Mono {
             }
             updateCount++;
         }
+
+        private void Pass(object msg) {
+            Debug.Log(msg);
+            Debug.Break();
+        }
+
+        private void Fail(object msg) {
+            Debug.Log(msg);
+            Debug.Break();
+        }
+
+        private StatManager stats { get { return FindObjectOfType<StatManager>(); } }
+        private GameController gameController { get { return FindObjectOfType<GameController>(); } }
+        private SaverLoader saverLoader { get { return FindObjectOfType<SaverLoader>(); } }
+
+        private decimal expectedStatValue;
+        private int updateCount = 0;
     }
 }

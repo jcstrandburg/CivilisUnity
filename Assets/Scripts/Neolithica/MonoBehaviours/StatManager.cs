@@ -1,22 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Neolithica.ScriptableObjects;
-using Neolithica.Serialization.Attributes;
+using Tofu.Serialization;
 using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
     /// <summary>
     /// Manages values and persistence of stats
     /// </summary>
+    [SavableMonobehaviour(27)]
     public class StatManager : MonoBehaviour {
 
-        [SerializeField]
-        public Dictionary<string, GameStat> stats = new Dictionary<string, GameStat>();
-        [DontSaveField]
-        [NonSerialized]
+        private Dictionary<string, GameStat> stats = new Dictionary<string, GameStat>();
         private StatPersistor persistor;
+
+        /// <summary>Temporary storage for GameStats from a save game, to be loaded from on invokation of SetStats</summary>
+        private ReadOnlyCollection<GameStat> statsFromSaveGame;
 
         //dummy stat persistor for testing purposes
         public static StatPersistor DummyPersistor {
@@ -57,11 +58,12 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public GameStat Stat(string name) {
-            if (stats.ContainsKey(name)) {
-                return stats[name];
-            }
-            return null;
+        public IGameStat Stat(string name) {
+            return stats.ContainsKey(name) ? stats[name] : null;
+        }
+
+        public ReadOnlyCollection<GameStat> Stats() {
+            return stats.Values.ToReadOnlyCollection();
         }
 
         /// <summary>
@@ -77,6 +79,22 @@ namespace Neolithica.MonoBehaviours {
             }
         }
 
+        public void RestoreStatsFromSaveGameIfPresent() {
+            if (statsFromSaveGame != null) {
+                Dictionary<string, GameStat> statsFromSaveGameByName = statsFromSaveGame.ToDictionary(stat => stat.Name);
+
+                foreach (var stat in stats.Values.Where(stat => !stat.Persist && statsFromSaveGameByName.ContainsKey(stat.Name))) {
+                    stat.SetValue(statsFromSaveGameByName[stat.Name].Value);
+                }
+
+                statsFromSaveGame = null;
+            }
+        }
+
+        public void SetStatsFromSaveGame(IEnumerable<GameStat> stats) {
+            statsFromSaveGame = stats.ToReadOnlyCollection();
+        }
+
         /// <summary>
         /// Loads the default stat profiles from the resources folder
         /// </summary>
@@ -90,6 +108,11 @@ namespace Neolithica.MonoBehaviours {
         // Handles Awake event
         public void Awake() {
             LoadDefaultStats();
+        }
+
+        // Handles Start event
+        public void Start() {
+            RestoreStatsFromSaveGameIfPresent();
         }
 
         // Handles OnDestroy event

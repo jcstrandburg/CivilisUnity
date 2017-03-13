@@ -1,6 +1,3 @@
-using System;
-using UnityEngine;
-
 namespace UnityTest
 {
     public class PlatformRunnerSettings : ProjectSettingsBase

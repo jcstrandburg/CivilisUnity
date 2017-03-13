@@ -8,12 +8,15 @@ namespace Neolithica.MonoBehaviours.Editors {
         public override void OnInspectorGUI() {
             DrawDefaultInspector();
             GroundController groundController = (GroundController)target;
-            if (GUILayout.Button("Randomize Terrain")) {
+
+            if (GUILayout.Button("Randomize Terrain"))
                 groundController.GenerateMap();
-            }
-            if (GUILayout.Button("Clear Resources")) {
+            
+            if (GUILayout.Button("Generate Resources"))
+                groundController.GenerateResourcesAndDoodads();
+
+            if (GUILayout.Button("Clear Resources"))
                 groundController.ClearResources();
-            }
         }
     }
 }

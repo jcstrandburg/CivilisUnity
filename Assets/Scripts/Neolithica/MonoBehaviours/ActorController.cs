@@ -2,9 +2,11 @@
 using Neolithica.MonoBehaviours.Logistics;
 using Neolithica.MonoBehaviours.Reservations;
 using Neolithica.Orders.Simple;
+using Tofu.Serialization;
 using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(17)]
     public class ActorController : NeolithicObject {
         public float moveSpeed;
         public List<BaseOrder> orderQueue = new List<BaseOrder>();
@@ -13,7 +15,6 @@ namespace Neolithica.MonoBehaviours {
         public bool followContours = true;
         public double health = 1.0;
 
-        public GameObject palzy;//temp debugging object
         public int queueLength = 0;
 
         public StorageReservation storageReservation { get { return GetComponentInChildren<StorageReservation>(); } }
@@ -127,13 +128,13 @@ namespace Neolithica.MonoBehaviours {
         /// <summary>
         /// Finds and returned the first found child object that has the tag "Resource" and has a Resource component
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="resourceKind"></param>
         /// <returns>A Resource object</returns>
-        public Resource GetCarriedResource(Resource.Type? type=null) {
+        public Resource GetCarriedResource(ResourceKind? resourceKind=null) {
             foreach (Transform t in transform) {
                 if (t.gameObject == null || t.tag != "Resource") continue;
                 Resource r = t.GetComponent<Resource>();
-                if (type == null || r.type == type) {
+                if (resourceKind == null || r.resourceKind == resourceKind) {
                     return r;
                 }
             }

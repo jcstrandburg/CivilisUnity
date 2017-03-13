@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tofu.Serialization;
 using UnityEngine;
 using UnityEngine.EventSystems;
-
-namespace Neolithica.Extensions {
-}
+using Random = System.Random;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(25)]
     public class GroundController : MonoBehaviour, IPointerDownHandler {
         public TerrainSettings terrainSettings;
         public NewGameSettings settings;
@@ -19,6 +19,8 @@ namespace Neolithica.MonoBehaviours {
 
         private List<GameObject> trees = new List<GameObject>();
         private List<GameObject> berries = new List<GameObject>();
+
+        private Random m_random = new Random();
 
         [Inject]
         public GameController GameController { get; set; }
@@ -177,17 +179,16 @@ namespace Neolithica.MonoBehaviours {
 
         private GameObject AttemptPlaceStoneOrGold(float x, float y, GameObject[] prefabs, float waterLevel, TerrainData terrainData) {
             float noise = Mathf.PerlinNoise(settings.seed + 29.5f * x, settings.seed*2 + 29.5f * y);
-            float noise2 = Mathf.PerlinNoise(settings.seed*2 + 29.5f * x, settings.seed * 3 + 29.5f * y);
-            float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth),
-                Mathf.RoundToInt(y * terrainData.heightmapHeight));
+            float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth), Mathf.RoundToInt(y * terrainData.heightmapHeight));
+
             if (height > waterLevel && noise < settings.stoneRate) {
                 Vector3 newPosition = randomizePosition(x, y, terrainData);
-                int index = (int)(noise2 * prefabs.Length)%prefabs.Length;
-                GameObject newObject = GameController.Factory.Instantiate(prefabs[index]);
+                GameObject newObject = GameController.Factory.Instantiate(prefabs[m_random.Next(prefabs.Length - 1)]);
                 newObject.transform.position = newPosition;
                 newObject.GetComponent<NeolithicObject>().SnapToGround(true);
                 return newObject;
             }
+
             return null;
         }
 
@@ -372,6 +373,11 @@ namespace Neolithica.MonoBehaviours {
                     GameController.IssueMoveOrder(eventData);
                     break;
             }
+        }
+
+        // Handles Start event
+        public void Awake() {
+            GenerateMap();
         }
     }
 }

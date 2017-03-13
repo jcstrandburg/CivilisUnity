@@ -1,7 +1,9 @@
 ﻿using Neolithica.ScriptableObjects;
+using Tofu.Serialization;
 using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(26)]
     public class NeolithicObject : MonoBehaviour {
 
         public enum Selectability { Unselectable, Selectable, Multiselectable };
@@ -22,8 +24,12 @@ namespace Neolithica.MonoBehaviours {
 
         // Handles Start event
         public virtual void Start() {
-            SnapToGround();
             halo = GetComponentInChildren<SelectHalo>();
+        }
+
+        // Handles AfterInject event
+        public virtual void AfterInject() {
+            SnapToGround();
         }
 
         // Handles OnDeserialize event
@@ -75,11 +81,13 @@ namespace Neolithica.MonoBehaviours {
 
         /// <summary>
         /// Snaps the object to the ground. Will only actually snap if the object's snapToGround flag is true or a the force parameter is true
+        /// Precondition: GameController has been injected
         /// </summary>
         /// <param name="force">If true the snapToGround field will be ignored</param>
         public void SnapToGround(bool force=false) {
             if (snapToGround || force) {
-                transform.position = GameController.SnapToGround(transform.position);
+                Vector3 snappedPos = GameController.SnapToGround(transform.position);
+                transform.position = snappedPos;
             }
         }
     }

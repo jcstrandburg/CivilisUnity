@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tofu.Serialization;
 using UnityEngine;
 
 namespace Neolithica.MonoBehaviours.Logistics {
+    [SavableMonobehaviour(23)]
     public class LogisticsManager : MonoBehaviour {
 
         [SerializeField]

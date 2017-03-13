@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using Tofu.Serialization;
+using UnityEngine;
 
 namespace Neolithica.MonoBehaviours.Logistics {
+    [SavableMonobehaviour(21)]
     public class LogisticsNode : MonoBehaviour {
 
         private LogisticsNetwork logisticsNetwork;

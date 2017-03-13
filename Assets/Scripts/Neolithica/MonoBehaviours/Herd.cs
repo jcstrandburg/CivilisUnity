@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using Tofu.Serialization;
 using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(9)]
     public class Herd : MonoBehaviour {
         public GameObject rabbit;
         public Vector3[] path;
@@ -9,8 +11,6 @@ namespace Neolithica.MonoBehaviours {
         public float nodeProgress;
         public float migrateSpeed;
         public Vector3 diff;
-        //public GameObject resourcePrefab;
-        public Resource.Type resourceType;
         public GameObject animalPrefab;
         public int maxSize = 3;
         public float respawnDelay = 10.0f;

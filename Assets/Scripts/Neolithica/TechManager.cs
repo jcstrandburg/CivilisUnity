@@ -1,28 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AqlaSerializer;
 using Neolithica.ScriptableObjects;
-using Neolithica.Serialization.Attributes;
+using Tofu.Serialization;
 using UnityEngine;
 
 namespace Neolithica {
-    [Serializable]
+    [Serializable, SerializableType]
     public class TechManager {
-        [DontSaveField]
-        [NonSerialized]
-        public Technology[] techs;
-        public List<string> researchedTechs = new List<String>();
 
-        public void LoadArray(Technology[] techs) {
-            this.techs = techs;
+        public Technology[] Techs;
+        [SerializableMember(1)] public List<string> ResearchedTechs = new List<string>();
+
+        public void LoadTechs(IEnumerable<Technology> techs) {
+            Techs = techs.ToArray();
         }
 
         public void LoadTree(string[] jsonStrings) {
-            techs = new Technology[jsonStrings.Length];
+            Techs = new Technology[jsonStrings.Length];
             int x = 0;
             foreach (string s in jsonStrings) {
                 try {
-                    techs[x] = JsonUtility.FromJson<Technology>(s);
+                    Techs[x] = JsonUtility.FromJson<Technology>(s);
                 } catch (ArgumentException e) {
                     Debug.Log(e);
                     Debug.Log("Error parsing technology file: " + s);
@@ -32,16 +32,16 @@ namespace Neolithica {
         }
 
         public bool TechResearched(string techname) {
-            return researchedTechs.Contains(techname);
+            return ResearchedTechs.Contains(techname);
         }
 
         public float BuyTech(string techName) {
-            if (researchedTechs.Contains(techName)) {
+            if (ResearchedTechs.Contains(techName)) {
                 return 0.0f;
             }
-            foreach (Technology t in techs) {
+            foreach (Technology t in Techs) {
                 if (t.techName == techName) {
-                    researchedTechs.Add(techName);
+                    ResearchedTechs.Add(techName);
                     return t.cost;
                 }
             }
@@ -50,7 +50,7 @@ namespace Neolithica {
 
         public bool PrereqsMet(Technology t) {
             foreach (String req in t.requires) {
-                if (!researchedTechs.Contains(req)) {
+                if (!ResearchedTechs.Contains(req)) {
                     return false;
                 }
             }
@@ -59,8 +59,8 @@ namespace Neolithica {
 
         public Technology[] GetEligibleTechs() {
             List<Technology> elligibles = new List<Technology>();
-            foreach (Technology t in techs) {
-                if (!researchedTechs.Contains(t.techName) && PrereqsMet(t)) {
+            foreach (Technology t in Techs) {
+                if (!ResearchedTechs.Contains(t.techName) && PrereqsMet(t)) {
                     elligibles.Add(t);
                 }
             }
@@ -68,13 +68,13 @@ namespace Neolithica {
         }
 
         public void Research(Technology t) {
-            if (researchedTechs.Contains(t.techName)) {
+            if (ResearchedTechs.Contains(t.techName)) {
                 throw new Exception("Technology already researched: " + t.techName);
             }
-            if (!techs.Contains<Technology>(t)) {
+            if (!Techs.Contains<Technology>(t)) {
                 throw new Exception("Unable to research tech: " + t.techName);
             }
-            researchedTechs.Add(t.techName);
+            ResearchedTechs.Add(t.techName);
         }
     }
 }

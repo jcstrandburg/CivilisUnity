@@ -27,7 +27,7 @@ namespace Neolithica.Test.Editor {
             };
             TechManager tm = new TechManager();
             Technology[] eligibles;
-            tm.LoadArray(techs);
+            tm.LoadTechs(techs);
 
             eligibles = tm.GetEligibleTechs();
             Assert.True(tm.PrereqsMet(techs[0]));

@@ -1,11 +1,9 @@
-﻿using Neolithica.Serialization;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
     public class DebugMenu : MonoBehaviour {
 
-        [Inject]
-        public GameController GameController { get; set; }
+        [Inject] public GameController GameController;
 
         // Use this for initialization
         void Start () {	
@@ -25,8 +23,7 @@ namespace Neolithica.MonoBehaviours {
 
         public void AddWorker() {
             GameObject prefab = Resources.Load("Units/Worker") as GameObject;
-            GameObject newWorker = GameController.Factory.Instantiate(prefab);
-            newWorker.transform.position = Camera.main.transform.position;
+            GameController.Factory.Instantiate(prefab, Camera.main.transform.position);
         }
 
         public void GameSpeed() {

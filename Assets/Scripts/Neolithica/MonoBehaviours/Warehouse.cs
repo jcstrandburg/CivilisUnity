@@ -1,25 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Neolithica.DependencyInjection;
 using Neolithica.MonoBehaviours.Reservations;
+using Tofu.Serialization;
 using UnityEngine;
 
-// TODO: Remove finished reservations
-// TODO: Check to make sure reservations are for this warehouse before fulfilling them
 namespace Neolithica.MonoBehaviours {
+    // TODO: Remove finished reservations
+    // TODO: Check to make sure reservations are for this warehouse before fulfilling them
+    [SavableMonobehaviour(2)]
     public class Warehouse : MonoBehaviour {
         public double totalCapacity;
-        [SerializeField]
         public ResourceProfile[] resourceLimits = new ResourceProfile[] { };
-        [SerializeField]
         public ResourceProfile[] resourceContents = new ResourceProfile[] { };
-        [SerializeField]
         public List<StorageReservation> storageReservations = new List<StorageReservation>();
-        [SerializeField]
         public List<ResourceReservation> resourceReservations = new List<ResourceReservation>();
 
         [Inject]
         public GameController GameController { get; set; }
+        [Inject]
+        private GameFactoryBase Factory { get; set; }
 
         /// <summary>
         /// Deposits the contents of the given reservation into this warehouse
@@ -30,9 +31,9 @@ namespace Neolithica.MonoBehaviours {
                 throw new Exception("Reservation is not ready");
             }
             foreach (ResourceProfile rp in resourceContents) {
-                if (rp.type == res.resourceType) {
+                if (rp.ResourceKind == res.resourceResourceKind) {
                     res.Released = true;
-                    rp.amount += res.amount;
+                    rp.Amount += res.amount;
                     storageReservations.Remove(res);
                     SendMessage("OnResourceDeposited", SendMessageOptions.DontRequireReceiver);
                     return;
@@ -49,8 +50,8 @@ namespace Neolithica.MonoBehaviours {
             //var diff = resourceLimits.Select(rp => rp.type).Except(resourceContents.Select(rp => rp.type));
             //var toAdd = diff.Select(resourceType => new ResourceProfile(resourceType, 0)).ToList();
             var toAdd = resourceLimits
-                .Select(rp => rp.type)
-                .Except(resourceContents.Select(rp => rp.type))
+                .Select(rp => rp.ResourceKind)
+                .Except(resourceContents.Select(rp => rp.ResourceKind))
                 .Select(type => new ResourceProfile(type, 0));
             resourceContents = resourceContents.Union(toAdd).ToArray();
 
@@ -87,7 +88,7 @@ namespace Neolithica.MonoBehaviours {
             if (!enabled) { return 0; }
             double t = 0;
             foreach (ResourceProfile rp in resourceContents) {
-                t += rp.amount;
+                t += rp.Amount;
             }
             return t;
         }
@@ -95,13 +96,13 @@ namespace Neolithica.MonoBehaviours {
         /// <summary>
         /// Gets the amount of the given resource, whether reserved or not
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="resourceKind"></param>
         /// <returns>Total deposited resources for the given tag</returns>
-        public double GetTotalContents(Resource.Type type) {
+        public double GetTotalContents(ResourceKind resourceKind) {
             if (!enabled) { return 0; }
             foreach (ResourceProfile rp in resourceContents) {
-                if (rp.type == type) {
-                    return rp.amount;
+                if (rp.ResourceKind == resourceKind) {
+                    return rp.Amount;
                 }
             }
             return 0;
@@ -110,13 +111,13 @@ namespace Neolithica.MonoBehaviours {
         /// <summary>
         /// Get the total reserved content
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="resourceKind"></param>
         /// <returns></returns>
-        public double GetReservedContents(Resource.Type type) {
+        public double GetReservedContents(ResourceKind resourceKind) {
             double amount = 0 ;
 
             foreach (ResourceReservation r in resourceReservations) {
-                if (r.type == type) {
+                if (r.resourceKind == resourceKind) {
                     amount += r.amount;
                 }
             }
@@ -127,11 +128,11 @@ namespace Neolithica.MonoBehaviours {
         /// Gets total available contents for this warehouse
         /// </summary>
         /// <returns>Available contents in a dictionary</returns>
-        public Dictionary<Resource.Type, double> GetAllAvailableContents() {
-            var d = new Dictionary<Resource.Type, double>();
+        public Dictionary<ResourceKind, double> GetAllAvailableContents() {
+            var d = new Dictionary<ResourceKind, double>();
             if (!enabled) { return d; }
             foreach (var r in resourceContents) {
-                d[r.type] = GetAvailableContents(r.type);
+                d[r.ResourceKind] = GetAvailableContents(r.ResourceKind);
             }
             return d;
         }
@@ -139,11 +140,11 @@ namespace Neolithica.MonoBehaviours {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="resourceKind"></param>
         /// <returns></returns>
-        public double GetAvailableContents(Resource.Type type) {
+        public double GetAvailableContents(ResourceKind resourceKind) {
             if (!enabled) { return 0; }
-            return GetTotalContents(type) - GetReservedContents(type);
+            return GetTotalContents(resourceKind) - GetReservedContents(resourceKind);
         }
 
         /// <summary>
@@ -151,11 +152,11 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         /// <param name="resourceTag"></param>
         /// <returns></returns>
-        public double GetClaimedContents(Resource.Type type) {
+        public double GetClaimedContents(ResourceKind resourceKind) {
             if (!enabled) { return 0; }
             double amount = 0;
             foreach (ResourceReservation r in resourceReservations) {
-                if (r.type == type && r.Ready) {
+                if (r.resourceKind == resourceKind && r.Ready) {
                     amount += r.amount;
                 }
             }
@@ -167,9 +168,9 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         /// <param name="resourceTag"></param>
         /// <returns></returns>
-        public double GetUnclaimedContents(Resource.Type type) {
+        public double GetUnclaimedContents(ResourceKind resourceKind) {
             if (!enabled) { return 0; }
-            return GetTotalContents(type) - GetClaimedContents(type);
+            return GetTotalContents(resourceKind) - GetClaimedContents(resourceKind);
         }
 
         /// <summary>
@@ -177,12 +178,12 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         /// <param name="resourceTag"></param>
         /// <returns></returns>
-        public double GetTotalStorage(Resource.Type type) {
+        public double GetTotalStorage(ResourceKind resourceKind) {
             if (!enabled) { return 0; }
             double amount = 0;
             foreach (ResourceProfile p in resourceLimits) {
-                if (p.type == type) {
-                    amount += p.amount;
+                if (p.ResourceKind == resourceKind) {
+                    amount += p.Amount;
                 }
             }
             return amount;
@@ -191,9 +192,9 @@ namespace Neolithica.MonoBehaviours {
         /// <summary>
         /// Gets the total amount of space currently reserved (but not occupied) for the given resource tag
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="resourceKind"></param>
         /// <returns></returns>
-        public double GetReservedStorage(Resource.Type type) {
+        public double GetReservedStorage(ResourceKind resourceKind) {
             if (!enabled) { return 0; }
             double amount = 0;
             foreach (StorageReservation r in storageReservations) {
@@ -209,20 +210,20 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         /// <param name="resourceTag"></param>
         /// <returns></returns>
-        public double GetAvailableStorage(Resource.Type type) {
+        public double GetAvailableStorage(ResourceKind resourceKind) {
             if (!enabled) { return 0; }
-            return GetTotalStorage(type) - GetTotalContents(type) - GetReservedStorage(type);
+            return GetTotalStorage(resourceKind) - GetTotalContents(resourceKind) - GetReservedStorage(resourceKind);
         }
 
         /// <summary>
         /// Directly withdraws the specified resource without a reservation
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="resourceKind"></param>
         /// <param name="amount"></param>
-        public void WithdrawContents(Resource.Type type, double amount) {
+        public void WithdrawContents(ResourceKind resourceKind, double amount) {
             foreach (ResourceProfile rp in resourceContents) {
-                if (rp.type == type && rp.amount >= amount) {
-                    rp.amount -= amount;
+                if (rp.ResourceKind == resourceKind && rp.Amount >= amount) {
+                    rp.Amount -= amount;
                     SendMessage("OnResourceWithdrawn", SendMessageOptions.DontRequireReceiver);
                     return;
                 }
@@ -246,8 +247,8 @@ namespace Neolithica.MonoBehaviours {
             }
 
             foreach (ResourceProfile rp in resourceContents) {
-                if (rp.type == res.type && rp.amount >= res.amount) {
-                    rp.amount -= res.amount;
+                if (rp.ResourceKind == res.resourceKind && rp.Amount >= res.amount) {
+                    rp.Amount -= res.amount;
                     res.Released = true;
                     resourceReservations.Remove(res);
                     SendMessage("OnResourceWithdrawn", SendMessageOptions.DontRequireReceiver);
@@ -262,17 +263,17 @@ namespace Neolithica.MonoBehaviours {
         /// Attempts to reserve the resource contents of this warehouse, returning a boolean indicating whether the operation was successful
         /// </summary>
         /// <param name="reserver">Gameobject to which this reservation should be attached</param>
-        /// <param name="type">Resource type tag</param>
+        /// <param name="resourceKind">Resource type tag</param>
         /// <param name="amount">Amount to reserve</param>
         /// <returns>true on success, false on failure</returns>
-        public bool ReserveContents(GameObject reserver, Resource.Type type, double amount) {
-            double avail = GetAvailableContents(type);
+        public bool ReserveContents(GameObject reserver, ResourceKind resourceKind, double amount) {
+            double avail = GetAvailableContents(resourceKind);
             if (avail < amount) {
                 return false;
             }
             ResourceReservation r = reserver.AddComponent<ResourceReservation>();
             r.amount = amount;
-            r.type = type;
+            r.resourceKind = resourceKind;
             r.Ready = true;
             r.source = this.gameObject;
             //Debug.Log(r.resourceTag + " " + r.amount);
@@ -286,17 +287,17 @@ namespace Neolithica.MonoBehaviours {
         /// Attempts to reserve resource storage in this warehouse, returning a boolean indicating whether the operation was successful
         /// </summary>
         /// <param name="reserver">GameObject to which this reservation should be attached</param>
-        /// <param name="type">Resource type tag</param>
+        /// <param name="resourceKind">Resource type tag</param>
         /// <param name="amount">Amount to reserve</param>
         /// <returns>true on success, false on failure</returns>
-        public bool ReserveStorage(GameObject reserver, Resource.Type type, double amount) {
-            if (GetAvailableStorage(type) < amount) {
+        public bool ReserveStorage(GameObject reserver, ResourceKind resourceKind, double amount) {
+            if (GetAvailableStorage(resourceKind) < amount)
                 return false;
-            }
-            StorageReservation r = GameController.Factory.AddComponent<StorageReservation>(reserver);
+
+            StorageReservation r = Factory.AddComponent<StorageReservation>(reserver);
             r.warehouse = this;
             r.amount = amount;
-            r.resourceType = type;
+            r.resourceResourceKind = resourceKind;
             r.Ready = true;
             storageReservations.Add(r);
             return true;
@@ -315,10 +316,10 @@ namespace Neolithica.MonoBehaviours {
         public void OnTearDown() {
             Debug.Log("Tearing down");
             foreach (var rc in resourceContents) {
-                while (rc.amount > 0) {
-                    rc.amount -= 1;
+                while (rc.Amount > 0) {
+                    rc.Amount -= 1;
 
-                    var resource = GameController.CreateResourcePile(rc.type, Math.Min(rc.amount, 1.0));
+                    var resource = GameController.CreateResourcePile(rc.ResourceKind, Math.Min(rc.Amount, 1.0));
                     resource.transform.position = transform.position;
                     resource.GetComponent<Resource>().SetDown();
                 }

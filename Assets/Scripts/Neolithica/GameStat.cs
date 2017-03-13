@@ -1,68 +1,97 @@
 ﻿using System;
+using AqlaSerializer;
 
 namespace Neolithica {
-    [Serializable]
-    public class GameStat {
+    public delegate void IGameStatChangeListener(IGameStat s);
+
+    public interface IGameStat {
+        event IGameStatChangeListener OnChange;
+
+        /// <summary>
+        /// The value as accumulated throughout this game
+        /// </summary>
+        decimal Value { get; }
+
+        /// <summary>
+        /// The value as persisted across games
+        /// </summary>
+        decimal PersistantValue { get; }
+
+        /// <summary>
+        /// Adds the given value to the stat
+        /// </summary>
+        /// <param name="v"></param>
+        void Add(int v);
+
+        /// <summary>
+        /// Adds the given value to the stat
+        /// </summary>
+        /// <param name="v"></param>
+        void Add(double v);
+
+        /// <summary>
+        /// Adds the given value to the stat
+        /// </summary>
+        /// <param name="v"></param>
+        void Add(decimal v);
+    }
+
+    [SerializableType]
+    public class GameStat : IGameStat {
+
+        public event IGameStatChangeListener OnChange;
+
         /// <summary>The internal name</summary>
-        public readonly string name;
+        [SerializableMember(1)] public readonly string Name;
         /// <summary>Whether the stat has a persistent value across games</summary>
-        public readonly bool persist;
+        [SerializableMember(2)] public readonly bool Persist;
         /// <summary>Whether the stat is allowed only to increase</summary>
-        public readonly bool monotonic;
+        [SerializableMember(3)] public readonly bool Monotonic;
 
-        private decimal value;
-        private decimal persistantValue;
-        [NonSerialized]
-        private StatPersistor persistor;
+        /// <summary>
+        /// The value as accumulated throughout this game
+        /// </summary>
+        public decimal Value { get { return value; } }
 
-        public delegate void GameStatChangeListener(GameStat s);
-        [field:NonSerialized]
-        public event GameStatChangeListener OnChange;
+        /// <summary>
+        /// The value as persisted across games
+        /// </summary>
+        public decimal PersistantValue { get { return persistantValue; } }
 
         public GameStat(string name, bool persist, bool monotonic) {
-            this.name = name;
-            this.persist = persist;
-            this.monotonic = monotonic;
+            this.Name = name;
+            this.Persist = persist;
+            this.Monotonic = monotonic;
         }
 
         public void SetPersistor(StatPersistor p) {
             persistor = p;
-            if (persist) {
-                persistantValue = p.GetValue(name);
+
+            if (Persist) {
+                persistantValue = p.GetValue(Name);
             }
         }
 
-        /// <summary>
-        /// Adds the given value to the stat
-        /// </summary>
-        /// <param name="v"></param>
         public void Add(int v) {
             Add((decimal)v);
         }
 
-        /// <summary>
-        /// Adds the given value to the stat
-        /// </summary>
-        /// <param name="v"></param>
         public void Add(double v) {
             Add((decimal)v);
         }
 
-        /// <summary>
-        /// Adds the given value to the stat
-        /// </summary>
-        /// <param name="v"></param>
         public void Add(decimal v) {
-            if (v < 0 && monotonic) {
+            if (v < 0 && Monotonic)
                 throw new ArgumentException("Monotonic stats cannot decrease");
-            }
 
             if (v != 0) {
                 value += v;
-                if (persist) {
+
+                if (Persist) {
                     persistantValue += v;
-                    persistor.SetValue(name, persistantValue);
+                    persistor.SetValue(Name, persistantValue);
                 }
+
                 if (OnChange != null) {
                     OnChange(this);
                 }
@@ -70,21 +99,16 @@ namespace Neolithica {
         }
 
         /// <summary>
-        /// The value as accumulated throughout this game
+        /// Method for overriding value rather than incrementing it. To be used internally by <c>StatManager</c> (not exposed via <c>IGameStat</c>).
+        /// Does not trigger event listiners.
         /// </summary>
-        public decimal Value {
-            get {
-                return value;
-            }
+        /// <param name="value"></param>
+        public void SetValue(decimal value) {
+            this.value = value;
         }
 
-        /// <summary>
-        /// The value as persisted across games
-        /// </summary>
-        public decimal PersistantValue {
-            get {
-                return persistantValue;
-            }
-        }
+        private decimal value;
+        private decimal persistantValue;
+        private StatPersistor persistor;
     }
 }

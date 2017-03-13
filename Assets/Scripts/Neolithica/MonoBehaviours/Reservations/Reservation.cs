@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using Tofu.Serialization;
+using UnityEngine;
 
 namespace Neolithica.MonoBehaviours.Reservations {
+    [SavableMonobehaviour(20)]
     public class Reservation : MonoBehaviour {
 
         private float lifetime = Mathf.Infinity;

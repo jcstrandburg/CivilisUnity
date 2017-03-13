@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Neolithica.DependencyInjection;
 using Neolithica.MonoBehaviours;
 using NUnit.Framework;
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine;
 namespace Neolithica.Test.Editor {
     public class NeolithicTest {
 
-        protected GameFactory factory;
+        protected GameFactoryBase Factory;
         protected GameObject dummyObject;
         protected List<GameObject> tempObjects;
 
@@ -22,9 +23,8 @@ namespace Neolithica.Test.Editor {
         [SetUp]
         public virtual void SetUp()	{
             tempObjects = new List<GameObject>();
-            factory = new GameFactory();
-            dummyObject = new GameObject();
-            dummyObject.name = "DummyObject";
+            Factory = new MainGameFactory(null);
+            dummyObject = new GameObject {name = "DummyObject"};
         }
 
         [TearDown]
@@ -66,7 +66,7 @@ namespace Neolithica.Test.Editor {
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         protected T MakeTestComponent<T>() where T : Component {
-            return factory.InjectObject(MakePlainComponent<T>());        
+            return Factory.InjectObject(MakePlainComponent<T>());        
         }
 
         /// <summary>

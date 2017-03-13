@@ -18,7 +18,7 @@ namespace Neolithica.Test.Mono {
         public bool forestGardenForbidden;
 
         public void Start () {
-            GameController.Instance.InitializeAllObjects();
+            GameController.Instance.InjectAllObjects();
             var order = new HarvestFromReservoirOrder(testActor, testReservoir);
             testActor.OverrideOrder(order);
 

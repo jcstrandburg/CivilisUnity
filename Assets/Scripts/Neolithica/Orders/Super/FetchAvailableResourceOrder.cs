@@ -1,43 +1,47 @@
-﻿using Neolithica.MonoBehaviours;
+﻿using AqlaSerializer;
+using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
 
 namespace Neolithica.Orders.Super {
     /// <summary>
     /// Order to fetch the given resource from any available warehouse
     /// </summary>
+    [SerializableType]
     public class FetchAvailableResourceOrder : StatefulSuperOrder {
-        Resource.Type resourceType;
-        double amount;
+        [SerializableMember(1)]
+        private ResourceKind resourceResourceKind;
+        [SerializableMember(2)]
+        private double amount;
 
-        public FetchAvailableResourceOrder(ActorController a, Resource.Type resourceType, double amount) : base(a) {
-            this.resourceType = resourceType;
+        public FetchAvailableResourceOrder(ActorController a, ResourceKind resourceResourceKind, double amount) : base(a) {
+            this.resourceResourceKind = resourceResourceKind;
             this.amount = amount;
             GoToState("getReservation");
         }
 
         public override void Initialize() {
-            Resource r = actor.GetCarriedResource();
+            Resource r = Actor.GetCarriedResource();
             if (r != null) {
-                if (r.type == resourceType) {
-                    this.completed = true;
+                if (r.resourceKind == resourceResourceKind) {
+                    this.Completed = true;
                 } else {
-                    actor.DropCarriedResource();
+                    Actor.DropCarriedResource();
                 }
             }
         }
 
         protected override void CreateStates() {
             CreateState("getReservation",
-                () => new ReserveWarehouseContentsOrder(actor, resourceType, amount),
+                () => new ReserveWarehouseContentsOrder(Actor, resourceResourceKind, amount),
                 () => GoToState("gotoWarehouse"),
                 null);
             CreateState("gotoWarehouse",
-                () => new SimpleMoveOrder(actor, actor.resourceReservation.source.transform.position, 2.0f),
+                () => new SimpleMoveOrder(Actor, Actor.resourceReservation.source.transform.position, 2.0f),
                 () => GoToState("withdraw"),
                 null);
             CreateState("withdraw",
-                () => new SimpleWithdrawOrder(actor),
-                () => this.completed = true,
+                () => new SimpleWithdrawOrder(Actor),
+                () => this.Completed = true,
                 null);
         }
     }

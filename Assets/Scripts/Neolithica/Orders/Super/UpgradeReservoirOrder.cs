@@ -1,33 +1,17 @@
-﻿using Neolithica.MonoBehaviours;
+﻿using AqlaSerializer;
+using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
 using UnityEngine;
 
 namespace Neolithica.Orders.Super {
-    public class DoBuildingUpgrade : BaseOrder {
-        private NeolithicObject myTargetObj;
-        private GameObject myPrefab;
-
-        public DoBuildingUpgrade(ActorController a, NeolithicObject target, GameObject prefab) : base(a) {
-            myTargetObj = target;
-            myPrefab = prefab;
-        }
-
-        public override void DoStep() {
-            var replacement = GameController.Instance.Factory.Instantiate(myPrefab);
-            replacement.transform.position = myTargetObj.transform.position;
-            replacement.transform.rotation = myTargetObj.transform.rotation;
-            Object.Destroy(myTargetObj.gameObject);
-            actor.GameController.StatManager.Stat("forest-gardens").Add(1);
-
-            completed = true;
-        }
-    }
-
     /// <summary>
     /// Order to upgrade a reservoir to it's next stage
     /// </summary>
+    [SerializableType]
     public class UpgradeReservoirOrder : StatefulSuperOrder {
+        [SerializableMember(1)]
         private NeolithicObject targetObj;
+        [SerializableMember(2)]
         private GameObject myPrefab;
 
         public UpgradeReservoirOrder(ActorController a, NeolithicObject target, GameObject prefab) : base(a) {
@@ -38,12 +22,12 @@ namespace Neolithica.Orders.Super {
 
         protected override void CreateStates() {
             CreateState("seekTarget",
-                () => new SimpleMoveOrder(actor, targetObj.transform.position),
+                () => new SimpleMoveOrder(Actor, targetObj.transform.position),
                 () => GoToState("doUpgrade"),
                 null);
             CreateState("doUpgrade",
-                () => new DoBuildingUpgrade(actor, targetObj, myPrefab),
-                () => completed = true,
+                () => new DoBuildingUpgrade(Actor, targetObj, myPrefab),
+                () => Completed = true,
                 null);
         }
     }

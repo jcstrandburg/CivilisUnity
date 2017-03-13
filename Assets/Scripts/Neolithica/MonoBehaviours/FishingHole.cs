@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
-using Neolithica.Serialization.Attributes;
+using Tofu.Serialization;
 using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(12)]
     public class FishingHole : MonoBehaviour {
 
-        [SerializeField, DontSaveField]
+        [SerializeField]
         private GameObject[] fishies;
-        [SerializeField, DontSaveField]
+        [SerializeField]
         private Vector3[] targets;
 
         public float fishRange = 2.0f;

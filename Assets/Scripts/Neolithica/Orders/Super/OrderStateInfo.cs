@@ -5,7 +5,6 @@ namespace Neolithica.Orders.Super {
     /// <summary>
     /// Utility struct for stateful super orders
     /// </summary>
-    [Serializable]
     public struct OrderStateInfo {
         public Func<BaseOrder> startState;
         public Action completeState;

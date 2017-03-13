@@ -9,9 +9,6 @@ namespace Neolithica.MonoBehaviours.Editors {
         public override void OnInspectorGUI() {
             DrawDefaultInspector();
             ActorController a = (ActorController)target;
-            if (GUILayout.Button("Do Stuff")) {
-                a.palzy.transform.position += new Vector3(1.0f, 0);
-            }
             if (GUILayout.Button("Panic")) {
                 GameObject go = GameObject.Find("DumpingGround");
                 var order = new SimpleMoveOrder(a, go.transform.position);

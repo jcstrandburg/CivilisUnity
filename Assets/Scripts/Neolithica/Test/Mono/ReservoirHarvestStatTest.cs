@@ -15,7 +15,7 @@ namespace Neolithica.Test.Mono {
         public GameController gameController;
 
         public void Start () {
-            GameController.Instance.InitializeAllObjects();
+            GameController.Instance.InjectAllObjects();
             var order = new HarvestFromReservoirOrder(testActor, testReservoir);
             testActor.OverrideOrder(order);
         }

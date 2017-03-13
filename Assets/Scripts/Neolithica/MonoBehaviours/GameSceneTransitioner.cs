@@ -49,10 +49,10 @@ namespace Neolithica.MonoBehaviours {
         }
 
         /// <summary>
-        /// Does the scene transition
+        /// Transitions to the gameplay scene, either initiating a new game or a game load as appropriate
         /// </summary>
-        /// <param name="scene"></param>
-        /// <param name="mode"></param>
+        /// <param name="scene">The scene to transition to</param>
+        /// <param name="mode">Unused, necessary to fit signature of <c>SceneManager.sceneLoaded</c></param>
         void DoSceneTransition(Scene scene, LoadSceneMode mode) {
             if (loadGameName != null) {
                 GameController.Instance.SaverLoader.LoadGame(loadGameName);

@@ -76,6 +76,12 @@
     <Reference Include="protobuf-net">
       <HintPath>Assets\Imports\Protobuf\protobuf-net.dll</HintPath>
     </Reference>
+    <Reference Include="aqlaserializer">
+      <HintPath>Assets\Imports\Tofu\Serialization\aqlaserializer.dll</HintPath>
+    </Reference>
+    <Reference Include="RunSharp">
+      <HintPath>Assets\Imports\Tofu\Serialization\RunSharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Standard Assets\Environment\Water (Basic)\Scripts\WaterBasic.cs" />
@@ -174,7 +180,6 @@
     <None Include="Assets\Resources\Buildings\Outlineable.shader" />
     <None Include="Assets\Resources\Buildings\Outlined-Silhouette Only.shader" />
     <None Include="Assets\Resources\SelectionProjector\ProjectorShader.shader" />
-    <None Include="Assets\Scripts\Neolithica\Serialization\Surrogates\SurrogatesReadMe.txt" />
     <None Include="Assets\Standard Assets\Environment\Water (Basic)\Shaders\FXWaterBasic.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water\Shaders\FXWaterPro.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\FXWater4Advanced.shader" />

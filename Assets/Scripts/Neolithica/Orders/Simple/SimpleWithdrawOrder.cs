@@ -1,25 +1,27 @@
 ﻿using System;
+using AqlaSerializer;
 using Neolithica.MonoBehaviours;
 using UnityEngine;
 
 namespace Neolithica.Orders.Simple {
+    [SerializableType]
     public class SimpleWithdrawOrder : BaseOrder {
         public SimpleWithdrawOrder(ActorController a) : base(a) {
         }
 
         public override void DoStep() {
-            Warehouse w = actor.resourceReservation.source.GetComponent<Warehouse>();
+            Warehouse w = Actor.resourceReservation.source.GetComponent<Warehouse>();
             try {
-                var resourceType = actor.resourceReservation.type;
-                w.WithdrawReservation(actor.resourceReservation);            
-                Resource r = actor.GameController.CreateResourcePile(resourceType, 1);
-                actor.PickupResource(r);
-                this.completed = true;
+                var resourceType = Actor.resourceReservation.resourceKind;
+                w.WithdrawReservation(Actor.resourceReservation);            
+                Resource r = Actor.GameController.CreateResourcePile(resourceType, 1);
+                Actor.PickupResource(r);
+                this.Completed = true;
             }
             catch (Exception e) {
                 Debug.Log("SimpleWithdrawOrder failed to withdraw with exception");
                 Debug.Log(e);
-                this.failed = true;
+                this.Failed = true;
             }
         }
     }

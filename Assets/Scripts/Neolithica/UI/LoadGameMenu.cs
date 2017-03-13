@@ -1,4 +1,4 @@
-﻿using Neolithica.Serialization;
+﻿using Neolithica.MonoBehaviours;
 using UnityEngine;
 
 namespace Neolithica.UI {

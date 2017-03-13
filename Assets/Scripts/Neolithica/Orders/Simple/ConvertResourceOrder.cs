@@ -1,31 +1,33 @@
-﻿using Neolithica.MonoBehaviours;
+﻿using AqlaSerializer;
+using Neolithica.MonoBehaviours;
 using UnityEngine;
 
 namespace Neolithica.Orders.Simple {
     /// <summary>
     /// Simple order to convert a carried resource of one type to another type
     /// </summary>
+    [SerializableType]
     public class ConvertResourceOrder : BaseOrder {
-        Resource sourceResource;
-        Resource.Type toType;
+        [SerializableMember(1)] private Resource sourceResource;
+        [SerializableMember(2)] private ResourceKind toResourceKind;
 
-        public ConvertResourceOrder(ActorController a, Resource.Type fromType, Resource.Type toType) : base(a) {
+        public ConvertResourceOrder(ActorController a, ResourceKind fromResourceKind, ResourceKind toResourceKind) : base(a) {
             Resource r = a.GetCarriedResource();
-            if (r.type != fromType) {
-                Debug.Log("Actor does not have resource " + fromType + " to convert");
-                this.failed = true;
+            if (r.resourceKind != fromResourceKind) {
+                Debug.Log("Actor does not have resource " + fromResourceKind + " to convert");
+                this.Failed = true;
             }
             sourceResource = r;
-            this.toType = toType;
+            this.toResourceKind = toResourceKind;
         }
 
         public override void DoStep() {
-            Resource newResource = actor.GameController.CreateResourcePile(toType, 1);
+            Resource newResource = Actor.GameController.CreateResourcePile(toResourceKind, 1);
             newResource.amount = sourceResource.amount;
-            actor.PickupResource(newResource);
+            Actor.PickupResource(newResource);
             sourceResource.transform.SetParent(null);
             UnityEngine.Object.Destroy(sourceResource.gameObject);
-            this.completed = true;
+            this.Completed = true;
         }
     }
 }

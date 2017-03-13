@@ -1,20 +1,13 @@
 ﻿using Neolithica.MonoBehaviours.Logistics;
+using Tofu.Serialization;
 using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(6)]
     public class Resource : MonoBehaviour {
-        public enum Type {
-            Meat,
-            Wood,
-            Gold,
-            Fish,
-            Vegetables,
-            Stone,
-        }
-
         public const float lifeTime = 60.0f;
         public float timer;
-        public Type type;
+        public ResourceKind resourceKind;
         public double amount = 0;
         public bool preserved;
 
@@ -64,7 +57,7 @@ namespace Neolithica.MonoBehaviours {
             GameController.Factory.AddComponent<LogisticsNode>(gameObject);
             Warehouse w = GameController.Factory.AddComponent<Warehouse>(gameObject);
             ResourceProfile[] rp = new ResourceProfile[] {
-                new ResourceProfile(type, amount)
+                new ResourceProfile(resourceKind, amount)
             };
 
             w.SetLimits(rp);

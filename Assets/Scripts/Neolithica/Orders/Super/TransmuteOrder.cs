@@ -1,51 +1,56 @@
-﻿using Neolithica.MonoBehaviours;
+﻿using AqlaSerializer;
+using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
 
 namespace Neolithica.Orders.Super {
     /// <summary>
     /// Testing order to transmute one resource to another
     /// </summary>
+    [SerializableType]
     public class TransmuteOrder : StatefulSuperOrder {
-        Resource.Type fromType;
-        Resource.Type toType;
-        NeolithicObject target;
+        [SerializableMember(1)]
+        private ResourceKind fromResourceKind;
+        [SerializableMember(2)]
+        private ResourceKind toResourceKind;
+        [SerializableMember(3)]
+        private NeolithicObject target;
 
-        public TransmuteOrder(ActorController a, NeolithicObject target, Resource.Type fromType, Resource.Type toType) : base(a) {
-            this.fromType = fromType;
-            this.toType = toType;
+        public TransmuteOrder(ActorController a, NeolithicObject target, ResourceKind fromResourceKind, ResourceKind toResourceKind) : base(a) {
+            this.fromResourceKind = fromResourceKind;
+            this.toResourceKind = toResourceKind;
             this.target = target;
             GoToState("getSourceMaterial");
         }
 
         public override void Initialize() {
-            Resource r = actor.GetCarriedResource();
+            Resource r = Actor.GetCarriedResource();
             if (r == null) return;
-            if (r.type == fromType) {
+            if (r.resourceKind == fromResourceKind) {
                 GoToState("gotoWorkspace");
             }
-            else if (r.type == toType) {
+            else if (r.resourceKind == toResourceKind) {
                 GoToState("storeProduct");
             }
             else {
-                actor.DropCarriedResource();
+                Actor.DropCarriedResource();
             }
         }
 
         protected override void CreateStates() {
             CreateState("getSourceMaterial",
-                () => new FetchAvailableResourceOrder(actor, fromType, 1),
+                () => new FetchAvailableResourceOrder(Actor, fromResourceKind, 1),
                 () => GoToState("gotoWorkspace"),
                 null);
             CreateState("gotoWorkspace",
-                () => new SimpleMoveOrder(actor, target.transform.position, 2.0f),
+                () => new SimpleMoveOrder(Actor, target.transform.position, 2.0f),
                 () => GoToState("doTransmute"),
                 null);
             CreateState("doTransmute",
-                () => new ConvertResourceOrder(actor, fromType, toType),
+                () => new ConvertResourceOrder(Actor, fromResourceKind, toResourceKind),
                 () => GoToState("storeProduct"),
                 null);
             CreateState("storeProduct",
-                () => new StoreCarriedResourceOrder(actor),
+                () => new StoreCarriedResourceOrder(Actor),
                 () => GoToState("getSourceMaterial"),
                 null);
         }

@@ -1,21 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using AqlaSerializer;
+using Neolithica.DependencyInjection;
 using Neolithica.MonoBehaviours.Reservations;
+using Tofu.Serialization;
 using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
+    [SavableMonobehaviour(7)]
     public class Reservoir : MonoBehaviour {
-        public Resource.Type resourceType;
+        public ResourceKind resourceResourceKind;
         public double amount;
         public float regenRate;
         public double max;
         public string harvestStat=null;
         public List<Reservation> reservations = new List<Reservation>();
 
-        [Inject]
-        public StatManager statManager;
-        [Inject]
-        public GameFactory Factory { get; set; }
+        [Inject, DontSave] public StatManager statManager;
+        [Inject, DontSave] private GameFactoryBase FactoryBase;
 
         // Handles Start event
         void Start() {
@@ -53,6 +55,9 @@ namespace Neolithica.MonoBehaviours {
         /// Updates ResourceReservations, marking them ready as appropriate
         /// </summary>
         public void UpdateReservations() {
+            if (reservations.Count == 0)
+                return;
+
             reservations.RemoveAll((r) => r.Cancelled || r.Released);
             double availAmount = amount;
             foreach (ResourceReservation res in reservations) {
@@ -87,7 +92,7 @@ namespace Neolithica.MonoBehaviours {
                 reservations.Remove(res);
 
                 if (!String.IsNullOrEmpty(harvestStat)) {
-                    GameStat stat = statManager.Stat(harvestStat);
+                    IGameStat stat = statManager.Stat(harvestStat);
                     if (stat != null) {
                         stat.Add(res.amount);
                     } else {
@@ -108,8 +113,8 @@ namespace Neolithica.MonoBehaviours {
         /// <param name="amount"></param>
         /// <returns>The reservation</returns>
         public ResourceReservation NewReservation(GameObject go, double amount) {
-            var r = Factory.AddComponent<ResourceReservation>(go);
-            r.type = this.resourceType;
+            var r = FactoryBase.AddComponent<ResourceReservation>(go);
+            r.resourceKind = this.resourceResourceKind;
             r.amount = amount;
             r.source = this.gameObject;
             reservations.Add(r);

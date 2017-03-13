@@ -1,9 +1,11 @@
-﻿using Neolithica.MonoBehaviours;
+﻿using AqlaSerializer;
+using Neolithica.MonoBehaviours;
 using UnityEngine;
 
 namespace Neolithica.Orders.Simple {
+    [SerializableType]
     public class CatchFishOrder : BaseOrder {
-        float progress = 0.0f;
+        [SerializableMember(1)] float progress = 0.0f;
 
         public CatchFishOrder(ActorController a, NeolithicObject fishingHole) : base(a) {
         }
@@ -11,9 +13,9 @@ namespace Neolithica.Orders.Simple {
         public override void DoStep() {
             progress += Time.fixedDeltaTime;
             if (progress >= 1.25f) {
-                Resource res = actor.GameController.CreateResourcePile(Resource.Type.Fish, 1.0);
-                actor.PickupResource(res);
-                this.completed = true;
+                Resource res = Actor.GameController.CreateResourcePile(ResourceKind.Fish, 1.0);
+                Actor.PickupResource(res);
+                this.Completed = true;
             }
         }
     }

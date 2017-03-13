@@ -1,30 +1,33 @@
-﻿using Neolithica.MonoBehaviours;
+﻿using AqlaSerializer;
+using Neolithica.MonoBehaviours;
 using UnityEngine;
 
 namespace Neolithica.Orders.Simple {
     /// <summary>
     /// Order to reserve storage for the current carried resource in any available warehouse
     /// </summary>
+    [SerializableType]
     public class ReserveStorageOrder : BaseOrder {
-        Resource resource;
+        [SerializableMember(1)]
+        private Resource resource;
 
         public ReserveStorageOrder(ActorController a) : base(a) {
             resource = a.GetCarriedResource();
             if (!resource) {
-                failed = true;
+                Failed = true;
             }
         }
 
         public override void DoStep() {
-            Resource.Type type = resource.type;
+            ResourceKind resourceKind = resource.resourceKind;
             double amount = resource.amount;
 
-            if (actor.GameController.ReserveStorage(actor, type, amount)) {
+            if (Actor.GameController.ReserveStorage(Actor, resourceKind, amount)) {
                 Debug.Log("Reserved storage");
-                completed = true;
+                Completed = true;
             }
             else {
-                failed = true;
+                Failed = true;
             }
         }
     }

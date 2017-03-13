@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Tofu.Serialization;
 
 namespace Neolithica.MonoBehaviours.Reservations {
-    [Serializable]
+    [SavableMonobehaviour(28)]
     public class StorageReservation : Reservation {
         public Warehouse warehouse;
-        public Resource.Type resourceType;
+        public ResourceKind resourceResourceKind;
         public double amount;
     }
 }

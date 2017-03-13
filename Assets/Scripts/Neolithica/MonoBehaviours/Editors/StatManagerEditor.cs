@@ -7,9 +7,13 @@ namespace Neolithica.MonoBehaviours.Editors {
         public override void OnInspectorGUI() {
             StatManager my = (StatManager)target;
 
-            foreach (var stat in my.stats.Values) {
-                EditorGUILayout.LabelField(stat.name);
-                EditorGUILayout.FloatField((float)stat.Value);
+            foreach (var stat in my.Stats()) {
+                EditorGUILayout.LabelField(stat.Name);
+                double startingValue = (double)stat.Value;
+                double newValue = EditorGUILayout.DoubleField(startingValue);
+
+                if (newValue != startingValue)
+                    stat.SetValue((decimal)newValue);
             }
         }
     }

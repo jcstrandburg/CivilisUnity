@@ -13,7 +13,7 @@ namespace Neolithica.Orders.Simple {
         public override void DoStep() {
             base.DoStep();
             if (reservation.Ready) {
-                completed = true;
+                Completed = true;
             }
         }
 

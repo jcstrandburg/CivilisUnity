@@ -1,13 +1,17 @@
-﻿using Neolithica.MonoBehaviours;
+﻿using AqlaSerializer;
+using Neolithica.MonoBehaviours;
 using UnityEngine;
 
 namespace Neolithica.Orders.Simple {
     /// <summary>
     /// A simple stateless move order
     /// </summary>
+    [SerializableType]
     public class SimpleMoveOrder : BaseOrder {
-        public Vector3 targetPosition;
-        float proximity;
+        [SerializableMember(1)]
+        private Vector3 targetPosition;
+        [SerializableMember(2)]
+        private float proximity;
 
         public SimpleMoveOrder(ActorController a, Vector3 position, float proximity = 0.0f) : base(a) {
             a.GetComponent<NeolithicObject>().statusString = "Moving to position";
@@ -16,10 +20,10 @@ namespace Neolithica.Orders.Simple {
         }
 
         public override void DoStep() {
-            this.completed = actor.MoveTowards(targetPosition);
-            Vector3 diff = targetPosition - actor.transform.position;
+            this.Completed = Actor.MoveTowards(targetPosition);
+            Vector3 diff = targetPosition - Actor.transform.position;
             if (diff.magnitude < proximity) {
-                this.completed = true;
+                this.Completed = true;
             }
         }
     }

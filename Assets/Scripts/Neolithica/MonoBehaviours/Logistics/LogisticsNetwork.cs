@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tofu.Serialization;
 using UnityEngine;
 
 namespace Neolithica.MonoBehaviours.Logistics {
+    [SavableMonobehaviour(22)]
     public class LogisticsNetwork : MonoBehaviour {
 
-        GameObject dumpingGround;
-        private List<LogisticsNode> nodes = new List<LogisticsNode>();
         public int strategy = 1;
 
         public int NodeCount {
@@ -106,8 +106,8 @@ namespace Neolithica.MonoBehaviours.Logistics {
         void KeepFoodBufferFilled() {
             if (foodbuffer < 3.0) {
                 var warehouses = FindComponents<Warehouse>();
-                var types = new List<Resource.Type> { Resource.Type.Meat, Resource.Type.Vegetables, Resource.Type.Fish};
-                var typesToRemove = new List<Resource.Type>();
+                var types = new List<ResourceKind> { ResourceKind.Meat, ResourceKind.Vegetables, ResourceKind.Fish};
+                var typesToRemove = new List<ResourceKind>();
                 var resources = new List<ResourceProfile>();
 
                 foreach (var w in warehouses) {
@@ -142,16 +142,18 @@ namespace Neolithica.MonoBehaviours.Logistics {
         /// <param name="resources"></param>
         /// <returns>Food value</returns>
         public double CalcFoodValue(IEnumerable<ResourceProfile> resources) {
-            var p = resources.OrderBy((ResourceProfile rp) => -rp.amount).ToArray();
+            var p = resources.OrderBy((ResourceProfile rp) => -rp.Amount).ToArray();
             if (p.Count() == 0 || p.Count() > 3) {
                 throw new ArgumentException("Unexpected resource count " + resources.Count());
             }
 
             double returnMe = 0;
             for (int i = 0; i < p.Length; i++) {
-                returnMe += (i + 1) * p[i].amount;
+                returnMe += (i + 1) * p[i].Amount;
             }
             return returnMe;
         }
+
+        private List<LogisticsNode> nodes = new List<LogisticsNode>();
     }
 }

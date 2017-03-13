@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using Neolithica.MonoBehaviours;
 using Neolithica.ScriptableObjects;
 using NUnit.Framework;
@@ -80,6 +81,30 @@ namespace Neolithica.Test.Editor {
             sm2.SetStats(stats);
             Assert.AreEqual(12m, sm2.Stat("stat2").PersistantValue);
             Assert.AreEqual(11m, sm2.Stat("stat3").PersistantValue);
+        }
+
+        [Test]
+        public void TestFromSaveGame() {
+            // stat1 is not persisted, should load from savegame values, stat2 should not
+            var statProfiles = new StatProfile[] {
+                StatProfile.Make("stat1", false, true),
+                StatProfile.Make("stat2", true, true),
+            };
+
+            // both saved stats have persist=true, StatManager should ignore this
+            var savedStats = new GameStat[] { new GameStat("stat1", true, true), new GameStat("stat2", true, true) }
+                .ToDictionary(stat => stat.Name);
+            
+            savedStats["stat1"].SetValue(12m);
+            savedStats["stat2"].SetValue(12m);
+
+            var statManager = MakeDummyStatManager();
+            statManager.SetStatsFromSaveGame(savedStats.Values);
+            statManager.SetStats(statProfiles);
+            statManager.RestoreStatsFromSaveGameIfPresent();
+
+            Assert.AreEqual(12m, statManager.Stat("stat1").Value);
+            Assert.AreEqual(0m, statManager.Stat("stat2").Value);
         }
 
         [Test]

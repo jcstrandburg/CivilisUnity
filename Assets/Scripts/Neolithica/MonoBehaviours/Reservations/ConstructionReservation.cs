@@ -1,6 +1,9 @@
-﻿namespace Neolithica.MonoBehaviours.Reservations {
+﻿using Tofu.Serialization;
+
+namespace Neolithica.MonoBehaviours.Reservations {
+    [SavableMonobehaviour(18)]
     public class ConstructionReservation : Reservation {
-        public Resource.Type resourceType;
+        public ResourceKind resourceResourceKind;
         public double amount;
     }
 }
