@@ -70,7 +70,7 @@ namespace Neolithica.MonoBehaviours {
                 }
             }
 
-            currentOrder.Update();
+            currentOrder.Update(this);
             queueLength = orderQueue.Count;
         }
 

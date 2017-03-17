@@ -8,30 +8,30 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(1)]
         private NeolithicObject target;
 
-        public FishOrder(ActorController a, NeolithicObject target) : base(a) {
+        public FishOrder(ActorController actor, NeolithicObject target) : base(actor) {
             this.target = target;
-            GoToState("seekTarget");
+            GoToState("seekTarget", actor);
         }
 
-        public override void Initialize() {
-            Actor.DropCarriedResource();
+        public override void Initialize(ActorController actor) {
+            actor.DropCarriedResource();
         }
 
         protected override void CreateStates() {
             CreateState(
-                "seekTarget", 
-                () => new SimpleMoveOrder(Actor, target.transform.position, 20.0f), 
-                () => GoToState("getResource"), 
+                "seekTarget",
+                actor => new SimpleMoveOrder(actor, target.transform.position, 20.0f),
+                actor => GoToState("getResource", actor), 
                 null);
             CreateState(
-                "getResource", 
-                () => new CatchFishOrder(Actor, target),
-                () => GoToState("storeResource"),
+                "getResource",
+                actor => new CatchFishOrder(actor, target),
+                actor => GoToState("storeResource", actor),
                 null);
             CreateState(
                 "storeResource",
-                () => new StoreCarriedResourceOrder(Actor),
-                () => GoToState("seekTarget"),
+                actor => new StoreCarriedResourceOrder(actor),
+                actor => GoToState("seekTarget", actor),
                 null);
         }
     }

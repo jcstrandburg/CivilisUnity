@@ -11,13 +11,13 @@ namespace Neolithica.Orders.Simple {
         [SerializableMember(1)]
         private NeolithicObject target;
 
-        public TearDownOrder(ActorController a, NeolithicObject target) : base(a) {
+        public TearDownOrder(ActorController a, NeolithicObject target) : base() {
             a.GetComponent<NeolithicObject>().statusString = "Tearing down "+target.name;
             this.target = target;
         }
 
-        public override void DoStep() {
-            if (Actor.MoveTowards(target.transform.position)) {
+        public override void DoStep(ActorController actor) {
+            if (actor.MoveTowards(target.transform.position)) {
                 target.gameObject.SendMessage("OnTearDown");
                 Object.Destroy(target.gameObject);
                 this.Completed = true;

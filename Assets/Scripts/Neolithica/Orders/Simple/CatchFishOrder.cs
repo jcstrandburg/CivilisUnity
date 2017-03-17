@@ -7,14 +7,14 @@ namespace Neolithica.Orders.Simple {
     public class CatchFishOrder : BaseOrder {
         [SerializableMember(1)] float progress = 0.0f;
 
-        public CatchFishOrder(ActorController a, NeolithicObject fishingHole) : base(a) {
+        public CatchFishOrder(ActorController a, NeolithicObject fishingHole) : base() {
         }
 
-        public override void DoStep() {
+        public override void DoStep(ActorController actor) {
             progress += Time.fixedDeltaTime;
             if (progress >= 1.25f) {
-                Resource res = Actor.GameController.CreateResourcePile(ResourceKind.Fish, 1.0);
-                Actor.PickupResource(res);
+                Resource res = actor.GameController.CreateResourcePile(ResourceKind.Fish, 1.0);
+                actor.PickupResource(res);
                 this.Completed = true;
             }
         }

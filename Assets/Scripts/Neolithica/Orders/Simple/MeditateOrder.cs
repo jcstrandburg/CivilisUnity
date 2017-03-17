@@ -7,11 +7,11 @@ namespace Neolithica.Orders.Simple {
     /// </summary>
     [SerializableType]
     public class MeditateOrder : BaseOrder {
-        public MeditateOrder(ActorController a, NeolithicObject target) : base(a) {
+        public MeditateOrder(ActorController a, NeolithicObject target) : base() {
         }
 
-        public override void DoStep() {
-            Actor.GameController.Spirit += 0.03f;
+        public override void DoStep(ActorController actor) {
+            actor.GameController.Spirit += 0.03f;
         }
     }
 }

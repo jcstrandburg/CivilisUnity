@@ -22,26 +22,26 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(1)] public BaseOrder currentOrder = null;
         [SerializableMember(2)] public string currentState;
 
-        public StatefulSuperOrder(ActorController a) : base(a) {
+        public StatefulSuperOrder(ActorController actor) : base() {
         }
 
         protected abstract void CreateStates();
 
-        public void CreateState(string stateName, Func<BaseOrder> startState, Action completeState, Action failState) {
+        public void CreateState(string stateName, Func<ActorController, BaseOrder> startState, Action<ActorController> completeState, Action<ActorController> failState) {
             OrderStateInfo info = new OrderStateInfo(startState, completeState, failState);
             states.Add(stateName, info);
         }
 
-        public override void DoStep() {
+        public override void DoStep(ActorController actor) {
             if (currentOrder != null) {
-                currentOrder.DoStep();
+                currentOrder.DoStep(actor);
 
                 //check to see if order is done somehow
                 if (currentOrder.Done) {
                     OrderStateInfo info = States[currentState];
                     if (currentOrder.Completed) {
-                        if (info.completeState != null) {
-                            info.completeState();
+                        if (info.CompleteState != null) {
+                            info.CompleteState(actor);
                         }
                         else {
                             this.Failed = true;
@@ -49,8 +49,8 @@ namespace Neolithica.Orders.Super {
                         }
                     }
                     else if (currentOrder.Failed) {
-                        if (info.failState != null) {
-                            info.failState();
+                        if (info.FailState != null) {
+                            info.FailState(actor);
                         }
                         else {
                             this.Failed = true;
@@ -69,11 +69,11 @@ namespace Neolithica.Orders.Super {
         }
 
         /// <summary>Changes to the given state</summary>
-        public void GoToState(string state) {
+        public void GoToState(string state, ActorController actor) {
             if (States.ContainsKey(state)) {
                 OrderStateInfo info = States[state];
                 currentState = state;
-                currentOrder = info.startState();
+                currentOrder = info.StartState(actor);
             }
             else {
                 throw new ArgumentOutOfRangeException("Nonexistant order state: " + state);

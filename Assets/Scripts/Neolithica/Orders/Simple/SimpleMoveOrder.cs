@@ -13,15 +13,15 @@ namespace Neolithica.Orders.Simple {
         [SerializableMember(2)]
         private float proximity;
 
-        public SimpleMoveOrder(ActorController a, Vector3 position, float proximity = 0.0f) : base(a) {
+        public SimpleMoveOrder(ActorController a, Vector3 position, float proximity = 0.0f) : base() {
             a.GetComponent<NeolithicObject>().statusString = "Moving to position";
             this.proximity = proximity;
             targetPosition = position;
         }
 
-        public override void DoStep() {
-            this.Completed = Actor.MoveTowards(targetPosition);
-            Vector3 diff = targetPosition - Actor.transform.position;
+        public override void DoStep(ActorController actor) {
+            this.Completed = actor.MoveTowards(targetPosition);
+            Vector3 diff = targetPosition - actor.transform.position;
             if (diff.magnitude < proximity) {
                 this.Completed = true;
             }

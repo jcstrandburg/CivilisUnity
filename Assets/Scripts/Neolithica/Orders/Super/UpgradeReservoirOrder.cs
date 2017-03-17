@@ -14,20 +14,20 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(2)]
         private GameObject myPrefab;
 
-        public UpgradeReservoirOrder(ActorController a, NeolithicObject target, GameObject prefab) : base(a) {
+        public UpgradeReservoirOrder(ActorController actor, NeolithicObject target, GameObject prefab) : base(actor) {
             targetObj = target;
             myPrefab = prefab;
-            GoToState("seekTarget");
+            GoToState("seekTarget", actor);
         }
 
         protected override void CreateStates() {
             CreateState("seekTarget",
-                () => new SimpleMoveOrder(Actor, targetObj.transform.position),
-                () => GoToState("doUpgrade"),
+                actor => new SimpleMoveOrder(actor, targetObj.transform.position),
+                actor => GoToState("doUpgrade", actor),
                 null);
             CreateState("doUpgrade",
-                () => new DoBuildingUpgrade(Actor, targetObj, myPrefab),
-                () => Completed = true,
+                actor => new DoBuildingUpgrade(actor, targetObj, myPrefab),
+                actor => Completed = true,
                 null);
         }
     }

@@ -15,43 +15,43 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(3)]
         private NeolithicObject target;
 
-        public TransmuteOrder(ActorController a, NeolithicObject target, ResourceKind fromResourceKind, ResourceKind toResourceKind) : base(a) {
+        public TransmuteOrder(ActorController actor, NeolithicObject target, ResourceKind fromResourceKind, ResourceKind toResourceKind) : base(actor) {
             this.fromResourceKind = fromResourceKind;
             this.toResourceKind = toResourceKind;
             this.target = target;
-            GoToState("getSourceMaterial");
+            GoToState("getSourceMaterial", actor);
         }
 
-        public override void Initialize() {
-            Resource r = Actor.GetCarriedResource();
+        public override void Initialize(ActorController actor) {
+            Resource r = actor.GetCarriedResource();
             if (r == null) return;
             if (r.resourceKind == fromResourceKind) {
-                GoToState("gotoWorkspace");
+                GoToState("gotoWorkspace", actor);
             }
             else if (r.resourceKind == toResourceKind) {
-                GoToState("storeProduct");
+                GoToState("storeProduct", actor);
             }
             else {
-                Actor.DropCarriedResource();
+                actor.DropCarriedResource();
             }
         }
 
         protected override void CreateStates() {
             CreateState("getSourceMaterial",
-                () => new FetchAvailableResourceOrder(Actor, fromResourceKind, 1),
-                () => GoToState("gotoWorkspace"),
+                actor => new FetchAvailableResourceOrder(actor, fromResourceKind, 1),
+                actor => GoToState("gotoWorkspace", actor),
                 null);
             CreateState("gotoWorkspace",
-                () => new SimpleMoveOrder(Actor, target.transform.position, 2.0f),
-                () => GoToState("doTransmute"),
+                actor => new SimpleMoveOrder(actor, target.transform.position, 2.0f),
+                actor => GoToState("doTransmute", actor),
                 null);
             CreateState("doTransmute",
-                () => new ConvertResourceOrder(Actor, fromResourceKind, toResourceKind),
-                () => GoToState("storeProduct"),
+                actor => new ConvertResourceOrder(actor, fromResourceKind, toResourceKind),
+                actor => GoToState("storeProduct", actor),
                 null);
             CreateState("storeProduct",
-                () => new StoreCarriedResourceOrder(Actor),
-                () => GoToState("getSourceMaterial"),
+                actor => new StoreCarriedResourceOrder(actor),
+                actor => GoToState("getSourceMaterial", actor),
                 null);
         }
     }

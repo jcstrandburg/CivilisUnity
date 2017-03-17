@@ -10,17 +10,17 @@ namespace Neolithica.Orders.Simple {
         [SerializableMember(2)]
         private GameObject myPrefab;
 
-        public DoBuildingUpgrade(ActorController a, NeolithicObject target, GameObject prefab) : base(a) {
+        public DoBuildingUpgrade(ActorController a, NeolithicObject target, GameObject prefab) : base() {
             myTargetObj = target;
             myPrefab = prefab;
         }
 
-        public override void DoStep() {
+        public override void DoStep(ActorController actor) {
             var replacement = GameController.Instance.Factory.Instantiate(myPrefab);
             replacement.transform.position = myTargetObj.transform.position;
             replacement.transform.rotation = myTargetObj.transform.rotation;
             Object.Destroy(myTargetObj.gameObject);
-            Actor.GameController.StatManager.Stat("forest-gardens").Add(1);
+            actor.GameController.StatManager.Stat("forest-gardens").Add(1);
 
             Completed = true;
         }

@@ -8,27 +8,27 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(1)]
         private Herd herd;
 
-        public HuntOrder(ActorController a, Herd herd) : base(a) {
+        public HuntOrder(ActorController actor, Herd herd) : base(actor) {
             this.herd = herd;
-            GoToState("seekTarget");
+            GoToState("seekTarget", actor);
         }
 
-        public override void Initialize() {
-            Actor.DropCarriedResource();
+        public override void Initialize(ActorController actor) {
+            actor.DropCarriedResource();
         }
 
         protected override void CreateStates() {
-            CreateState("seekTarget", 
-                () => new SimpleMoveOrder(Actor, herd.rabbit.transform.position), 
-                () => GoToState("getResource"), 
+            CreateState("seekTarget",
+                actor => new SimpleMoveOrder(actor, herd.rabbit.transform.position),
+                actor => GoToState("getResource", actor), 
                 null);
-            CreateState("getResource", 
-                () => new SlaughterHuntedAnimalOrder(Actor, herd), 
-                () => GoToState("storeResource"), 
+            CreateState("getResource",
+                actor => new SlaughterHuntedAnimalOrder(actor, herd),
+                actor => GoToState("storeResource", actor), 
                 null);
-            CreateState("storeResource", 
-                () => new StoreCarriedResourceOrder(Actor), 
-                () => GoToState("seekTarget"), 
+            CreateState("storeResource",
+                actor => new StoreCarriedResourceOrder(actor),
+                actor => GoToState("seekTarget", actor), 
                 null);
         }
     }

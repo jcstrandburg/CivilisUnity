@@ -16,45 +16,45 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(3)]
         private ResourceReservation resourceReservation;
 
-        public HarvestFromReservoirOrder(ActorController a, NeolithicObject target) : base(a) {
+        public HarvestFromReservoirOrder(ActorController actor, NeolithicObject target) : base(actor) {
             targetObj = target;
             reservoir = target.GetComponent<Reservoir>();
-            GoToState("seekTarget");
+            GoToState("seekTarget", actor);
         }
 
-        public override void Initialize() {
-            Resource r = Actor.GetCarriedResource();
+        public override void Initialize(ActorController actor) {
+            Resource r = actor.GetCarriedResource();
             if (r != null && r.resourceKind == reservoir.resourceResourceKind) {
-                GoToState("storeContents");
+                GoToState("storeContents", actor);
             } else {
-                Actor.DropCarriedResource();
+                actor.DropCarriedResource();
             }
         }
 
         protected override void CreateStates() {
             CreateState("seekTarget",
-                () => new SimpleMoveOrder(
-                    Actor, 
-                    Actor.GameController.SnapToGround(targetObj.transform.position)),
-                () => GoToState("reservationWait"),
+                actor => new SimpleMoveOrder(
+                    actor, 
+                    actor.GameController.SnapToGround(targetObj.transform.position)),
+                actor => GoToState("reservationWait", actor),
                 null);
             CreateState("reservationWait",
-                () => {
-                    resourceReservation = reservoir.NewReservation(Actor.gameObject, 1);
-                    return new WaitForReservationOrder(Actor, resourceReservation);
+                actor => {
+                    resourceReservation = reservoir.NewReservation(actor.gameObject, 1);
+                    return new WaitForReservationOrder(actor, resourceReservation);
                 },
-                () => GoToState("getResource"),
+                actor => GoToState("getResource", actor),
                 null);
             CreateState("getResource",
-                () => new ExtractFromReservoirOrder(Actor, resourceReservation),
-                () => {
+                actor => new ExtractFromReservoirOrder(actor, resourceReservation),
+                actor => {
                     resourceReservation = null;
-                    GoToState("storeContents");
+                    GoToState("storeContents", actor);
                 },
                 null);
             CreateState("storeContents",
-                () => new StoreCarriedResourceOrder(Actor),
-                () => GoToState("seekTarget"),
+                actor => new StoreCarriedResourceOrder(actor),
+                actor => GoToState("seekTarget", actor),
                 null);
         }
 

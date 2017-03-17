@@ -12,14 +12,14 @@ namespace Neolithica.Orders.Simple {
         [SerializableMember(1)]
         private StorageReservation res;
 
-        public StoreReservationOrder(ActorController a, StorageReservation r) : base(a) {
+        public StoreReservationOrder(ActorController a, StorageReservation r) : base() {
             res = r;
         }
 
-        public override void DoStep() {
-            if (Actor.MoveTowards(res.warehouse.transform.position)) {
+        public override void DoStep(ActorController actor) {
+            if (actor.MoveTowards(res.warehouse.transform.position)) {
                 res.warehouse.DepositReservation(res);
-                Object.Destroy(Actor.GetCarriedResource(res.resourceResourceKind).gameObject);
+                Object.Destroy(actor.GetCarriedResource(res.resourceResourceKind).gameObject);
                 res.Released = true;
                 this.Completed = true;
             }

@@ -13,35 +13,35 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(2)]
         private double amount;
 
-        public FetchAvailableResourceOrder(ActorController a, ResourceKind resourceResourceKind, double amount) : base(a) {
+        public FetchAvailableResourceOrder(ActorController actor, ResourceKind resourceResourceKind, double amount) : base(actor) {
             this.resourceResourceKind = resourceResourceKind;
             this.amount = amount;
-            GoToState("getReservation");
+            GoToState("getReservation", actor);
         }
 
-        public override void Initialize() {
-            Resource r = Actor.GetCarriedResource();
+        public override void Initialize(ActorController actor) {
+            Resource r = actor.GetCarriedResource();
             if (r != null) {
                 if (r.resourceKind == resourceResourceKind) {
                     this.Completed = true;
                 } else {
-                    Actor.DropCarriedResource();
+                    actor.DropCarriedResource();
                 }
             }
         }
 
         protected override void CreateStates() {
             CreateState("getReservation",
-                () => new ReserveWarehouseContentsOrder(Actor, resourceResourceKind, amount),
-                () => GoToState("gotoWarehouse"),
+                actor => new ReserveWarehouseContentsOrder(actor, resourceResourceKind, amount),
+                actor => GoToState("gotoWarehouse", actor),
                 null);
             CreateState("gotoWarehouse",
-                () => new SimpleMoveOrder(Actor, Actor.resourceReservation.source.transform.position, 2.0f),
-                () => GoToState("withdraw"),
+                actor => new SimpleMoveOrder(actor, actor.resourceReservation.source.transform.position, 2.0f),
+                actor => GoToState("withdraw", actor),
                 null);
             CreateState("withdraw",
-                () => new SimpleWithdrawOrder(Actor),
-                () => this.Completed = true,
+                actor => new SimpleWithdrawOrder(actor),
+                actor => this.Completed = true,
                 null);
         }
     }

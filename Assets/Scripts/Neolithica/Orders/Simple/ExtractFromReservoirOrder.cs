@@ -14,18 +14,18 @@ namespace Neolithica.Orders.Simple {
         [SerializableMember(2)]
         private readonly ResourceReservation reservation;
 
-        public ExtractFromReservoirOrder(ActorController a, ResourceReservation res) : base(a) {
+        public ExtractFromReservoirOrder(ActorController a, ResourceReservation res) : base() {
             a.GetComponent<NeolithicObject>().statusString = "Extracting resource";
             reservation = res;
         }
 
-        public override void DoStep() {
+        public override void DoStep(ActorController actor) {
             progress += Time.fixedDeltaTime;
             if (progress >= 1.0f) {
                 Reservoir reservoir = reservation.source.GetComponent<Reservoir>();
                 reservoir.WithdrawReservation(reservation);
-                Resource res = Actor.GameController.CreateResourcePile(reservoir.resourceResourceKind, 1);
-                Actor.PickupResource(res);
+                Resource res = actor.GameController.CreateResourcePile(reservoir.resourceResourceKind, 1);
+                actor.PickupResource(res);
                 Completed = true;
             }
         }

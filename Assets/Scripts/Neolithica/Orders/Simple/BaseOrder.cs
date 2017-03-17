@@ -26,7 +26,6 @@ namespace Neolithica.Orders.Simple {
     [SerializeDerivedType(25, typeof(GetConstructionJobOrder))]
     [SerializeDerivedType(50, typeof(StatefulSuperOrder))]
     public abstract class BaseOrder {
-        public ActorController Actor;
         public bool Completed;
         public bool Cancelled;
         public bool Failed;
@@ -38,28 +37,28 @@ namespace Neolithica.Orders.Simple {
             }
         }
 
-        protected BaseOrder(ActorController a) {
-            Actor = a;
+        protected BaseOrder() {
             Completed = Cancelled = Failed = false;
         }
 
-        public void Update() {
+        public void Update(ActorController actor) {
             if (!Initialized) {
-                Initialize();
+                Initialize(actor);
                 Initialized = true;
             }
             if (!Done) {
-                DoStep();
+                DoStep(actor);
             }
         }
 
-        public virtual void Initialize() {
+        public virtual void Initialize(ActorController actor) {
         }
 
         /// <summary>
         /// Does a single step for this order
         /// </summary>
-        public abstract void DoStep();
+        /// <param name="actor"></param>
+        public abstract void DoStep(ActorController actor);
 
         /// <summary>
         /// Cancels this order, freeing any resources as appropriate

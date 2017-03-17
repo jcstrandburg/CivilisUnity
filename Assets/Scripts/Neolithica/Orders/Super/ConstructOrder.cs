@@ -12,39 +12,39 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(1)]
         private ConstructionManager manager;
 
-        public ConstructOrder(ActorController a, NeolithicObject target) : base(a) {
+        public ConstructOrder(ActorController actor, NeolithicObject target) : base(actor) {
             manager = target.GetComponent<ConstructionManager>();
-            GoToState("getConstructionJob");
+            GoToState("getConstructionJob", actor);
         }
 
-        public override void Initialize() {
-            Resource r = Actor.GetCarriedResource();
+        public override void Initialize(ActorController actor) {
+            Resource r = actor.GetCarriedResource();
             if (r != null)
-                Actor.DropCarriedResource();
+                actor.DropCarriedResource();
         }
 
         protected override void CreateStates() {
             CreateState("getConstructionJob",
-                () => new GetConstructionJobOrder(Actor, manager),
-                () => {
+                actor => new GetConstructionJobOrder(actor, manager),
+                actor => {
                     if (manager.ConstructionFinished())
                         this.Completed = true;
                     else
-                        GoToState("fetchResource");
+                        GoToState("fetchResource", actor);
                 },
                 null);
             CreateState("fetchResource",
-                () => {
-                    var res = Actor.GetComponent<ConstructionReservation>();
-                    return new FetchAvailableResourceOrder(Actor, res.resourceResourceKind, 1);
+                actor => {
+                    var res = actor.GetComponent<ConstructionReservation>();
+                    return new FetchAvailableResourceOrder(actor, res.resourceResourceKind, 1);
                 },
-                () => GoToState("depositResource"),
+                actor => GoToState("depositResource", actor),
                 null);
             CreateState("depositResource",
-                () => new CompleteConstructionReservation(Actor, manager),
-                () => {
+                actor => new CompleteConstructionReservation(actor, manager),
+                actor => {
                     if (!manager.ConstructionFinished()) {
-                        GoToState("getConstructionJob");
+                        GoToState("getConstructionJob", actor);
                     } else {
                         this.Completed = true;
                     }

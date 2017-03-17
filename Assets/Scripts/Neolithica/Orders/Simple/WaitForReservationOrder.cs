@@ -5,13 +5,13 @@ namespace Neolithica.Orders.Simple {
     public class WaitForReservationOrder : IdleOrder {
         private Reservation reservation;
 
-        public WaitForReservationOrder(ActorController a, Reservation r) : base(a) {
-            a.GetComponent<NeolithicObject>().statusString = "Waiting for reservation";
+        public WaitForReservationOrder(ActorController actor, Reservation r) : base(actor) {
+            actor.GetComponent<NeolithicObject>().statusString = "Waiting for reservation";
             reservation = r;
         }
 
-        public override void DoStep() {
-            base.DoStep();
+        public override void DoStep(ActorController actor) {
+            base.DoStep(actor);
             if (reservation.Ready) {
                 Completed = true;
             }

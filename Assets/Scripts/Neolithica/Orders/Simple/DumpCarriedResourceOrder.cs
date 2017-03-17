@@ -14,21 +14,21 @@ namespace Neolithica.Orders.Simple {
         [SerializableMember(2)]
         private Vector3 target;
 
-        public DumpCarriedResourceOrder(ActorController a) : base(a) {
+        public DumpCarriedResourceOrder(ActorController actor) : base() {
             dump = GameObject.Find("DumpingGround");
             if (dump) {
-                target = a.GameController.SnapToGround(dump.transform.position);
+                target = actor.GameController.SnapToGround(dump.transform.position);
             } else {
                 Vector2 offset = 10.0f * UnityEngine.Random.insideUnitCircle;
-                target = a.GameController
-                    .SnapToGround(Actor.transform.position + new Vector3(offset.x, 0, offset.y));
+                target = actor.GameController
+                    .SnapToGround(actor.transform.position + new Vector3(offset.x, 0, offset.y));
             }
         }
 
-        public override void DoStep() {
+        public override void DoStep(ActorController actor) {
             try {
-                if (Actor.MoveTowards(target)) {
-                    Actor.DropCarriedResource();
+                if (actor.MoveTowards(target)) {
+                    actor.DropCarriedResource();
                     this.Completed = true;
                 }
             }

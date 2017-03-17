@@ -8,33 +8,32 @@ namespace Neolithica.Orders.Super {
     /// </summary>
     [SerializableType]
     public class StoreCarriedResourceOrder : StatefulSuperOrder {
-        public StoreCarriedResourceOrder(ActorController a) : base(a) {
-            GoToState("getReservation");
+        public StoreCarriedResourceOrder(ActorController actor) : base(actor) {
+            GoToState("getReservation", actor);
         }
 
         protected override void CreateStates() {
             CreateState("getReservation",
-                () => new ReserveStorageOrder(Actor),
-                () => GoToState("seekStorage"),
-                () => {
-                    //Debug.Log("Couldn't get reservation, dumping!");
-                    GoToState("dump");
+                actor => new ReserveStorageOrder(actor),
+                actor => GoToState("seekStorage", actor),
+                actor => {
+                    GoToState("dump", actor);
                 });
             CreateState("dump",
-                () => new DumpCarriedResourceOrder(Actor),
-                () => this.Completed = true,
+                actor => new DumpCarriedResourceOrder(actor),
+                actor => this.Completed = true,
                 null);
             CreateState("seekStorage",
-                () => new SimpleMoveOrder(Actor, Actor.storageReservation.warehouse.transform.position, 2.0f),
-                () => GoToState("reservationWait"),
+                actor => new SimpleMoveOrder(actor, actor.storageReservation.warehouse.transform.position, 2.0f),
+                actor => GoToState("reservationWait", actor),
                 null);
             CreateState("reservationWait",
-                () => new WaitForReservationOrder(Actor, Actor.storageReservation),
-                () => GoToState("deposit"),
+                actor => new WaitForReservationOrder(actor, actor.storageReservation),
+                actor => GoToState("deposit", actor),
                 null);
             CreateState("deposit",
-                () => new StoreReservationOrder(Actor, Actor.storageReservation),
-                () => this.Completed = true,
+                actor => new StoreReservationOrder(actor, actor.storageReservation),
+                actor => this.Completed = true,
                 null);
         }
     }
