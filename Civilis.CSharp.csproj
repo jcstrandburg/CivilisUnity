@@ -326,6 +326,7 @@
     <Compile Include="Assets\Scripts\Neolithica\UI\SettingsMenu.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\SliderBinding.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\TextBinding.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\Utility\MinMax.cs" />
     <Compile Include="Assets\StatManagerSurrogate.cs" />
     <Compile Include="Assets\StatManipulatorSurrogate.cs" />
     <Compile Include="Assets\StorageReservationSurrogate.cs" />
