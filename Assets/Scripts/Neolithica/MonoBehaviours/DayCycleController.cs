@@ -45,7 +45,7 @@ namespace Neolithica.MonoBehaviours {
             if (!Physics.Raycast(Camera.main.transform.position, ray.direction, out hit, Mathf.Infinity, terrainLayerMask))
                 return;
 
-            const float nightLightFloatDistance = 10.0f;
+            const float nightLightFloatDistance = 7.75f;
             nightLight.transform.position = new Vector3(
                 hit.point.x,
                 Mathf.Max(0.0f, hit.point.y) + nightLightFloatDistance,
