@@ -12,6 +12,10 @@ namespace Neolithica.MonoBehaviours {
 
         public string LoadIntoScene = null;
 
+        public void OnEnable() {
+            TypeModelBuilderBase.CacheBaseModel();
+        }
+
         public void SaveGame(string name = "Quick") {
             if (name == null)
                 throw new ArgumentNullException("name");
