@@ -11,6 +11,7 @@ namespace Neolithica.UI {
     public class NewGameMenu : MonoBehaviour {
         private NewGameSettings settings = new NewGameSettings();
 
+        [SerializeField]
         private List<ResourceSettings> resourceSettings = new List<ResourceSettings> {
             new ResourceSettings {Type = ResourcePlacementType.Berries, Frequency = 4.0f, Abundance = 0.3f},
             new ResourceSettings {Type = ResourcePlacementType.Trees, Frequency = 1.5f, Abundance = 0.5f},
@@ -38,6 +39,9 @@ namespace Neolithica.UI {
         public void StartNewGame() {
             GameObject go = new GameObject();
             var transition = go.AddComponent<GameSceneTransitioner>();
+
+            settings.ImportResourceSettings(resourceSettings);
+
             transition.InitNewGame(settings);
             SceneManager.LoadScene("PlayGame");
         }

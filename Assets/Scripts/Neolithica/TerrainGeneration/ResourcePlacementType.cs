@@ -1,4 +1,7 @@
-﻿namespace Neolithica.TerrainGeneration {
+﻿using System;
+
+namespace Neolithica.TerrainGeneration {
+    [Serializable]
     public enum ResourcePlacementType {
         None,
         Berries,

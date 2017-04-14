@@ -31,8 +31,5 @@ namespace Neolithica.Editor {
                 rect.size.x*width,
                 rect.size.y);
         }
-
-        private static GUIContent s_minLabel = new GUIContent("Min");
-        private static GUIContent s_maxLabel = new GUIContent("Max");
     }
 }

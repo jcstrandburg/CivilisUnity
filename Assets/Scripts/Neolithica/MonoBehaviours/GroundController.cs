@@ -20,15 +20,6 @@ namespace Neolithica.MonoBehaviours {
         public float grassThreshold = 105.0f;
         public float waterLevel = 20.0f;
 
-        [SerializeField] private List<ResourceSettings> resourceSettings = new List<ResourceSettings> {
-            new ResourceSettings {Type = ResourcePlacementType.Berries, Frequency = 4.0f, Abundance = 0.3f},
-            new ResourceSettings {Type = ResourcePlacementType.Trees, Frequency = 1.5f, Abundance = 0.5f},
-            new ResourceSettings {Type = ResourcePlacementType.Fish, Frequency = 5.0f, Abundance = 0.2f},
-            new ResourceSettings {Type = ResourcePlacementType.Gold, Frequency = 2.0f, Abundance = 0.2f},
-            new ResourceSettings {Type = ResourcePlacementType.Stone, Frequency = 2.0f, Abundance = 0.2f},
-            new ResourceSettings {Type = ResourcePlacementType.Doodad, Frequency = 10.0f, Abundance = 0.15f},
-        };
-
         private Random mRandom = new Random();
         private float[,] heights;
 
@@ -296,7 +287,7 @@ namespace Neolithica.MonoBehaviours {
             float waterLevel = water.transform.position.y;
             float waterHeight = waterLevel / terrainData.size.y;
 
-            var placer = new ResourcePlacer(terrainData, waterHeight, settings, resourceSettings);
+            var placer = new ResourcePlacer(terrainData, waterHeight, settings, settings.ResourceSettings);
             List<GameObject> trees = new List<GameObject>();
             List<GameObject> berries = new List<GameObject>();
 

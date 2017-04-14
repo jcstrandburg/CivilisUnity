@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AqlaSerializer;
+using Neolithica.TerrainGeneration;
 
 namespace Neolithica {
     [Serializable, SerializableType]
@@ -29,5 +32,12 @@ namespace Neolithica {
         [SerializableMember(5)] public float stoneRate = 0.17f;
         [SerializableMember(6)] public float fishRate = 0.2f;
         [SerializableMember(7)] public float doodadRate = 0.35f;
+
+        [SerializableMember(8)] public List<ResourceSettings> ResourceSettings = null;
+
+        public void ImportResourceSettings(IEnumerable<ResourceSettings> resourceSettings)
+        {
+            ResourceSettings = resourceSettings.ToList();
+        }
     }
 }
