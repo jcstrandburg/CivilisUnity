@@ -35,7 +35,7 @@ namespace Neolithica.UI {
         }
 
         public void Start() {
-            if (!String.IsNullOrEmpty(startMenu)) {
+            if (!string.IsNullOrEmpty(startMenu)) {
                 PushMenuName(startMenu);
             }
         }
@@ -46,9 +46,8 @@ namespace Neolithica.UI {
                 currentMenu.SetActive(false);
             }
             var newMenu = GameController.Factory.Instantiate(prefab);
-            Canvas c = FindObjectOfType<Canvas>();
             newMenu.SetActive(true);
-            newMenu.transform.SetParent(c.transform);
+            newMenu.transform.SetParent(canvas.transform);
             newMenu.transform.position = new Vector3((float)Screen.width / 2, (float)Screen.height / 2);
             menuStack.Push(newMenu);
         }

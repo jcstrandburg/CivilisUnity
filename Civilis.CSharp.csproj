@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows:5</UnityBuildTarget>
     <UnityVersion>5.5.1f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion Condition=" '$(VisualStudioVersion)' != '10.0' ">4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -202,6 +204,7 @@
     <Compile Include="Assets\LogisticsNodeSurrogate.cs" />
     <Compile Include="Assets\NeolithicObjectSurrogate.cs" />
     <Compile Include="Assets\Neolithica\DependencyInjection\IBehaviourResolver.cs" />
+    <Compile Include="Assets\Neolithica\TerrainGeneration\Smoother.cs" />
     <Compile Include="Assets\PlantDomesticationManagerSurrogate.cs" />
     <Compile Include="Assets\ReservationSurrogate.cs" />
     <Compile Include="Assets\ReservoirSurrogate.cs" />
@@ -255,6 +258,9 @@
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\Reservoir.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\Resource.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\ResourceKind.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\TerrainGeneration\ResourceSettings.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\TerrainGeneration\ResourcePlacementType.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\TerrainGeneration\ResourcePlacer.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\SaverLoader.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\SelectHalo.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\SelectionHandle.cs" />
@@ -262,6 +268,7 @@
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\StatManager.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\StatManipulator.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\SubMenuController.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\TerrainSourceData.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\Toast.cs" />
     <Compile Include="Assets\Scripts\Neolithica\MonoBehaviours\Warehouse.cs" />
     <Compile Include="Assets\Scripts\Neolithica\NewGameSettings.cs" />
@@ -303,6 +310,8 @@
     <Compile Include="Assets\Scripts\Neolithica\SingletonMonoBehaviourResolver.cs" />
     <Compile Include="Assets\Scripts\Neolithica\StreamStatPersistor.cs" />
     <Compile Include="Assets\Scripts\Neolithica\TechManager.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\TerrainGeneration\Eroder.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\TerrainGeneration\EroderSettings.cs" />
     <Compile Include="Assets\Scripts\Neolithica\Test\Mono\PlantDomesticationTestRunner.cs" />
     <Compile Include="Assets\Scripts\Neolithica\Test\Mono\ReservoirHarvestStatTest.cs" />
     <Compile Include="Assets\Scripts\Neolithica\Test\Mono\SaveLoadTestRunner.cs" />
@@ -311,6 +320,7 @@
     <Compile Include="Assets\Scripts\Neolithica\Test\Scripts\TestSavableBehaviour.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\AssemblyInfo.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\DataBindingSource.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\UI\DataBindingSourceEditor.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\FrontScreenController.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\GameUIController.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\InputFieldBinding.cs" />
@@ -326,6 +336,7 @@
     <Compile Include="Assets\Scripts\Neolithica\UI\SettingsMenu.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\SliderBinding.cs" />
     <Compile Include="Assets\Scripts\Neolithica\UI\TextBinding.cs" />
+    <Compile Include="Assets\Scripts\Neolithica\Utility\IntVector.cs" />
     <Compile Include="Assets\Scripts\Neolithica\Utility\MinMax.cs" />
     <Compile Include="Assets\StatManagerSurrogate.cs" />
     <Compile Include="Assets\StatManipulatorSurrogate.cs" />
