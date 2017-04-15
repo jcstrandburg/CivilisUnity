@@ -1,4 +1,6 @@
-﻿// Projector texture for showing unit selection halos
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+// Projector texture for showing unit selection halos
 
 Shader "Projector/AdditiveTint" {
 	Properties{
@@ -30,7 +32,7 @@ Shader "Projector/AdditiveTint" {
 	v2f vert(float4 vertex : POSITION)
 	{
 		v2f o;
-		o.pos = mul(UNITY_MATRIX_MVP, vertex);
+		o.pos = UnityObjectToClipPos(vertex);
 		o.uvShadow = mul(unity_Projector, vertex);
 		return o;
 	}

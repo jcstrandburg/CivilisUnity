@@ -1,4 +1,6 @@
-﻿Shader "Outlined/Silhouette" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Outlined/Silhouette" {
 	Properties{
 		_OutlineColor("Outline Color", Color) = (0,0,0,1)
 		_Outline("Outline width", Range(0.0, 0.03)) = .005
@@ -24,7 +26,7 @@
 
 	v2f rVert(appdata v) {
 		v2f o;
-		o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+		o.pos = UnityObjectToClipPos(v.vertex);
 		o.color.r = 0;
 		o.color.g = 0;
 		o.color.b = 0;
@@ -38,7 +40,7 @@
 		v2f o;
 
 		v.vertex.xyz += v.normal.xyz * _Outline;
-		o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+		o.pos = UnityObjectToClipPos(v.vertex);
 		//o.pos.xyz += v.normal.xyz * _Outline;
 
 		/*float3 norm = mul((float3x3)UNITY_MATRIX_IT_MV, v.normal);
