@@ -16,7 +16,6 @@ namespace Neolithica.Test.Editor {
         /// </summary>
         [Test]
         public void TestContentsMissingFromLimits1() {
-            MakeTestComponent<GameController>();
             Warehouse w = MakeTestComponent<Warehouse>();
 
             var resourceLimits = new ResourceProfile[] {
@@ -61,7 +60,6 @@ namespace Neolithica.Test.Editor {
         /// </summary>
         [Test]
         public void TestContentsMissingFromLimits2() {
-            MakeTestComponent<GameController>();
             Warehouse w = MakeTestComponent<Warehouse>();
 
             var resourceLimits = new ResourceProfile[] {
@@ -100,7 +98,6 @@ namespace Neolithica.Test.Editor {
 
         [Test]
         public void TestContentsAndSpaceAvailability() {
-            MakeTestComponent<GameController>();
             Warehouse w = MakeTestComponent<Warehouse>();
             w.SetLimits(new ResourceProfile[] {
                 new ResourceProfile(ResourceKind.Stone, 10),

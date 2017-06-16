@@ -3,6 +3,7 @@ using System.Linq;
 using Neolithica.MonoBehaviours;
 using Neolithica.ScriptableObjects;
 using NUnit.Framework;
+using NUnit.Framework.Constraints;
 using UnityEngine;
 
 namespace Neolithica.Test.Editor {
@@ -11,14 +12,14 @@ namespace Neolithica.Test.Editor {
     public class StatTests : NeolithicTest {
 
         [Test]
-        [ExpectedException("System.ArgumentException")]
         public void MonotonicTest() {
             var stats = new StatProfile[] {
                 StatProfile.Make("monotonicStat", false, true),
             };
             var statManager = MakeDummyStatManager();
             statManager.SetStats(stats);
-            statManager.Stat("monotonicStat").Add(-1);
+
+            Assert.That(() => statManager.Stat("monotonicStat").Add(-1), Throws.ArgumentException);
         }
 
         /// <summary>
