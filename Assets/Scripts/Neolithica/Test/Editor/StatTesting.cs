@@ -3,7 +3,6 @@ using System.Linq;
 using Neolithica.MonoBehaviours;
 using Neolithica.ScriptableObjects;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using UnityEngine;
 
 namespace Neolithica.Test.Editor {

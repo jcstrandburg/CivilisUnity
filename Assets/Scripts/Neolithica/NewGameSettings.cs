@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using AqlaSerializer;
 using Neolithica.TerrainGeneration;
 
@@ -21,6 +20,7 @@ namespace Neolithica {
         [SerializableMember(12)] public float hillFrequency = 3.0f;
         [SerializableMember(13)] public float hillHeight = 0.12f;
         [SerializableMember(14)] public float hillBaseOffset = -0.25f;
+        [SerializableMember(15)] public float waterLevel = 0.25f;
     }
 
     [Serializable, SerializableType]
@@ -33,11 +33,13 @@ namespace Neolithica {
         [SerializableMember(6)] public float fishRate = 0.2f;
         [SerializableMember(7)] public float doodadRate = 0.35f;
 
-        [SerializableMember(8)] public List<ResourceSettings> ResourceSettings = null;
-
-        public void ImportResourceSettings(IEnumerable<ResourceSettings> resourceSettings)
-        {
-            ResourceSettings = resourceSettings.ToList();
-        }
+        [SerializableMember(8)] public List<ResourceSettings> ResourceSettings = new List<ResourceSettings> {
+            new ResourceSettings {Type = ResourcePlacementType.Berries, Frequency = 4.0f, Abundance = 0.3f},
+            new ResourceSettings {Type = ResourcePlacementType.Trees, Frequency = 1.5f, Abundance = 0.5f},
+            new ResourceSettings {Type = ResourcePlacementType.Fish, Frequency = 5.0f, Abundance = 0.2f},
+            new ResourceSettings {Type = ResourcePlacementType.Gold, Frequency = 2.0f, Abundance = 0.2f},
+            new ResourceSettings {Type = ResourcePlacementType.Stone, Frequency = 2.0f, Abundance = 0.2f},
+            new ResourceSettings {Type = ResourcePlacementType.Doodad, Frequency = 10.0f, Abundance = 0.15f},
+        };
     }
 }

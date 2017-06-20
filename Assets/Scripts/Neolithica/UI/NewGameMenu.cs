@@ -11,19 +11,9 @@ namespace Neolithica.UI {
     public class NewGameMenu : MonoBehaviour {
         private NewGameSettings settings = new NewGameSettings();
 
-        [SerializeField]
-        private List<ResourceSettings> resourceSettings = new List<ResourceSettings> {
-            new ResourceSettings {Type = ResourcePlacementType.Berries, Frequency = 4.0f, Abundance = 0.3f},
-            new ResourceSettings {Type = ResourcePlacementType.Trees, Frequency = 1.5f, Abundance = 0.5f},
-            new ResourceSettings {Type = ResourcePlacementType.Fish, Frequency = 5.0f, Abundance = 0.2f},
-            new ResourceSettings {Type = ResourcePlacementType.Gold, Frequency = 2.0f, Abundance = 0.2f},
-            new ResourceSettings {Type = ResourcePlacementType.Stone, Frequency = 2.0f, Abundance = 0.2f},
-            new ResourceSettings {Type = ResourcePlacementType.Doodad, Frequency = 10.0f, Abundance = 0.15f},
-        };
-
         void Awake () {
             var dbs = GetComponent<DataBindingSource>();
-            var resourceSettingsDict = resourceSettings.ToDictionary(r => r.Type);
+            var resourceSettingsDict = settings.ResourceSettings.ToDictionary(r => r.Type);
 
             settings.seed = UnityEngine.Random.Range(0.0f, 1000.0f);
             dbs.AddBinding("seed", () => settings.seed, (object val) => settings.seed = Convert.ToSingle(val));
@@ -39,8 +29,6 @@ namespace Neolithica.UI {
         public void StartNewGame() {
             GameObject go = new GameObject();
             var transition = go.AddComponent<GameSceneTransitioner>();
-
-            settings.ImportResourceSettings(resourceSettings);
 
             transition.InitNewGame(settings);
             SceneManager.LoadScene("PlayGame");

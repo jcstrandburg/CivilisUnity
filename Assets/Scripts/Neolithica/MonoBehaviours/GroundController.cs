@@ -254,7 +254,6 @@ namespace Neolithica.MonoBehaviours {
             }
         }
 
-
         private void SpawnResourcesAndDoodads() {
             Transform resources = transform.Find("Resources");
             Transform doodads = transform.Find("Doodads");
@@ -287,7 +286,7 @@ namespace Neolithica.MonoBehaviours {
             float waterLevel = water.transform.position.y;
             float waterHeight = waterLevel / terrainData.size.y;
 
-            var placer = new ResourcePlacer(terrainData, waterHeight, settings, settings.ResourceSettings);
+            ResourcePlacer placer = new ResourcePlacer(terrainData, waterHeight, settings, settings.ResourceSettings);
             List<GameObject> trees = new List<GameObject>();
             List<GameObject> berries = new List<GameObject>();
 
@@ -416,9 +415,6 @@ namespace Neolithica.MonoBehaviours {
                 break;
             case PointerEventData.InputButton.Right:
                 GameController.IssueMoveOrder(eventData);
-                break;
-            default:
-                // do nothing
                 break;
             }
         }

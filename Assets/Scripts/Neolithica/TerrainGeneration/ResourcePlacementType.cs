@@ -1,7 +1,8 @@
 ﻿using System;
+using AqlaSerializer;
 
 namespace Neolithica.TerrainGeneration {
-    [Serializable]
+    [Serializable, SerializableType]
     public enum ResourcePlacementType {
         None,
         Berries,

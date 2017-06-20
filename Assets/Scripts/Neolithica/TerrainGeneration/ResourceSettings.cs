@@ -1,10 +1,11 @@
 ﻿using System;
+using AqlaSerializer;
 
 namespace Neolithica.TerrainGeneration {
-    [Serializable]
+    [Serializable, SerializableType]
     public class ResourceSettings {
-        public ResourcePlacementType Type;
-        public float Frequency;
-        public float Abundance;
+        [SerializableMember(1)] public ResourcePlacementType Type;
+        [SerializableMember(2)] public float Frequency;
+        [SerializableMember(3)] public float Abundance;
     }
 }
