@@ -4,6 +4,7 @@ using AqlaSerializer;
 using AqlaSerializer.Meta;
 using Neolithica.ScriptableObjects;
 using Neolithica.Serialization.Surrogates;
+using Neolithica.Test.Scripts;
 using NUnit.Framework;
 using Tofu.Serialization;
 using UnityEngine;

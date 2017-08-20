@@ -1,8 +1,9 @@
 using AqlaSerializer;
 using Neolithica.MonoBehaviours;
+using Tofu.Serialization;
 using UnityEngine;
 
-namespace Tofu.Serialization.Surrogates {
+namespace Neolithica.Serialization.Surrogates {
     [SerializableType, SurrogateFor(typeof(AnimalController))]
     public class AnimalControllerSurrogate {
 

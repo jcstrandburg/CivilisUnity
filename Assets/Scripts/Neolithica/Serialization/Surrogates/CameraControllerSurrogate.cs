@@ -1,7 +1,8 @@
 using AqlaSerializer;
 using Neolithica.MonoBehaviours;
+using Tofu.Serialization;
 
-namespace Tofu.Serialization.Surrogates {
+namespace Neolithica.Serialization.Surrogates {
     [SerializableType, SurrogateFor(typeof(CameraController))]
     public class CameraControllerSurrogate {
 

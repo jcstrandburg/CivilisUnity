@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using AqlaSerializer.Meta;
+using Neolithica.Serialization.Surrogates;
+using Neolithica.Test.Scripts;
 using NUnit.Framework;
 using Tofu.Serialization;
 using Tofu.Serialization.Surrogates;
