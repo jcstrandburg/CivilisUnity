@@ -5,15 +5,10 @@ namespace Neolithica.MonoBehaviours.Reservations {
     [SavableMonobehaviour(20)]
     public class Reservation : MonoBehaviour {
 
-        private float lifetime = Mathf.Infinity;
         private bool ready = false; //if the reserved asset is ready
         private bool acknowledged = false; //i don't know what this is for
         private bool released = false; //if the reservation has been released by the customer
         private bool cancelled = false; //if the reservation has been cancelled by the vendor
-
-        public void SetTimeout(float timeout) {
-            lifetime = timeout;
-        }
 
         public bool Ready {
             get { return ready; }
@@ -43,10 +38,6 @@ namespace Neolithica.MonoBehaviours.Reservations {
         public bool Cancelled {
             get { return cancelled;  }
             set { cancelled = value; }
-        }
-
-        public void FixedUpdate() {
-            lifetime -= Time.fixedDeltaTime;
         }
     }
 }
