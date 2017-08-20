@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,9 +10,17 @@ namespace Neolithica.MonoBehaviours.Editors {
             DrawDefaultInspector();
             GroundController groundController = (GroundController)target;
 
-            if (GUILayout.Button("Randomize Terrain"))
+            if (GUILayout.Button("Randomize Terrain")) {
+                groundController.Randomize();
                 groundController.GenerateMap();
-            
+            }
+
+            if (GUILayout.Button("Erode Terrain")) {
+                foreach (int i in Enumerable.Range(0, 3))
+                    groundController.ErodeMap();
+            }
+                
+
             if (GUILayout.Button("Generate Resources"))
                 groundController.GenerateResourcesAndDoodads();
 

@@ -15,37 +15,45 @@ namespace Neolithica.Test.Editor {
     [Category("Serialization Tests")]
     public class TofuSerializationTests : NeolithicTest {
 
+        [OneTimeSetUp]
+        public override void TestFixtureSetUp() {
+            base.TestFixtureSetUp();
+
+            m_testPrefab = Resources.Load<GameObject>("TestSavable");
+        }
+
         [SetUp]
         public override void SetUp() {
             base.SetUp();
-            Assert.NotNull(s_testPrefab);
+            Assert.NotNull(m_testPrefab);
         }
 
         [Test]
         public void BasicSaveTestMocked() {
             var builder = new MockModelBuilder();
-            BasicTestWithModelBuilder(builder, new[] { s_testPrefab });
+            BasicTestWithModelBuilder(builder, new[] { m_testPrefab });
         }
 
         [Test]
         public void BasicSaveTestAttributeBased() {
             var builder = new AttributeBasedTypeModelBuilder();
-            BasicTestWithModelBuilder(builder, new [] { s_testPrefab });
+            BasicTestWithModelBuilder(builder, new [] { m_testPrefab });
         }
 
         [Test]
         [TestCaseSource(typeof(PrefabProvider), "GetEnumerator")]
-        public void SaveAllPrefabs(GameObject prefab) {
-            TestSerializePrefab(prefab, s_allSavablePrefabs);
+        public void SaveAllPrefabs(GameObject prefab)
+        {
+            TestSerializePrefab(prefab, AllSaveablePrefabs);
         }
 
         [Test]
         public void MonoBehaviourReferencesAreSerialized() {
             string id1 = Guid.NewGuid().ToString();
             string id2 = Guid.NewGuid().ToString();
-            GameObject object1 = Object.Instantiate(s_testPrefab);
+            GameObject object1 = Object.Instantiate(m_testPrefab);
             object1.name = id1;
-            GameObject object2 = Object.Instantiate(s_testPrefab);
+            GameObject object2 = Object.Instantiate(m_testPrefab);
             object2.name = id2;
             TestSavableBehaviour behaviour1 = object1.GetComponent<TestSavableBehaviour>();
             TestSavableBehaviour behaviour2 = object2.GetComponent<TestSavableBehaviour>();
@@ -54,7 +62,7 @@ namespace Neolithica.Test.Editor {
 
             var builder = new MockModelBuilder();
             SaveGame saveGame = SaveGamePacker.PackSaveGame(new[] { object1, object2 }, builder.GetSavableMonobehaviours());
-            SerializeAndUnserialize(saveGame, builder, s_allSavablePrefabs);
+            SerializeAndUnserialize(saveGame, builder, AllSaveablePrefabs);
 
             GameObject newObject1 = GameObject.Find(id1);
             GameObject newObject2 = GameObject.Find(id2);
@@ -67,9 +75,9 @@ namespace Neolithica.Test.Editor {
         public void GameObjectReferencesAreSerialized() {
             string id1 = "object1";
             string id2 = "object2";
-            GameObject object1 = Object.Instantiate(s_testPrefab);
+            GameObject object1 = Object.Instantiate(m_testPrefab);
             object1.name = id1;
-            GameObject object2 = Object.Instantiate(s_testPrefab);
+            GameObject object2 = Object.Instantiate(m_testPrefab);
             object2.name = id2;
             TestSavableBehaviour behaviour1 = object1.GetComponent<TestSavableBehaviour>();
             TestSavableBehaviour behaviour2 = object2.GetComponent<TestSavableBehaviour>();
@@ -79,7 +87,7 @@ namespace Neolithica.Test.Editor {
 
             var builder = new MockModelBuilder();
             SaveGame saveGame = SaveGamePacker.PackSaveGame(new[] { object1, object2 }, builder.GetSavableMonobehaviours());
-            SerializeAndUnserialize(saveGame, builder, s_allSavablePrefabs);
+            SerializeAndUnserialize(saveGame, builder, AllSaveablePrefabs);
 
             GameObject newObject1 = GameObject.Find(id1);
             GameObject newObject2 = GameObject.Find(id2);
@@ -124,7 +132,7 @@ namespace Neolithica.Test.Editor {
         }
 
         private void BasicTestWithModelBuilder(ITypeModelBuilder builder, IEnumerable<GameObject> prefabs) {
-            GameObject instantiated = Object.Instantiate(s_testPrefab);
+            GameObject instantiated = Object.Instantiate(m_testPrefab);
             string testName = Guid.NewGuid().ToString();
             string testValue = Guid.NewGuid().ToString();
             Vector3 testPosition = new Vector3(10, 20, 30);
@@ -144,9 +152,15 @@ namespace Neolithica.Test.Editor {
             Assert.AreEqual(testPosition, testObject.transform.position);
         }
 
-        private static GameObject s_testPrefab = Resources.Load<GameObject>("TestSavable");
-        private static List<GameObject> s_allSavablePrefabs = Resources.LoadAll<Savable>("")
-            .Where(savable => savable.PrefabId != null).Select(savable => savable.gameObject).ToList();
+        private static ICollection<GameObject> AllSaveablePrefabs
+        {
+            get
+            {
+                return Resources.LoadAll<Savable>("").Where(savable => savable.PrefabId != null).Select(savable => savable.gameObject).ToList();
+            }
+        }
+
+        private GameObject m_testPrefab;
 
         private class MockModelBuilder : TypeModelBuilderBase {
             public override ReadOnlyCollection<Type> GetSavableMonobehaviours() {
@@ -164,8 +178,8 @@ namespace Neolithica.Test.Editor {
         }
 
         private class PrefabProvider {
-            public IEnumerator<TestCaseData> GetEnumerator() {
-                return s_allSavablePrefabs.Select(prefab => new TestCaseData(prefab).SetName(prefab.name)).GetEnumerator();
+            public static IEnumerator<TestCaseData> GetEnumerator() {
+                return AllSaveablePrefabs.Select(prefab => new TestCaseData(prefab).SetName(prefab.name)).GetEnumerator();
             }
         }
     }

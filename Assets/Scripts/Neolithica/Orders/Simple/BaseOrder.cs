@@ -1,7 +1,6 @@
 ﻿using AqlaSerializer;
 using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Super;
-
 namespace Neolithica.Orders.Simple {
     /// <summary>
     /// The base for all actor orders

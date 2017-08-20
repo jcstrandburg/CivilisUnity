@@ -12,11 +12,11 @@ namespace Neolithica.Test.Editor {
         protected GameObject dummyObject;
         protected List<GameObject> tempObjects;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public virtual void TestFixtureSetUp() {
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public virtual void TestTextureTearDown() {
         }
 

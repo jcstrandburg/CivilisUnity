@@ -13,6 +13,11 @@ namespace Neolithica.UI {
 
         void Start() {
             slider = GetComponent<Slider>();
+            cachedSourceValue = source.GetValue(sourceTag);
+            cachedSliderValue = slider.value;
+
+            if (cachedSourceValue != null)
+                slider.value = (float) cachedSourceValue;
         }
 
         // Update is called once per frame
