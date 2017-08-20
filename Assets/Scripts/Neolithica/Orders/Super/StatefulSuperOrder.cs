@@ -45,7 +45,7 @@ namespace Neolithica.Orders.Super {
                         }
                         else {
                             this.Failed = true;
-                            Debug.Log("No complete transition available for state: " + currentState);
+                            Debug.Log($"No complete transition available for state: {currentState}");
                         }
                     }
                     else if (currentOrder.Failed) {
@@ -54,11 +54,11 @@ namespace Neolithica.Orders.Super {
                         }
                         else {
                             this.Failed = true;
-                            Debug.Log("No failure transition available for state: " + currentState);
+                            Debug.Log($"No failure transition available for state: {currentState}");
                         }
                     }
                     else if (currentOrder.Cancelled) {
-                        throw new Exception("Order exectution cannot continue when sub order is cancelled!");
+                        throw new InvalidOperationException("Order exectution cannot continue when sub order is cancelled!");
                     }
                 }
             }
@@ -76,7 +76,7 @@ namespace Neolithica.Orders.Super {
                 currentOrder = info.StartState(actor);
             }
             else {
-                throw new ArgumentOutOfRangeException("Nonexistant order state: " + state);
+                throw new ArgumentOutOfRangeException(nameof(state), $"Nonexistant order state: {state}");
             }
         }
 

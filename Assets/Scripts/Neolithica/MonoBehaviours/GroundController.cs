@@ -39,9 +39,9 @@ namespace Neolithica.MonoBehaviours {
         protected float GetHeight(float x, float y) {
             if (x < 0 || x > 1)
 
-                throw new ArgumentException(string.Format("Invalid value for x {0}", x));
+                throw new ArgumentException($"Invalid value for x {x}", nameof(x));
             if (y < 0 || y > 1)
-                throw new ArgumentException(string.Format("Invalid value for y {0}", y));
+                throw new ArgumentException($"Invalid value for y {y}", nameof(y));
 
             float xOffset = settings.seed * 1.2f;
             float yOffset = settings.seed * 0.9f;
@@ -98,13 +98,13 @@ namespace Neolithica.MonoBehaviours {
         public void ClusterResources(ICollection<GameObject> objects, float maxDist, float bias) {
 
             if (objects == null)
-                throw new ArgumentNullException("objects");
+                throw new ArgumentNullException(nameof(objects));
 
             if (maxDist <= 0)
-                throw new ArgumentOutOfRangeException("maxDist", maxDist, "Must be positive");
+                throw new ArgumentOutOfRangeException(nameof(maxDist), maxDist, "Must be positive");
 
             if (bias < 0)
-                throw new ArgumentOutOfRangeException("bias", bias, "Must not be negavite");
+                throw new ArgumentOutOfRangeException(nameof(bias), bias, "Must not be negavite");
 
             //put the XZ coordinates in a dictionary by InstanceID so that we can tell which object we are comparing with
             float squareMaxDist = maxDist * maxDist;

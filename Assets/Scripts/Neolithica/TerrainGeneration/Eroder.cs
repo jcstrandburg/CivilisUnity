@@ -90,7 +90,7 @@ namespace Neolithica.TerrainGeneration {
             IntVector intPos = (IntVector)pos;
 
             if (f < 0)
-                throw new ArgumentOutOfRangeException("f");
+                throw new ArgumentOutOfRangeException(nameof(f), "Must be non-negative");
 
             Deposits += f;
 
@@ -112,7 +112,7 @@ namespace Neolithica.TerrainGeneration {
 
         private void ErodeAt(Vector2 pos, float f, float radius) {
             if (radius < 1.0f)
-                throw new ArgumentOutOfRangeException("radius", "Radius must be at least 1.0");
+                throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be at least 1.0");
 
             int sampleRange = (int)radius;
             float[,] weights = new float[sampleRange * 2 + 1, sampleRange * 2 + 1];
@@ -154,7 +154,7 @@ namespace Neolithica.TerrainGeneration {
             IntVector intPos = (IntVector)pos;
 
             if (f < 0)
-                throw new ArgumentOutOfRangeException("f");
+                throw new ArgumentOutOfRangeException(nameof(f), "Must be non-negative");
 
             Erosions += f;
 

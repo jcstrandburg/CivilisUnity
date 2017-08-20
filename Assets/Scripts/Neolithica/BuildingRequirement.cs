@@ -28,7 +28,7 @@ namespace Neolithica {
                 case Comparison.GreaterThan:
                     return compareAmount > amount;
                 default:
-                    throw new InvalidOperationException("Unhandled comparison value" + comparison);
+                    throw new InvalidOperationException($"Unhandled comparison value {comparison}");
             }
         }
     }

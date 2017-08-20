@@ -33,7 +33,6 @@ namespace Neolithica.MonoBehaviours {
         public override void FixedUpdate() {
             //follow migration path
             if (wild) {
-                //Debug.Log(targetLocation + " " + transform.position);
                 if (MoveTowards(targetLocation)) {
                     Herd herd = GetComponentInParent<Herd>();
 

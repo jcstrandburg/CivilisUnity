@@ -10,7 +10,7 @@ namespace Tofu.Serialization {
             List<Savable> savableComponents = prefabs.Select(p => p.GetComponent<Savable>()).ToList();
 
             if (savableComponents.Any(s => s == null))
-                throw new ArgumentException(string.Format("One or more of prefabs has no savable component"));
+                throw new ArgumentException("One or more of prefabs has no savable component", nameof(savableComponents));
                 
             m_prefabs = savableComponents.ToDictionary(s => s.PrefabId, s => s.gameObject);
         }
@@ -22,7 +22,7 @@ namespace Tofu.Serialization {
 
         protected GameObject GetPrefab(string prefabName) {
             if (!m_prefabs.ContainsKey(prefabName))
-                throw new InvalidOperationException(string.Format("Unable to locate prefab {0}", prefabName));
+                throw new ArgumentException($"Unable to locate prefab {prefabName}", nameof(prefabName));
 
             return m_prefabs[prefabName];
         }

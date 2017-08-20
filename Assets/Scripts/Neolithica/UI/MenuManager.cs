@@ -53,9 +53,9 @@ namespace Neolithica.UI {
         }
 
         public void PushMenuName(string name) {
-            GameObject prefab = (GameObject)Resources.Load("Menus/" + name);
+            GameObject prefab = (GameObject)Resources.Load($"Menus/{name}");
             if (prefab == null) {
-                throw new ArgumentException("Cannot load menu "+name);
+                throw new ArgumentException($"Cannot load menu {name}", nameof(name));
             }
             PushMenuPrefab(prefab);
         }

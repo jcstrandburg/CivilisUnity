@@ -42,10 +42,7 @@ namespace Neolithica.Test.Mono {
                 case 3:
                     Debug.Log("Examining Game State");
                     if (stats.Stat("teststat").Value != expectedStatValue) {
-                        Fail(
-                            String.Format("Expected teststat to have value {0}, get value {1}",
-                                expectedStatValue,
-                                stats.Stat("teststat").Value));
+                        Fail($"Expected teststat to have value {expectedStatValue}, get value {stats.Stat("teststat").Value}");
                         break;
                     }
                     if (gameController.ForbiddenActions.Count != 1 || !gameController.ForbiddenActions.Contains(CommandType.Butcher)) {

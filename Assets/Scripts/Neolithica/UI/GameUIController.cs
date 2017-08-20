@@ -31,7 +31,7 @@ namespace Neolithica.UI {
             selectionMenu.Hide();
 
             Text t = transform.Find("VersionLabel").GetComponent<Text>();
-            t.text = string.Format("v{0}", Assembly.GetExecutingAssembly().GetName().Version.ToString());
+            t.text = $"v{Assembly.GetExecutingAssembly().GetName().Version}";
 
             MakeDataBindings();
         }

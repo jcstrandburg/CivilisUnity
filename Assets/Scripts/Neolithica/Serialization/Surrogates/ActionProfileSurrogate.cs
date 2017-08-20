@@ -31,13 +31,13 @@ namespace Neolithica.Serialization.Surrogates {
 
         private static ActionProfile Resolve(string name) {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             if (s_allActionProfiles == null)
                 s_allActionProfiles = Resources.LoadAll<ActionProfile>("").ToDictionary(ap => ap.name);
 
             if (!s_allActionProfiles.ContainsKey(name))
-                throw new ArgumentException(string.Format("Unable to resolve ActionProfile {0}", name), "name");
+                throw new ArgumentException($"Unable to resolve ActionProfile {name}", nameof(name));
 
             return s_allActionProfiles[name];
         }

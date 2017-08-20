@@ -31,7 +31,7 @@ namespace Neolithica.MonoBehaviours {
             if (Time.timeScale > 4.0f) {
                 Time.timeScale = 0.25f;
             }
-            Debug.Log("Timescale: " + Time.timeScale);
+            Debug.Log($"Timescale: {Time.timeScale}");
         }
 
         public void PauseGame() {
@@ -40,7 +40,7 @@ namespace Neolithica.MonoBehaviours {
 
         public void ShowSaveGames() {
             string[] games = GameController.GetComponent<SaverLoader>().GetSaveGames();
-            Debug.Log("Found " + games.Length + " save games");
+            Debug.Log($"Found {games.Length} save games");
             foreach (string s in games) {
                 Debug.Log(s);
             }

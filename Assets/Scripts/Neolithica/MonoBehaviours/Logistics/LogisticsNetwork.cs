@@ -142,13 +142,13 @@ namespace Neolithica.MonoBehaviours.Logistics {
         /// <param name="resources"></param>
         /// <returns>Food value</returns>
         public double CalcFoodValue(IEnumerable<ResourceProfile> resources) {
-            var p = resources.OrderBy((ResourceProfile rp) => -rp.Amount).ToArray();
-            if (p.Count() == 0 || p.Count() > 3) {
-                throw new ArgumentException("Unexpected resource count " + resources.Count());
+            var p = resources.OrderBy((ResourceProfile rp) => -rp.Amount).ToList();
+            if (p.Count == 0 || p.Count() > 3) {
+                throw new ArgumentException($"Unexpected resource count {p.Count}", nameof(resources));
             }
 
             double returnMe = 0;
-            for (int i = 0; i < p.Length; i++) {
+            for (int i = 0; i < p.Count; i++) {
                 returnMe += (i + 1) * p[i].Amount;
             }
             return returnMe;

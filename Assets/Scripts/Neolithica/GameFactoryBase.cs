@@ -87,7 +87,7 @@ namespace Neolithica.DependencyInjection {
         /// <returns>The object passed in</returns>
         public T InjectObject<T>(T injectme) {
             if (injectme == null) {
-                throw new ArgumentException("Given null object to inject");
+                throw new ArgumentNullException(nameof(injectme), "Cannot inject null object");
             }
             var compType = injectme.GetType();
 
@@ -131,14 +131,14 @@ namespace Neolithica.DependencyInjection {
 
         private T Resolve<T>() {
             if (!m_dependencyResolvers.ContainsKey(typeof(T)))
-                throw new InvalidOperationException(string.Format("Unable to resolve type {0}", typeof(T).Name));
+                throw new InvalidOperationException($"Unable to resolve type {typeof(T).Name}");
 
             return (T)m_dependencyResolvers[typeof(T)].Resolve();
         }
 
         private object Resolve(Type type) {
             if (!m_dependencyResolvers.ContainsKey(type))
-                throw new InvalidOperationException(string.Format("Unable to resolve type {0}", type.Name));
+                throw new InvalidOperationException($"Unable to resolve type {type.Name}");
 
             return m_dependencyResolvers[type].Resolve();
         }

@@ -14,7 +14,7 @@ namespace Neolithica.Orders.Simple {
         public ConvertResourceOrder(ActorController a, ResourceKind fromResourceKind, ResourceKind toResourceKind) : base() {
             Resource r = a.GetCarriedResource();
             if (r.resourceKind != fromResourceKind) {
-                Debug.Log("Actor does not have resource " + fromResourceKind + " to convert");
+                Debug.Log($"Actor does not have resource {fromResourceKind} to convert");
                 this.Failed = true;
             }
             sourceResource = r;

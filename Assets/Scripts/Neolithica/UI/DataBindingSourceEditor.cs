@@ -10,7 +10,7 @@ namespace Neolithica.UI {
 
             var dbs = (DataBindingSource) target;
             foreach (var label in dbs.BindingLabels)
-                GUILayout.Label(string.Format("{0}: {1}", label, dbs.GetValue(label)));
+                GUILayout.Label($"{label}: {dbs.GetValue(label)}");
         }
     }
 }

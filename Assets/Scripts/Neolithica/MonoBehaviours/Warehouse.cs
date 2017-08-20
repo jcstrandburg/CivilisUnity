@@ -276,10 +276,7 @@ namespace Neolithica.MonoBehaviours {
             r.resourceKind = resourceKind;
             r.Ready = true;
             r.source = this.gameObject;
-            //Debug.Log(r.resourceTag + " " + r.amount);
-            //Debug.Log("Res count: " + resourceReservations.Count);
             resourceReservations.Add(r);
-            //Debug.Log("Res count: "+resourceReservations.Count);
             return true;
         }
 

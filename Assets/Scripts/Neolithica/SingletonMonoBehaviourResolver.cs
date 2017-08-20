@@ -38,11 +38,11 @@ namespace Neolithica.DependencyInjection {
                 instances = m_rootObject.GetComponentsInChildren<T>();
                 break;
             default:
-                throw new InvalidOperationException(string.Format("Unexpected value {0}", m_mode));
+                throw new InvalidOperationException($"Unexpected value {m_mode}");
             }
 
             if (instances.Length > 1)
-                throw new InvalidOperationException(string.Format("Multiple instances of type {0} found in scene", typeof(T).Name));
+                throw new InvalidOperationException($"Multiple instances of type {typeof(T).Name} found in scene");
 
             return m_value = instances.SingleOrDefault();
         }

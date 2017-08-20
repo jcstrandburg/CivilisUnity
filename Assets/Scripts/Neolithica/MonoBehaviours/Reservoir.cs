@@ -79,11 +79,11 @@ namespace Neolithica.MonoBehaviours {
         public bool WithdrawReservation(ResourceReservation res) {
             if (res.source != this.gameObject) {
                 Debug.Log(res);
-                throw new ArgumentException("Reservation not for this Reservoir");
+                throw new ArgumentException("Reservation not for this Reservoir", nameof(res));
             }
             if (res.Released || res.Cancelled) {
                 Debug.Log(res);
-                throw new ArgumentException("Invalid reservation!");
+                throw new ArgumentException("Invalid reservation!", nameof(res));
             }
 
             if (amount >= res.amount) {
@@ -96,7 +96,7 @@ namespace Neolithica.MonoBehaviours {
                     if (stat != null) {
                         stat.Add(res.amount);
                     } else {
-                        Debug.Log("Unable to resolve stat " + harvestStat);
+                        Debug.Log($"Unable to resolve stat {harvestStat}");
                     }                
                 }
 

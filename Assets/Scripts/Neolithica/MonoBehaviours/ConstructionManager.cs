@@ -184,9 +184,9 @@ namespace Neolithica.MonoBehaviours {
             foreach (var kvp in avails) {
                 var resourceType = kvp.Key;
                 double amount = kvp.Value;
-                Debug.Log("Checking if I need " + amount + " " + resourceType);
+                Debug.Log($"Checking if I need {amount} {resourceType}");
                 double needed = GetNeededResource(resourceType);
-                Debug.Log("I need " + needed + " " + resourceType);
+                Debug.Log($"I need {needed} {resourceType}");
                 if (needed > 0) {
                     Debug.Log("Making a ConstructionReservation");
                     var res = actor.gameObject.AddComponent<ConstructionReservation>();
@@ -228,7 +228,7 @@ namespace Neolithica.MonoBehaviours {
         /// <param name="res"></param>
         public void FillReservation(ConstructionReservation res) {
             if (!reservations.Contains(res)) {
-                throw new ArgumentException("Reservation does not belong to this construction object");
+                throw new ArgumentException("Reservation does not belong to this construction object", nameof(res));
             }
 
             var requirement = unfilledResourceReqs.Single(r => r.name == res.resourceResourceKind.ToString());

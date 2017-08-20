@@ -18,9 +18,9 @@ namespace Neolithica.MonoBehaviours {
 
         public void SaveGame(string name = "Quick") {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
-            var path = Application.persistentDataPath + "/Saved Games/" + name + ".sav";
+            var path = $"{Application.persistentDataPath}/Saved Games/{name}.sav";
             try {
                 ITypeModelBuilder builder = new AttributeBasedTypeModelBuilder();
                 var serializer = new GameSerializer(GetPrefabs(), builder);
@@ -40,9 +40,9 @@ namespace Neolithica.MonoBehaviours {
             DestroyImmediate(oldRoot); // this is generally a bad idea, but it's necessary for our dependency injection to work
 
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
-            var path = Application.persistentDataPath + "/Saved Games/" + name + ".sav";
+            var path = $"{Application.persistentDataPath}/Saved Games/{name}.sav";
             if (string.IsNullOrEmpty(LoadIntoScene)) {
                 ITypeModelBuilder builder = new AttributeBasedTypeModelBuilder();
                 var serializer = new GameSerializer(GetPrefabs(), builder);

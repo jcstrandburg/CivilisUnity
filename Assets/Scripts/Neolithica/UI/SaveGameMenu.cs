@@ -27,11 +27,9 @@ namespace Neolithica.UI {
         public void SaveGame() {
             var gameName = saveNameField.text;
             if (gameName != null) {
-                Debug.Log("Saving game: " + gameName);
-                //SaverLoader.SaveGame(gameName);
+                Debug.Log($"Saving game: {gameName}");
                 GetComponent<MenuController>().PopMenu();
             } else {
-                Debug.Log("NULL");
                 Debug.Log(saveNameField);
                 Debug.Log(saveNameField.text);
             }

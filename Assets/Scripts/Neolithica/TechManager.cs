@@ -25,7 +25,7 @@ namespace Neolithica {
                     Techs[x] = JsonUtility.FromJson<Technology>(s);
                 } catch (ArgumentException e) {
                     Debug.Log(e);
-                    Debug.Log("Error parsing technology file: " + s);
+                    Debug.Log($"Error parsing technology file: {s}");
                 }
                 x++;
             }
@@ -69,10 +69,10 @@ namespace Neolithica {
 
         public void Research(Technology t) {
             if (ResearchedTechs.Contains(t.techName)) {
-                throw new Exception("Technology already researched: " + t.techName);
+                throw new InvalidOperationException($"Technology already researched: {t.techName}");
             }
             if (!Techs.Contains<Technology>(t)) {
-                throw new Exception("Unable to research tech: " + t.techName);
+                throw new Exception($"Unable to research tech: {t.techName}");
             }
             ResearchedTechs.Add(t.techName);
         }

@@ -17,7 +17,7 @@ namespace Neolithica.MonoBehaviours.Editors {
             if (GUILayout.Button("TestResources")) {
                 var x = Controller.GetAllAvailableResources();
                 foreach (var y in x) {
-                    Debug.Log(y.Key + " " + y.Value);
+                    Debug.Log($"{y.Key} {y.Value}");
                 }
             }
             if (GUILayout.Button("Initialize All Objects")) {

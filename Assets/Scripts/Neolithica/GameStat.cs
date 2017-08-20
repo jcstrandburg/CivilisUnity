@@ -82,7 +82,7 @@ namespace Neolithica {
 
         public void Add(decimal v) {
             if (v < 0 && Monotonic)
-                throw new ArgumentException("Monotonic stats cannot decrease");
+                throw new ArgumentException("Monotonic stats cannot decrease", nameof(v));
 
             if (v != 0) {
                 value += v;

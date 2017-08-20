@@ -29,7 +29,7 @@ namespace Neolithica.UI {
                 var b = mBindings[sourceTag];
                 b.setter(value);
             } else {
-                Debug.Log("Attempting to set invalid sourceTag " + sourceTag);
+                Debug.Log($"Attempting to set invalid sourceTag {sourceTag}");
             }
         }
 

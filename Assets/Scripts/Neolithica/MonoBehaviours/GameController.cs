@@ -155,7 +155,7 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         /// <param name="t"></param>
         public void BuyTech(Technology t) {
-            Debug.Log("Researching tech: " + t.techName);
+            Debug.Log($"Researching tech: {t.techName}");
             if (t.cost <= this.Spirit) {
                 this.Spirit -= t.cost;
                 TechManager.Research(t);
@@ -437,7 +437,7 @@ namespace Neolithica.MonoBehaviours {
                         newOrder = new UpgradeReservoirOrder(actor, target, prefab);
                         break;
                     default:
-                        throw new InvalidOperationException("Unrecognized order tag " + orderTag);
+                        throw new InvalidOperationException($"Unrecognized order tag {orderTag}");
                 }
 
                 Factory.InjectObject(newOrder);
@@ -547,7 +547,7 @@ namespace Neolithica.MonoBehaviours {
                     return r;
                 }
             }
-            throw new ArgumentException(string.Format("Unable to locate prefab for resource tag {0}", resourceKind), "resourceKind");
+            throw new ArgumentException($"Unable to locate prefab for resource tag {resourceKind}", nameof(resourceKind));
         }
 
         /// <summary>
