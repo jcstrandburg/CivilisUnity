@@ -5,9 +5,7 @@ using UnityEngine;
 namespace Neolithica.UI {
     public class DataBindingSource : MonoBehaviour {
 
-        public IEnumerable<string> BindingLabels {
-            get { return mBindings.Keys; }
-        }
+        public IEnumerable<string> BindingLabels => mBindings.Keys;
 
         public void AddBinding(string sourceTag, Func<object> getter, Action<object> setter) {
             Binding b = new Binding();

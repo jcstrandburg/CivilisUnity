@@ -20,11 +20,7 @@ namespace Neolithica.MonoBehaviours {
         private ReadOnlyCollection<GameStat> statsFromSaveGame;
 
         //dummy stat persistor for testing purposes
-        public static StatPersistor DummyPersistor {
-            get {
-                return new StreamStatPersistor(Stream.Null);
-            }
-        }
+        public static StatPersistor DummyPersistor => new StreamStatPersistor(Stream.Null);
 
         /// <summary>
         /// Stat persistor property, will create a default StreamStatPersistor if no other persistor is supplied

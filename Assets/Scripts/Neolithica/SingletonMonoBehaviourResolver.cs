@@ -47,7 +47,7 @@ namespace Neolithica.DependencyInjection {
             return m_value = instances.SingleOrDefault();
         }
 
-        public Type DependencyType { get { return typeof(T); } }
+        public Type DependencyType => typeof(T);
 
         private T m_value;
         private readonly GameObject m_rootObject;

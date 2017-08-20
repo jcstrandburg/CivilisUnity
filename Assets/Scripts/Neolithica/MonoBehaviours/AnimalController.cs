@@ -14,11 +14,7 @@ namespace Neolithica.MonoBehaviours {
         public GameObject babyVersion;
         public GameObject adultVersion;
 
-        public bool IsAdult {
-            get {
-                return age > 500;
-            }
-        }
+        public bool IsAdult => age > 500;
 
         public override void Start() {
             base.Start();

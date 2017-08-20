@@ -17,8 +17,8 @@ namespace Neolithica.MonoBehaviours {
 
         public int queueLength = 0;
 
-        public StorageReservation storageReservation { get { return GetComponentInChildren<StorageReservation>(); } }
-        public ResourceReservation resourceReservation { get { return GetComponentInChildren<ResourceReservation>(); } }
+        public StorageReservation storageReservation => GetComponentInChildren<StorageReservation>();
+        public ResourceReservation resourceReservation => GetComponentInChildren<ResourceReservation>();
         public LogisticsActor logisticsActor;
 
         // Handles Start event

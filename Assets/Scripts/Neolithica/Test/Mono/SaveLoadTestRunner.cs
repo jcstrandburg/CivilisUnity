@@ -68,9 +68,9 @@ namespace Neolithica.Test.Mono {
             Debug.Break();
         }
 
-        private StatManager stats { get { return FindObjectOfType<StatManager>(); } }
-        private GameController gameController { get { return FindObjectOfType<GameController>(); } }
-        private SaverLoader saverLoader { get { return FindObjectOfType<SaverLoader>(); } }
+        private StatManager stats => FindObjectOfType<StatManager>();
+        private GameController gameController => FindObjectOfType<GameController>();
+        private SaverLoader saverLoader => FindObjectOfType<SaverLoader>();
 
         private decimal expectedStatValue;
         private int updateCount = 0;

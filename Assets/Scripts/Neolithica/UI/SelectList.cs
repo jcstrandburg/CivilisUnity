@@ -12,13 +12,7 @@ namespace Neolithica.UI {
         public Color selectedColor;
 
         public string SelectedItem {
-            get {
-                if (selectedItem != null) {
-                    return selectedItem.GetComponent<Text>().text;
-                } else {
-                    return null;
-                }
-            }
+            get { return selectedItem != null ? selectedItem.GetComponent<Text>().text : null; }
         }
 
         public void SelectItem(SelectListItem item) {

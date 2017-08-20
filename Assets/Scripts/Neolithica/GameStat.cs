@@ -51,12 +51,12 @@ namespace Neolithica {
         /// <summary>
         /// The value as accumulated throughout this game
         /// </summary>
-        public decimal Value { get { return value; } }
+        public decimal Value => value;
 
         /// <summary>
         /// The value as persisted across games
         /// </summary>
-        public decimal PersistantValue { get { return persistantValue; } }
+        public decimal PersistantValue => persistantValue;
 
         public GameStat(string name, bool persist, bool monotonic) {
             this.Name = name;

@@ -11,9 +11,7 @@ namespace Neolithica.DependencyInjection {
     /// </summary>
     public abstract class GameFactoryBase {
         [Injectable]
-        public GameFactoryBase Factory {
-            get { return this; }
-        }
+        public GameFactoryBase Factory => this;
 
         /// <summary>Injectable fields by object type</summary>
         private readonly Dictionary<Type, FieldInfo[]> fieldInfoCache = new Dictionary<Type, FieldInfo[]>();
@@ -154,7 +152,7 @@ namespace Neolithica.DependencyInjection {
                 return m_factory;
             }
 
-            public Type DependencyType { get { return typeof(GameFactoryBase); } }
+            public Type DependencyType => typeof(GameFactoryBase);
 
             private readonly GameFactoryBase m_factory;
         }

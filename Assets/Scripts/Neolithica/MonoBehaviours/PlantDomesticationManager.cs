@@ -6,11 +6,7 @@ namespace Neolithica.MonoBehaviours {
     public class PlantDomesticationManager : MonoBehaviour {
 
         private bool forestGardensEnabled = false;
-        public bool ForestGardensEnabled {
-            get {
-                return forestGardensEnabled;
-            }
-        }
+        public bool ForestGardensEnabled => forestGardensEnabled;
 
         [Inject]
         public GameController GameController { get; set; }

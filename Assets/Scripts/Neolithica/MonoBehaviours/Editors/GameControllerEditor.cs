@@ -6,9 +6,7 @@ namespace Neolithica.MonoBehaviours.Editors {
     [CustomEditor(typeof(GameController))]
     public class GameControllerEditor : Editor {
 
-        private GameController Controller {
-            get { return (GameController) target; }
-        }
+        private GameController Controller => (GameController) target;
 
         public void OnEnable() {
             Controller.InjectAllObjects();
