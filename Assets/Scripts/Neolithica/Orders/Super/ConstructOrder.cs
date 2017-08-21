@@ -12,7 +12,7 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(1)]
         private ConstructionManager manager;
 
-        public ConstructOrder(ActorController actor, NeolithicObject target) : base(actor) {
+        public ConstructOrder(ActorController actor, NeolithicObject target) {
             manager = target.GetComponent<ConstructionManager>();
             GoToState("getConstructionJob", actor);
         }

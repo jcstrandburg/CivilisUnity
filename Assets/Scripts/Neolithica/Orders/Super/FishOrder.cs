@@ -8,7 +8,7 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(1)]
         private NeolithicObject target;
 
-        public FishOrder(ActorController actor, NeolithicObject target) : base(actor) {
+        public FishOrder(ActorController actor, NeolithicObject target) {
             this.target = target;
             GoToState("seekTarget", actor);
         }

@@ -22,9 +22,6 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(1)] public BaseOrder currentOrder = null;
         [SerializableMember(2)] public string currentState;
 
-        public StatefulSuperOrder(ActorController actor) : base() {
-        }
-
         protected abstract void CreateStates();
 
         public void CreateState(string stateName, Func<ActorController, BaseOrder> startState, Action<ActorController> completeState, Action<ActorController> failState) {

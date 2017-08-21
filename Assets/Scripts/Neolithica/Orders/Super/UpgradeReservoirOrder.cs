@@ -14,7 +14,7 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(2)]
         private GameObject myPrefab;
 
-        public UpgradeReservoirOrder(ActorController actor, NeolithicObject target, GameObject prefab) : base(actor) {
+        public UpgradeReservoirOrder(ActorController actor, NeolithicObject target, GameObject prefab) {
             targetObj = target;
             myPrefab = prefab;
             GoToState("seekTarget", actor);

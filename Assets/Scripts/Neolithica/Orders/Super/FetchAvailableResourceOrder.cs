@@ -13,7 +13,7 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(2)]
         private double amount;
 
-        public FetchAvailableResourceOrder(ActorController actor, ResourceKind resourceResourceKind, double amount) : base(actor) {
+        public FetchAvailableResourceOrder(ActorController actor, ResourceKind resourceResourceKind, double amount) {
             this.resourceResourceKind = resourceResourceKind;
             this.amount = amount;
             GoToState("getReservation", actor);

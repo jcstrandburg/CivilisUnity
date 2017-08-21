@@ -15,7 +15,7 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(3)]
         private NeolithicObject target;
 
-        public TransmuteOrder(ActorController actor, NeolithicObject target, ResourceKind fromResourceKind, ResourceKind toResourceKind) : base(actor) {
+        public TransmuteOrder(ActorController actor, NeolithicObject target, ResourceKind fromResourceKind, ResourceKind toResourceKind) {
             this.fromResourceKind = fromResourceKind;
             this.toResourceKind = toResourceKind;
             this.target = target;

@@ -16,7 +16,7 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(3)]
         private ResourceReservation resourceReservation;
 
-        public HarvestFromReservoirOrder(ActorController actor, NeolithicObject target) : base(actor) {
+        public HarvestFromReservoirOrder(ActorController actor, NeolithicObject target) {
             targetObj = target;
             reservoir = target.GetComponent<Reservoir>();
             GoToState("seekTarget", actor);

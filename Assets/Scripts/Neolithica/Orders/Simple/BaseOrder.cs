@@ -29,11 +29,7 @@ namespace Neolithica.Orders.Simple {
         public bool Failed;
         public bool Initialized;
 
-        public bool Done {
-            get {
-                return Completed || Cancelled || Failed;
-            }
-        }
+        public bool Done => Completed || Cancelled || Failed;
 
         protected BaseOrder() {
             Completed = Cancelled = Failed = false;

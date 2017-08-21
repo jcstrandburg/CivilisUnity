@@ -8,7 +8,7 @@ namespace Neolithica.Orders.Super {
     /// </summary>
     [SerializableType]
     public class StoreCarriedResourceOrder : StatefulSuperOrder {
-        public StoreCarriedResourceOrder(ActorController actor) : base(actor) {
+        public StoreCarriedResourceOrder(ActorController actor) {
             GoToState("getReservation", actor);
         }
 

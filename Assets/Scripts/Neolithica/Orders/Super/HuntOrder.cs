@@ -8,7 +8,7 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(1)]
         private Herd herd;
 
-        public HuntOrder(ActorController actor, Herd herd) : base(actor) {
+        public HuntOrder(ActorController actor, Herd herd) {
             this.herd = herd;
             GoToState("seekTarget", actor);
         }
