@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Neolithica.MonoBehaviours;
 using UnityEngine;
 
 namespace Neolithica.TerrainGeneration {
@@ -15,23 +14,28 @@ namespace Neolithica.TerrainGeneration {
 
         public ResourcePlacementType GetPlacementType(float x, float y) {
             float height = mTerrainData.GetInterpolatedHeight(x, y) / mTerrainData.size.y;
-            var matches = new List<KeyValuePair<ResourcePlacementType, float>>();
 
-            foreach (ResourcePlacementType type in mPlacementTypes) {
-                float fitness = GetFitness(type, x, y, height, mWaterHeight, fitnessHelpers[type],
-                    mResourceSettings[type], resourceGenOffset[type]);
+            var matches2 = mPlacementTypes
+                .Select(type => new
+                {
+                    fitness = GetFitness(
+                        x: x,
+                        y: y,
+                        height: height,
+                        waterHeight: mWaterHeight,
+                        fitnessHelper: fitnessHelpers[type],
+                        resourceSetting: mResourceSettings[type],
+                        offset: resourceGenOffset[type]),
+                    type
+                })
+                .ToList();
 
-                if (fitness > 0.0f)
-                    matches.Add(new KeyValuePair<ResourcePlacementType, float>(type, fitness));
-            }
-
-            if (matches.Any())
-                return matches.OrderByDescending(pair => pair.Value).First().Key;
-
-            return ResourcePlacementType.None;
+            return matches2.Any()
+                ? matches2.OrderByDescending(it => it.fitness).First().type
+                : ResourcePlacementType.None;
         }
 
-        private float GetFitness(ResourcePlacementType type, float x, float y, float height, float waterHeight, Func<float, float, float> fitnessHelper, ResourceSettings resourceSetting, float offset) {
+        private float GetFitness(float x, float y, float height, float waterHeight, Func<float, float, float> fitnessHelper, ResourceSettings resourceSetting, float offset) {
             float noise = Mathf.PerlinNoise(
                 mSettings.seed + resourceSetting.Frequency * x + offset,
                 mSettings.seed + resourceSetting.Frequency * y + offset);
@@ -56,22 +60,15 @@ namespace Neolithica.TerrainGeneration {
 
         private readonly Dictionary<ResourcePlacementType, float> resourceGenOffset =
             new Dictionary<ResourcePlacementType, float> {
-                { ResourcePlacementType.Berries, 0.0f },
-                { ResourcePlacementType.Trees,   1.5f },
-                { ResourcePlacementType.Fish,    3.4f },
-                { ResourcePlacementType.Gold,    3.7f },
-                { ResourcePlacementType.Stone,   6.9f },
-                { ResourcePlacementType.Doodad, 10.0f },
+                [ResourcePlacementType.Berries] = 0.0f,
+                [ResourcePlacementType.Trees]   = 1.5f,
+                [ResourcePlacementType.Fish]    = 3.4f,
+                [ResourcePlacementType.Gold]    = 3.7f,
+                [ResourcePlacementType.Stone]   = 6.9f,
+                [ResourcePlacementType.Doodad]  = 10.0f,
             };
 
         private readonly Dictionary<ResourcePlacementType, ResourceSettings> mResourceSettings;
-
-        private static float dummy(float height, float waterHeight) {
-            if (height < waterHeight)
-                return 0.0f;
-
-            return 1.0f;
-        }
 
         private static float FishFitness(float height, float waterHeight) {
             return height < waterHeight ? 1.0f : 0.0f;
