@@ -72,7 +72,7 @@ namespace Neolithica {
                 throw new InvalidOperationException($"Technology already researched: {t.techName}");
             }
             if (!Techs.Contains<Technology>(t)) {
-                throw new Exception($"Unable to research tech: {t.techName}");
+                throw new InvalidOperationException($"Unable to research tech: {t.techName}");
             }
             ResearchedTechs.Add(t.techName);
         }
