@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Neolithica.TerrainGeneration;
+using Neolithica.Utility;
 using Tofu.Serialization;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -84,7 +85,6 @@ namespace Neolithica.MonoBehaviours {
         /// Clears current resources (and doodads) and regenerates new ones
         /// </summary>
         public void GenerateResourcesAndDoodads() {
-            ClearResources();
             mRandom = new Random(settings.seed.GetHashCode());
             SpawnResourcesAndDoodads();
         }
@@ -114,24 +114,24 @@ namespace Neolithica.MonoBehaviours {
                 points[o.GetInstanceID()] = v;
             }
 
-            foreach (var o in objects) {
-                var position = new Vector2(o.transform.position.x, o.transform.position.z);
-                Vector2 offset = new Vector2(0.0f, 0.0f);
+            foreach (GameObject obj in objects) {
+                var position = new Vector2(obj.transform.position.x, obj.transform.position.z);
+                var offset = new Vector2(0.0f, 0.0f);
 
                 foreach (var kvp in points) {
                     //get the difference between the position of this object and the camparison object
-                    var diff = kvp.Value - position;
+                    Vector2 diff = kvp.Value - position;
 
                     //if within max distance and not this object
-                    if (kvp.Key != o.GetInstanceID() && diff.sqrMagnitude <= squareMaxDist)
+                    if (kvp.Key != obj.GetInstanceID() && diff.sqrMagnitude <= squareMaxDist)
                     {
                         float localWeight = 1.0f / diff.magnitude;
                         offset += localWeight * diff;
                     }
                 }
-                o.transform.position += (new Vector3(offset.x, 0.0f, offset.y))*bias;
+                obj.transform.position += (new Vector3(offset.x, 0.0f, offset.y))*bias;
 
-                var neolithicObject = o.GetComponent<NeolithicObject>();
+                var neolithicObject = obj.GetComponent<NeolithicObject>();
                 if (neolithicObject != null) {
                     neolithicObject.SnapToGround(true);
                 }
@@ -152,98 +152,16 @@ namespace Neolithica.MonoBehaviours {
         private Vector3 RandomizePosition(float x, float y, TerrainData terrainData) {
             float angle = Mathf.PerlinNoise(settings.seed + 65 * x, settings.seed + 65 * y);
             float amplitutue = Mathf.PerlinNoise(settings.seed + 25 * x, settings.seed + 25 * y);
-            return    transform.position
-                      + new Vector3(x * terrainData.size.x, 0.0f, y * terrainData.size.z)
-                      + Quaternion.Euler(0, 720 * angle, 0) * new Vector3(0, 0, amplitutue * 24);
+            return transform.position
+                + new Vector3(x * terrainData.size.x, 0.0f, y * terrainData.size.z)
+                + Quaternion.Euler(0, 720 * angle, 0) * new Vector3(0, 0, amplitutue * 24);
         }
 
-        private GameObject AttemptPlaceTrees(float x, float y, GameObject prefab, float waterLevel, TerrainData terrainData) {
-            float noise = Mathf.PerlinNoise(settings.seed + 9 * x, settings.seed + 9 * y);
-            float height = terrainData.GetHeight(
-                Mathf.RoundToInt(x * terrainData.heightmapWidth),
-                Mathf.RoundToInt(y * terrainData.heightmapHeight));
-
-            if (height > waterLevel && noise > height*settings.treeMultiplier) {
-                Vector3 newPosition = RandomizePosition(x, y, terrainData);
-                GameObject newTree = GameController.Factory.Instantiate(prefab);
-                newTree.transform.position = newPosition;
-                newTree.GetComponent<NeolithicObject>().SnapToGround(true);
-                return newTree;
-            }
-            return null;
-        }
-
-        private GameObject AttemptPlaceBerries(float x, float y, GameObject prefab, float waterLevel, TerrainData terrainData) {
-            float noise = Mathf.PerlinNoise(settings.seed + 17.5f * x, settings.seed + 17.5f * y);
-            float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth),
-                Mathf.RoundToInt(y * terrainData.heightmapHeight));
-            if (height > waterLevel && noise > height * settings.berryMultiplier) {
-                Vector3 newPosition = RandomizePosition(x, y, terrainData);
-                GameObject newObject = GameController.Factory.Instantiate(prefab);
-                newObject.transform.position = newPosition;
-                newObject.GetComponent<NeolithicObject>().SnapToGround(true);
-                return newObject;
-            }
-            return null;
-        }
-
-        private GameObject AttemptPlaceStoneOrGold(float x, float y, GameObject[] prefabs, float waterLevel, TerrainData terrainData) {
-            float noise = Mathf.PerlinNoise(settings.seed + 29.5f * x, settings.seed*2 + 29.5f * y);
-            float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth), Mathf.RoundToInt(y * terrainData.heightmapHeight));
-
-            if (height > waterLevel && noise < settings.stoneRate) {
-                Vector3 newPosition = RandomizePosition(x, y, terrainData);
-                GameObject newObject = GameController.Factory.Instantiate(prefabs[mRandom.Next(prefabs.Length - 1)]);
-                newObject.transform.position = newPosition;
-                newObject.GetComponent<NeolithicObject>().SnapToGround(true);
-                return newObject;
-            }
-
-            return null;
-        }
-
-        private GameObject AttemptPlaceFish(float x, float y, GameObject prefab, float waterLevel, TerrainData terrainData) {
-            float noise = Mathf.PerlinNoise(settings.seed*2 + 25.5f * x, settings.seed + 25.5f * y);
-            float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth),
-                Mathf.RoundToInt(y * terrainData.heightmapHeight));
-            if (height < waterLevel && noise < settings.fishRate) {
-                Vector3 newPosition = RandomizePosition(x, y, terrainData);
-                GameObject newObject = GameController.Factory.Instantiate(prefab);
-                newObject.transform.position = new Vector3(newPosition.x, waterLevel, newPosition.z);
-                //newObject.GetComponent<NeolithicObject>().SnapToGround(true);
-                return newObject;
-            }
-            return null;
-        }
-
-        private GameObject AttemptPlaceDoodad(float x, float y, GameObject[] prefabs, float waterLevel, TerrainData terrainData) {
-            float noise = Mathf.PerlinNoise(settings.seed * 5 + 70f * x, settings.seed * 4 + 70f * y);
-            float noise2 = Mathf.PerlinNoise(settings.seed * 6 + 70f * x, settings.seed * 7 + 70f * y);
-            float height = terrainData.GetHeight(Mathf.RoundToInt(x * terrainData.heightmapWidth),
-                Mathf.RoundToInt(y * terrainData.heightmapHeight));
-            if (height > waterLevel && noise < settings.doodadRate) {
-                Vector3 newPosition = RandomizePosition(x, y, terrainData);
-                int index = (int)(noise2 * prefabs.Length) % prefabs.Length;
-                GameObject newObject = GameController.Factory.Instantiate(prefabs[index]);
-                newObject.transform.position = newPosition;
-                newObject.GetComponent<NeolithicObject>().SnapToGround(true);
-                return newObject;
-            }
-            return null;
-        }
-
-        public void ClearResources() {
-            Transform resources = transform.Find("Resources");
-            Transform doodads = transform.Find("Doodads");
-
+        public void ClearResources(Transform resources, Transform doodads) {
             //we have to store a seperate list to destroy objects since destroying them disrupts the transfrom children iterator
-            var gameObjects = new List<GameObject>();
-            foreach (Transform t in resources.transform) {
-                gameObjects.Add(t.gameObject);
-            }
-            foreach (Transform t in doodads.transform) {
-                gameObjects.Add(t.gameObject);
-            }
+            var gameObjects = (from Transform t in resources.transform select t.gameObject)
+                .Concat(from Transform t in doodads.transform select t.gameObject)
+                .ToList();
 
             foreach (GameObject go in gameObjects) {
 #if UNITY_EDITOR
@@ -257,12 +175,10 @@ namespace Neolithica.MonoBehaviours {
         private void SpawnResourcesAndDoodads() {
             Transform resources = transform.Find("Resources");
             Transform doodads = transform.Find("Doodads");
-            ClearResources();
-
-            var prefabs = new Dictionary<ResourcePlacementType, List<GameObject>>();
+            ClearResources(resources, doodads);
 
             // TODO: get rid of this water junk
-            var water = GameObject.Find("Water4Simple");
+            GameObject water = GameObject.Find("Water4Simple");
 
             GameObject[] doodadPrefabs = {
                 (GameObject)Resources.Load("Doodads/DeadTree6"),
@@ -272,17 +188,18 @@ namespace Neolithica.MonoBehaviours {
                 (GameObject)Resources.Load("Doodads/SmallRock7"),
             };
 
-            prefabs[ResourcePlacementType.Trees] = new List<GameObject> { Resources.Load<GameObject>("Buildings/WoodSource") };
-            prefabs[ResourcePlacementType.Stone] = new List<GameObject> { Resources.Load<GameObject>("Buildings/StoneRocks") };
-            prefabs[ResourcePlacementType.Gold] = new List<GameObject> { Resources.Load<GameObject>("Buildings/GoldRocks") };
-            prefabs[ResourcePlacementType.Fish] = new List<GameObject> { Resources.Load<GameObject>("Prefabs/FishingHole") };
-            prefabs[ResourcePlacementType.Berries] = new List<GameObject> { Resources.Load<GameObject>("Buildings/ForagingGround") };
-            prefabs[ResourcePlacementType.Doodad] = doodadPrefabs.ToList();
 
-            Debug.Log(prefabs[ResourcePlacementType.Fish]);
-            Debug.Log(prefabs[ResourcePlacementType.Fish][0]);
+            var prefabs = new Dictionary<ResourcePlacementType, List<GameObject>>
+            {
+                [ResourcePlacementType.Trees]   = ListUtility.From(Resources.Load<GameObject>("Buildings/WoodSource")),
+                [ResourcePlacementType.Stone]   = ListUtility.From(Resources.Load<GameObject>("Buildings/StoneRocks")),
+                [ResourcePlacementType.Gold]    = ListUtility.From(Resources.Load<GameObject>("Buildings/GoldRocks")),
+                [ResourcePlacementType.Fish]    = ListUtility.From(Resources.Load<GameObject>("Prefabs/FishingHole")),
+                [ResourcePlacementType.Berries] = ListUtility.From(Resources.Load<GameObject>("Buildings/ForagingGround")),
+                [ResourcePlacementType.Doodad]  = doodadPrefabs.ToList(),
+            };
 
-            var terrainData = GetComponent<Terrain>().terrainData;
+            TerrainData terrainData = GetComponent<Terrain>().terrainData;
             float waterLevel = water.transform.position.y;
             float waterHeight = waterLevel / terrainData.size.y;
 
@@ -296,21 +213,16 @@ namespace Neolithica.MonoBehaviours {
                     float u = (x + 0.5f) / resolution;
                     float v = (y + 0.5f) / resolution;
 
-                    var type = placer.GetPlacementType(u, v);
+                    ResourcePlacementType type = placer.GetPlacementType(u, v);
 
                     switch (type) {
                         case ResourcePlacementType.None:
                             break;
                         default:
                             int index = mRandom.Next(0, prefabs[type].Count);
-                            var prefab = prefabs[type][index];
+                            GameObject prefab = prefabs[type][index];
 
-                            if (prefab == null) {
-                                Debug.Log(type);
-                                Debug.Log(index);
-                            }
-
-                            var instance = GameController.Factory.Instantiate(prefab);
+                            GameObject instance = GameController.Factory.Instantiate(prefab);
                             instance.transform.position = RandomizePosition(u, v, terrainData);
 
                             if (type == ResourcePlacementType.Fish)
@@ -321,15 +233,17 @@ namespace Neolithica.MonoBehaviours {
                             else
                                 instance.GetComponent<NeolithicObject>().SnapToGround();
 
-                            if (type == ResourcePlacementType.Trees)
-                                trees.Add(instance);
-                            else if (type == ResourcePlacementType.Berries)
-                                berries.Add(instance);
+                            switch (type)
+                            {
+                                case ResourcePlacementType.Trees:
+                                    trees.Add(instance);
+                                    break;
+                                case ResourcePlacementType.Berries:
+                                    berries.Add(instance);
+                                    break;
+                            }
 
-                            if (type == ResourcePlacementType.Doodad)
-                                instance.transform.SetParent(doodads);
-                            else
-                                instance.transform.SetParent(resources);
+                            instance.transform.SetParent(type == ResourcePlacementType.Doodad ? doodads : resources);
                             break;
                     }
                 }
@@ -340,14 +254,14 @@ namespace Neolithica.MonoBehaviours {
         }
 
         private void GenerateSplatMap() {
-            Terrain terrain = GetComponent<Terrain>();
+            var terrain = GetComponent<Terrain>();
             TerrainData terrainData = terrain.terrainData;
-            const bool c_doInterpolation = true;
+            const bool cDoInterpolation = true;
 
-            float[,,] splatmapData = new float[terrainData.alphamapWidth, terrainData.alphamapHeight, terrainData.alphamapLayers];
+            var splatmapData = new float[terrainData.alphamapWidth, terrainData.alphamapHeight, terrainData.alphamapLayers];
 
-            for (int y = 0; y < terrainData.alphamapHeight; y++) {
-                for (int x = 0; x < terrainData.alphamapWidth; x++) {
+            for (var y = 0; y < terrainData.alphamapHeight; y++) {
+                for (var x = 0; x < terrainData.alphamapWidth; x++) {
                     // Normalise x/y coordinates to range 0-1 
                     float y_01 = (float)y / (float)terrainData.alphamapHeight;
                     float x_01 = (float)x / (float)terrainData.alphamapWidth;
@@ -370,21 +284,21 @@ namespace Neolithica.MonoBehaviours {
                         splatWeights[3] = 1.0f;
                     } else if (h > stoneThreshhold) {
                         splatWeights[2] = 1.0f;
-                        if (c_doInterpolation) {
+                        if (cDoInterpolation) {
                             float factor = Interpolate(stoneThreshhold, snowThreshold, h);
                             splatWeights[3] = factor;
                             splatWeights[2] = 1.0f - factor;
                         }
                     } else if (h > grassThreshold || h < waterLevel) {
                         splatWeights[1] = 1.0f;
-                        if (c_doInterpolation) {
+                        if (cDoInterpolation) {
                             float factor = Interpolate(grassThreshold, stoneThreshhold, h);
                             splatWeights[2] = factor;
                             splatWeights[1] = 1.0f - factor;
                         }
                     } else {
                         splatWeights[0] = 1.0f;
-                        if (c_doInterpolation) {
+                        if (cDoInterpolation) {
                             float factor = Interpolate(waterLevel, grassThreshold, h);
                             splatWeights[1] = factor;
                             splatWeights[0] = 1.0f - factor;

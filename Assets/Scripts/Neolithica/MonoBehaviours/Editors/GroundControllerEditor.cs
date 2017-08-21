@@ -23,9 +23,6 @@ namespace Neolithica.MonoBehaviours.Editors {
 
             if (GUILayout.Button("Generate Resources"))
                 groundController.GenerateResourcesAndDoodads();
-
-            if (GUILayout.Button("Clear Resources"))
-                groundController.ClearResources();
         }
     }
 }
