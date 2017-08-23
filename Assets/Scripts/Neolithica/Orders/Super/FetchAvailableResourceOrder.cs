@@ -16,7 +16,7 @@ namespace Neolithica.Orders.Super {
         public FetchAvailableResourceOrder(ActorController actor, ResourceKind resourceResourceKind, double amount) {
             this.resourceResourceKind = resourceResourceKind;
             this.amount = amount;
-            GoToState("getReservation", actor);
+            GoToState(cGetReservation, actor);
         }
 
         public override void Initialize(ActorController actor) {
@@ -31,18 +31,22 @@ namespace Neolithica.Orders.Super {
         }
 
         protected override void CreateStates() {
-            CreateState("getReservation",
+            CreateState(cGetReservation,
                 actor => new ReserveWarehouseContentsOrder(actor, resourceResourceKind, amount),
-                actor => GoToState("gotoWarehouse", actor),
+                actor => GoToState(cGotoWarehouse, actor),
                 null);
-            CreateState("gotoWarehouse",
+            CreateState(cGotoWarehouse,
                 actor => new SimpleMoveOrder(actor, actor.resourceReservation.source.transform.position, 2.0f),
-                actor => GoToState("withdraw", actor),
+                actor => GoToState(cWithdraw, actor),
                 null);
-            CreateState("withdraw",
+            CreateState(cWithdraw,
                 actor => new SimpleWithdrawOrder(actor),
                 actor => this.Completed = true,
                 null);
         }
+
+        private const string cGetReservation = "getReservation";
+        private const string cGotoWarehouse = "gotoWarehouse";
+        private const string cWithdraw = "withdraw";
     }
 }

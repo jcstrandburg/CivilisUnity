@@ -19,42 +19,42 @@ namespace Neolithica.Orders.Super {
         public HarvestFromReservoirOrder(ActorController actor, NeolithicObject target) {
             targetObj = target;
             reservoir = target.GetComponent<Reservoir>();
-            GoToState("seekTarget", actor);
+            GoToState(cSeekTarget, actor);
         }
 
         public override void Initialize(ActorController actor) {
             Resource r = actor.GetCarriedResource();
             if (r != null && r.resourceKind == reservoir.resourceResourceKind) {
-                GoToState("storeContents", actor);
+                GoToState(cStoreContents, actor);
             } else {
                 actor.DropCarriedResource();
             }
         }
 
         protected override void CreateStates() {
-            CreateState("seekTarget",
+            CreateState(cSeekTarget,
                 actor => new SimpleMoveOrder(
                     actor, 
                     actor.GameController.SnapToGround(targetObj.transform.position)),
-                actor => GoToState("reservationWait", actor),
+                actor => GoToState(cReservationWait, actor),
                 null);
-            CreateState("reservationWait",
+            CreateState(cReservationWait,
                 actor => {
                     resourceReservation = reservoir.NewReservation(actor.gameObject, 1);
                     return new WaitForReservationOrder(actor, resourceReservation);
                 },
-                actor => GoToState("getResource", actor),
+                actor => GoToState(cGetResource, actor),
                 null);
-            CreateState("getResource",
+            CreateState(cGetResource,
                 actor => new ExtractFromReservoirOrder(actor, resourceReservation),
                 actor => {
                     resourceReservation = null;
-                    GoToState("storeContents", actor);
+                    GoToState(cStoreContents, actor);
                 },
                 null);
-            CreateState("storeContents",
+            CreateState(cStoreContents,
                 actor => new StoreCarriedResourceOrder(actor),
-                actor => GoToState("seekTarget", actor),
+                actor => GoToState(cSeekTarget, actor),
                 null);
         }
 
@@ -64,5 +64,10 @@ namespace Neolithica.Orders.Super {
                 resourceReservation.Released = true;
             }
         }
+
+        private const string cSeekTarget = "seekTarget";
+        private const string cStoreContents = "storeContents";
+        private const string cReservationWait = "reservationWait";
+        private const string cGetResource = "getResource";
     }
 }

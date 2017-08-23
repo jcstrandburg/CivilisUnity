@@ -25,56 +25,54 @@ namespace Neolithica.Orders.Super {
         protected abstract void CreateStates();
 
         public void CreateState(string stateName, Func<ActorController, BaseOrder> startState, Action<ActorController> completeState, Action<ActorController> failState) {
-            OrderStateInfo info = new OrderStateInfo(startState, completeState, failState);
-            states.Add(stateName, info);
+            var orderStateInfo = new OrderStateInfo(startState, completeState, failState);
+            states.Add(stateName, orderStateInfo);
         }
 
         public override void DoStep(ActorController actor) {
-            if (currentOrder != null) {
-                currentOrder.DoStep(actor);
+            if (currentOrder == null) {
+                Debug.Log($"{nameof(currentOrder)} is null");
+                Failed = true;
+                return;
+            }
 
-                //check to see if order is done somehow
-                if (currentOrder.Done) {
-                    OrderStateInfo info = States[currentState];
-                    if (currentOrder.Completed) {
-                        if (info.CompleteState != null) {
-                            info.CompleteState(actor);
-                        }
-                        else {
-                            this.Failed = true;
-                            Debug.Log($"No complete transition available for state: {currentState}");
-                        }
-                    }
-                    else if (currentOrder.Failed) {
-                        if (info.FailState != null) {
-                            info.FailState(actor);
-                        }
-                        else {
-                            this.Failed = true;
-                            Debug.Log($"No failure transition available for state: {currentState}");
-                        }
-                    }
-                    else if (currentOrder.Cancelled) {
-                        throw new InvalidOperationException("Order exectution cannot continue when sub order is cancelled!");
-                    }
+            currentOrder.DoStep(actor);
+
+            if (!currentOrder.Done)
+                return;
+
+            OrderStateInfo info = States[currentState];
+            if (currentOrder.Completed) {
+                if (info.CompleteState != null) {
+                    info.CompleteState(actor);
+                }
+                else {
+                    this.Failed = true;
+                    Debug.Log($"No complete transition available for state: {currentState}");
                 }
             }
-            else {
-                Debug.Log("currentOrder is null!");
-                this.Failed = true;
+            else if (currentOrder.Failed) {
+                if (info.FailState != null) {
+                    info.FailState(actor);
+                }
+                else {
+                    this.Failed = true;
+                    Debug.Log($"No failure transition available for state: {currentState}");
+                }
+            }
+            else if (currentOrder.Cancelled) {
+                throw new InvalidOperationException("Order exectution cannot continue when sub order is cancelled!");
             }
         }
 
         /// <summary>Changes to the given state</summary>
         public void GoToState(string state, ActorController actor) {
-            if (States.ContainsKey(state)) {
-                OrderStateInfo info = States[state];
-                currentState = state;
-                currentOrder = info.StartState(actor);
-            }
-            else {
+            if (!States.ContainsKey(state))
                 throw new ArgumentOutOfRangeException(nameof(state), $"Nonexistant order state: {state}");
-            }
+
+            OrderStateInfo info = States[state];
+            currentState = state;
+            currentOrder = info.StartState(actor);
         }
 
         protected Dictionary<string, OrderStateInfo> States {

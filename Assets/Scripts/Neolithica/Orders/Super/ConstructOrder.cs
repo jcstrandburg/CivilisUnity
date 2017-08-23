@@ -14,7 +14,7 @@ namespace Neolithica.Orders.Super {
 
         public ConstructOrder(ActorController actor, NeolithicObject target) {
             manager = target.GetComponent<ConstructionManager>();
-            GoToState("getConstructionJob", actor);
+            GoToState(cGetConstructionJob, actor);
         }
 
         public override void Initialize(ActorController actor) {
@@ -24,32 +24,36 @@ namespace Neolithica.Orders.Super {
         }
 
         protected override void CreateStates() {
-            CreateState("getConstructionJob",
+            CreateState(cGetConstructionJob,
                 actor => new GetConstructionJobOrder(actor, manager),
                 actor => {
                     if (manager.ConstructionFinished())
                         this.Completed = true;
                     else
-                        GoToState("fetchResource", actor);
+                        GoToState(cFetchResource, actor);
                 },
                 null);
-            CreateState("fetchResource",
+            CreateState(cFetchResource,
                 actor => {
                     var res = actor.GetComponent<ConstructionReservation>();
                     return new FetchAvailableResourceOrder(actor, res.resourceResourceKind, 1);
                 },
-                actor => GoToState("depositResource", actor),
+                actor => GoToState(cDepositResource, actor),
                 null);
-            CreateState("depositResource",
+            CreateState(cDepositResource,
                 actor => new CompleteConstructionReservation(actor, manager),
                 actor => {
                     if (!manager.ConstructionFinished()) {
-                        GoToState("getConstructionJob", actor);
+                        GoToState(cGetConstructionJob, actor);
                     } else {
                         this.Completed = true;
                     }
                 },
                 null);
         }
+
+        private const string cDepositResource = "cDepositResource";
+        private const string cFetchResource = "cFetchResource";
+        private const string cGetConstructionJob = "getConstructionJob";
     }
 }

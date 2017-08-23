@@ -9,32 +9,38 @@ namespace Neolithica.Orders.Super {
     [SerializableType]
     public class StoreCarriedResourceOrder : StatefulSuperOrder {
         public StoreCarriedResourceOrder(ActorController actor) {
-            GoToState("getReservation", actor);
+            GoToState(cGetReservation, actor);
         }
 
         protected override void CreateStates() {
-            CreateState("getReservation",
+            CreateState(cGetReservation,
                 actor => new ReserveStorageOrder(actor),
-                actor => GoToState("seekStorage", actor),
+                actor => GoToState(cSeekStorage, actor),
                 actor => {
-                    GoToState("dump", actor);
+                    GoToState(cDump, actor);
                 });
-            CreateState("dump",
+            CreateState(cDump,
                 actor => new DumpCarriedResourceOrder(actor),
                 actor => this.Completed = true,
                 null);
-            CreateState("seekStorage",
+            CreateState(cSeekStorage,
                 actor => new SimpleMoveOrder(actor, actor.storageReservation.warehouse.transform.position, 2.0f),
-                actor => GoToState("reservationWait", actor),
+                actor => GoToState(cReservationWait, actor),
                 null);
-            CreateState("reservationWait",
+            CreateState(cReservationWait,
                 actor => new WaitForReservationOrder(actor, actor.storageReservation),
-                actor => GoToState("deposit", actor),
+                actor => GoToState(cDeposit, actor),
                 null);
-            CreateState("deposit",
+            CreateState(cDeposit,
                 actor => new StoreReservationOrder(actor, actor.storageReservation),
                 actor => this.Completed = true,
                 null);
         }
+
+        private const string cGetReservation = "getReservation";
+        private const string cDump = "dump";
+        private const string cSeekStorage = "seekStorage";
+        private const string cReservationWait = "reservationWait";
+        private const string cDeposit = "deposit";
     }
 }

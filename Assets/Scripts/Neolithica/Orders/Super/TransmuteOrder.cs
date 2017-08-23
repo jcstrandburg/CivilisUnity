@@ -19,17 +19,17 @@ namespace Neolithica.Orders.Super {
             this.fromResourceKind = fromResourceKind;
             this.toResourceKind = toResourceKind;
             this.target = target;
-            GoToState("getSourceMaterial", actor);
+            GoToState(cGetSourceMaterial, actor);
         }
 
         public override void Initialize(ActorController actor) {
             Resource r = actor.GetCarriedResource();
             if (r == null) return;
             if (r.resourceKind == fromResourceKind) {
-                GoToState("gotoWorkspace", actor);
+                GoToState(cGotoWorkspace, actor);
             }
             else if (r.resourceKind == toResourceKind) {
-                GoToState("storeProduct", actor);
+                GoToState(cStoreProduct, actor);
             }
             else {
                 actor.DropCarriedResource();
@@ -37,22 +37,27 @@ namespace Neolithica.Orders.Super {
         }
 
         protected override void CreateStates() {
-            CreateState("getSourceMaterial",
+            CreateState(cGetSourceMaterial,
                 actor => new FetchAvailableResourceOrder(actor, fromResourceKind, 1),
-                actor => GoToState("gotoWorkspace", actor),
+                actor => GoToState(cGotoWorkspace, actor),
                 null);
-            CreateState("gotoWorkspace",
+            CreateState(cGotoWorkspace,
                 actor => new SimpleMoveOrder(actor, target.transform.position, 2.0f),
-                actor => GoToState("doTransmute", actor),
+                actor => GoToState(cDoTransmute, actor),
                 null);
-            CreateState("doTransmute",
+            CreateState(cDoTransmute,
                 actor => new ConvertResourceOrder(actor, fromResourceKind, toResourceKind),
-                actor => GoToState("storeProduct", actor),
+                actor => GoToState(cStoreProduct, actor),
                 null);
-            CreateState("storeProduct",
+            CreateState(cStoreProduct,
                 actor => new StoreCarriedResourceOrder(actor),
-                actor => GoToState("getSourceMaterial", actor),
+                actor => GoToState(cGetSourceMaterial, actor),
                 null);
         }
+
+        private const string cGetSourceMaterial = "getSourceMaterial";
+        private const string cGotoWorkspace = "gotoWorkspace";
+        private const string cDoTransmute = "doTransmute";
+        private const string cStoreProduct = "storeProduct";
     }
 }

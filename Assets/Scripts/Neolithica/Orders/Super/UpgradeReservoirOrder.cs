@@ -17,18 +17,21 @@ namespace Neolithica.Orders.Super {
         public UpgradeReservoirOrder(ActorController actor, NeolithicObject target, GameObject prefab) {
             targetObj = target;
             myPrefab = prefab;
-            GoToState("seekTarget", actor);
+            GoToState(cSeekTarget, actor);
         }
 
         protected override void CreateStates() {
-            CreateState("seekTarget",
+            CreateState(cSeekTarget,
                 actor => new SimpleMoveOrder(actor, targetObj.transform.position),
-                actor => GoToState("doUpgrade", actor),
+                actor => GoToState(cDoUpgrade, actor),
                 null);
-            CreateState("doUpgrade",
+            CreateState(cDoUpgrade,
                 actor => new DoBuildingUpgrade(actor, targetObj, myPrefab),
                 actor => Completed = true,
                 null);
         }
+
+        private const string cSeekTarget = "seekTarget";
+        private const string cDoUpgrade = "doUpgrade";
     }
 }

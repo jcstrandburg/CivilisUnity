@@ -10,7 +10,7 @@ namespace Neolithica.Orders.Super {
 
         public HuntOrder(ActorController actor, Herd herd) {
             this.herd = herd;
-            GoToState("seekTarget", actor);
+            GoToState(cSeekTarget, actor);
         }
 
         public override void Initialize(ActorController actor) {
@@ -18,18 +18,22 @@ namespace Neolithica.Orders.Super {
         }
 
         protected override void CreateStates() {
-            CreateState("seekTarget",
+            CreateState(cSeekTarget,
                 actor => new SimpleMoveOrder(actor, herd.rabbit.transform.position),
-                actor => GoToState("getResource", actor), 
+                actor => GoToState(cGetResource, actor), 
                 null);
-            CreateState("getResource",
+            CreateState(cGetResource,
                 actor => new SlaughterHuntedAnimalOrder(actor, herd),
-                actor => GoToState("storeResource", actor), 
+                actor => GoToState(cStoreResource, actor), 
                 null);
-            CreateState("storeResource",
+            CreateState(cStoreResource,
                 actor => new StoreCarriedResourceOrder(actor),
-                actor => GoToState("seekTarget", actor), 
+                actor => GoToState(cSeekTarget, actor), 
                 null);
         }
+
+        private const string cSeekTarget = "seekTarget";
+        private const string cGetResource = "getResource";
+        private const string cStoreResource = "storeResource";
     }
 }
