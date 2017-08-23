@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Neolithica.Extensions;
 using Neolithica.MonoBehaviours;
 using UnityEngine;
 using UnityEngine.Events;
@@ -9,30 +10,16 @@ namespace Neolithica.UI {
         public string startMenu = null;//the menu that gets pushed on to the stack when the scene starts
         public UnityEvent onEmpty;
 
-        private Stack<GameObject> menuStack = new Stack<GameObject>();
+        private readonly Stack<GameObject> menuStack = new Stack<GameObject>();
 
         private static MenuManager instance = null;
-        public static MenuManager Instance {
-            get {
-                if (instance == null) {
-                    instance = FindObjectOfType<MenuManager>();
-                }
-                return instance;
-            }
-        }
+        public static MenuManager Instance => UnityExtensions.CacheComponent(ref instance, FindObjectOfType<MenuManager>);
 
         [Inject]
         public GameController GameController { get; set; }
 
-        private Canvas _canvas;
-        private Canvas canvas {
-            get {
-                if (_canvas == null) {
-                    _canvas = FindObjectOfType<Canvas>();
-                }
-                return _canvas;
-            }
-        }
+        private Canvas canvas;
+        private Canvas Canvas => this.CacheComponent(ref canvas, FindObjectOfType<Canvas>);
 
         public void Start() {
             if (!string.IsNullOrEmpty(startMenu)) {
@@ -45,9 +32,9 @@ namespace Neolithica.UI {
                 GameObject currentMenu = menuStack.Peek();
                 currentMenu.SetActive(false);
             }
-            var newMenu = GameController.Factory.Instantiate(prefab);
+            GameObject newMenu = GameController.Factory.Instantiate(prefab);
             newMenu.SetActive(true);
-            newMenu.transform.SetParent(canvas.transform);
+            newMenu.transform.SetParent(Canvas.transform);
             newMenu.transform.position = new Vector3((float)Screen.width / 2, (float)Screen.height / 2);
             menuStack.Push(newMenu);
         }
@@ -67,12 +54,9 @@ namespace Neolithica.UI {
             if (menuStack.Count > 0) {
                 GameObject currentMenu = menuStack.Peek();
                 currentMenu.SetActive(true);
-            } else {
-                Debug.Log("Empty");
-                if (onEmpty != null) {
-                    Debug.Log("Invoking");
-                    onEmpty.Invoke();
-                }
+            } else if (onEmpty != null) {
+                Debug.Log("Invoking onEmpty");
+                onEmpty.Invoke();
             }
         }
     }

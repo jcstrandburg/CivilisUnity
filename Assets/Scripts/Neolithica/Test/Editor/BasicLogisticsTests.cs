@@ -25,12 +25,12 @@ namespace Neolithica.Test.Editor {
             Assert.IsNull(manager.FindNearestNetwork(new Vector3(1, 1, 1)));
 
             //add the first network, FindNearestNetwork should return network1
-            network1.logisticsManager = manager;
+            network1.LogisticsManager = manager;
             Assert.AreSame(network1, manager.FindNearestNetwork(new Vector3(1, 0, 1)));
             Assert.AreSame(network1, manager.FindNearestNetwork(new Vector3(-1, 0, -1)));
 
             //add the second network, one last test
-            network2.logisticsManager = manager;
+            network2.LogisticsManager = manager;
             Assert.AreSame(network1, manager.FindNearestNetwork(new Vector3(1, 0, 1)));
             Assert.AreSame(network2, manager.FindNearestNetwork(new Vector3(-1, 0, -1)));
         }
@@ -78,14 +78,14 @@ namespace Neolithica.Test.Editor {
             var node1 = MakePlainComponent<LogisticsNode>();
             var node2 = MakePlainComponent<LogisticsNode>();
 
-            network1.logisticsManager = manager;
+            network1.LogisticsManager = manager;
             network1.transform.position = new Vector3(0, 0, 0);
-            network2.logisticsManager = manager;
+            network2.LogisticsManager = manager;
             network2.transform.position = new Vector3(5, 0, 3);
 
-            node1.LogisticsLogisticsManager = manager;
+            node1.LogisticsManager = manager;
             node1.transform.position = new Vector3(1, 0, 1);
-            node2.LogisticsLogisticsManager = manager;
+            node2.LogisticsManager = manager;
             node2.transform.position = new Vector3(3, 0, 3);
 
             manager.RebuildNetworks();
@@ -98,9 +98,9 @@ namespace Neolithica.Test.Editor {
         [Test]
         public void TestNetworkInjectionWorks() {
             var network = MakeTestComponent<LogisticsNetwork>();
-            Assert.AreSame(manager, network.logisticsManager);
+            Assert.AreSame(manager, network.LogisticsManager);
             var node = MakeTestComponent<LogisticsNode>();
-            Assert.AreSame(manager, node.LogisticsLogisticsManager);
+            Assert.AreSame(manager, node.LogisticsManager);
             Assert.AreSame(network, node.LogisticsNetwork);
         }
 
@@ -125,13 +125,13 @@ namespace Neolithica.Test.Editor {
             var network2 = MakeTestComponent<LogisticsNetwork>();
             var node1 = MakePlainComponent<LogisticsNode>();//don't inject yet
 
-            network1.logisticsManager = manager;
+            network1.LogisticsManager = manager;
             network1.transform.position = new Vector3(0, 0, 0);
-            network2.logisticsManager = manager;
+            network2.LogisticsManager = manager;
             network2.transform.position = new Vector3(5, 0, 3);
 
             node1.transform.position = new Vector3(0, 0, 0);
-            node1.LogisticsLogisticsManager = manager;
+            node1.LogisticsManager = manager;
             Assert.AreSame(network1, node1.LogisticsNetwork);
 
             //destroy the first network

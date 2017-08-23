@@ -22,7 +22,7 @@ namespace Neolithica.Test.Scripts {
                 IntegrationTest.Fail("No logistics node present");
             } else if (node.LogisticsNetwork == null) {
                 IntegrationTest.Fail("Node is not a member of a network");
-            } else if (node.LogisticsNetwork.logisticsManager == null) {
+            } else if (node.LogisticsNetwork.LogisticsManager == null) {
                 IntegrationTest.Fail("Network has no logistics manager");
             }
 

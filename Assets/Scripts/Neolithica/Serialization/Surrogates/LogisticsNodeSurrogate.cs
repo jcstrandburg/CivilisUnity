@@ -16,7 +16,7 @@ namespace Neolithica.Serialization.Surrogates {
 
             return new LogisticsNodeSurrogate {
                 Resolver = MonoBehaviourResolver.Make(value),
-                LogisticsLogisticsManager = value.LogisticsLogisticsManager,
+                LogisticsLogisticsManager = value.LogisticsManager,
                 LogisticsNetwork = value.LogisticsNetwork,
             };
         }
@@ -26,7 +26,7 @@ namespace Neolithica.Serialization.Surrogates {
                 return null;
 
             LogisticsNode x = surrogate.Resolver.Resolve<LogisticsNode>();
-            x.LogisticsLogisticsManager = surrogate.LogisticsLogisticsManager;
+            x.LogisticsManager = surrogate.LogisticsLogisticsManager;
             x.LogisticsNetwork = surrogate.LogisticsNetwork;
 
             return x;

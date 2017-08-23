@@ -11,9 +11,7 @@ namespace Neolithica.UI {
         private GameObject listItemPrefab;
         public Color selectedColor;
 
-        public string SelectedItem {
-            get { return selectedItem != null ? selectedItem.GetComponent<Text>().text : null; }
-        }
+        public string SelectedItem => selectedItem != null ? selectedItem.GetComponent<Text>().text : null;
 
         public void SelectItem(SelectListItem item) {
             //Debug.Log("Selecting item");

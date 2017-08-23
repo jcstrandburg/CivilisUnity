@@ -19,10 +19,10 @@ namespace Neolithica.Serialization.Surrogates {
 
             return new LogisticsNetworkSurrogate {
                 Resolver = MonoBehaviourResolver.Make(value),
-                Foodbuffer = value.foodbuffer,
-                GameController = value.gameController,
+                Foodbuffer = value.Foodbuffer,
+                GameController = value.GameController,
                 Strategy = value.strategy,
-                LogisticsManager = value.logisticsManager,
+                LogisticsManager = value.LogisticsManager,
             };
         }
 
@@ -31,10 +31,10 @@ namespace Neolithica.Serialization.Surrogates {
                 return null;
 
             LogisticsNetwork x = surrogate.Resolver.Resolve<LogisticsNetwork>();
-            x.foodbuffer = surrogate.Foodbuffer;
-            x.gameController = surrogate.GameController;
+            x.Foodbuffer = surrogate.Foodbuffer;
+            x.GameController = surrogate.GameController;
             x.strategy = surrogate.Strategy;
-            x.logisticsManager = surrogate.LogisticsManager;
+            x.LogisticsManager = surrogate.LogisticsManager;
 
             return x;
         }

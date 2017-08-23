@@ -30,10 +30,10 @@ namespace Neolithica.MonoBehaviours {
                 SetPersistor(value);
             }
             get {
-                if (persistor == null) {
-                    var path = Application.persistentDataPath + "/Saved Games/stats";
-                    SetPersistor(new FilePathStatPersistor(path));
-                }
+                if (persistor != null) return persistor;
+
+                string path = Application.persistentDataPath + "/Saved Games/stats";
+                SetPersistor(new FilePathStatPersistor(path));
                 return persistor;
             }
         }

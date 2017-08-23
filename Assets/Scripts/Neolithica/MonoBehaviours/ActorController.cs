@@ -44,8 +44,8 @@ namespace Neolithica.MonoBehaviours {
             var logisticsManager = logisticsActor.logisticsManager;
             LogisticsNetwork network = logisticsManager ? logisticsManager.FindNearestNetwork(transform.position) : null;
 
-            if (network != null && network.foodbuffer > feedMe) {
-                network.foodbuffer -= feedMe;
+            if (network != null && network.Foodbuffer > feedMe) {
+                network.Foodbuffer -= feedMe;
                 health = System.Math.Min(1, health + feedMe);
             } else {
                 health -= feedMe;

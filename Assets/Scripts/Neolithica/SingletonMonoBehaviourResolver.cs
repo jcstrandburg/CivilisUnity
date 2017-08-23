@@ -42,7 +42,10 @@ namespace Neolithica.DependencyInjection {
             }
 
             if (instances.Length > 1)
+            {
+                Debug.Log(instances);
                 throw new InvalidOperationException($"Multiple instances of type {typeof(T).Name} found in scene");
+            }
 
             return m_value = instances.SingleOrDefault();
         }

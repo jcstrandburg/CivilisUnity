@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityTest.IntegrationTestRunner;
 using UnityEngine.SceneManagement;
+// ReSharper disable DelegateSubtraction
 
 namespace UnityTest
 {
@@ -60,8 +61,10 @@ namespace UnityTest
             EditorApplication.hierarchyWindowChanged += OnHierarchyChangeUpdate;
             EditorApplication.update -= BackgroundSceneChangeWatch;
             EditorApplication.update += BackgroundSceneChangeWatch;
+#pragma warning disable 618
             EditorApplication.playmodeStateChanged -= OnPlaymodeStateChanged;
             EditorApplication.playmodeStateChanged += OnPlaymodeStateChanged;
+#pragma warning restore 618
         }
 
         private static void OnPlaymodeStateChanged()
@@ -75,7 +78,9 @@ namespace UnityTest
             EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyWindowItemDraw;
             EditorApplication.update -= BackgroundSceneChangeWatch;
             EditorApplication.hierarchyWindowChanged -= OnHierarchyChangeUpdate;
+#pragma warning disable 618
             EditorApplication.playmodeStateChanged -= OnPlaymodeStateChanged;
+#pragma warning restore 618
 
             TestComponent.DestroyAllDynamicTests();
         }

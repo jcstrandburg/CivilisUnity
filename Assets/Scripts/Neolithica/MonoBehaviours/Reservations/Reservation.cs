@@ -23,14 +23,14 @@ namespace Neolithica.MonoBehaviours.Reservations {
         public bool Released {
             get { return released; }
             set { 
-                released = value; 
-                if (released) {
-                    if (Application.isPlaying) {
-                        Destroy(this);
-                    }
-                    else {
-                        DestroyImmediate(this);
-                    }
+                released = value;
+                if (!released) return;
+
+                if (Application.isPlaying) {
+                    Destroy(this);
+                }
+                else {
+                    DestroyImmediate(this);
                 }
             }
         }

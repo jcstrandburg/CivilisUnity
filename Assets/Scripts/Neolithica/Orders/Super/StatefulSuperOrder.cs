@@ -79,10 +79,11 @@ namespace Neolithica.Orders.Super {
 
         protected Dictionary<string, OrderStateInfo> States {
             get {
-                if (states == null) {
-                    states = new Dictionary<string, OrderStateInfo>();
-                    CreateStates();
-                }
+                if (states != null)
+                    return states;
+
+                states = new Dictionary<string, OrderStateInfo>();
+                CreateStates();
                 return states;
             }
         }

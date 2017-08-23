@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Neolithica.Extensions;
 using Tofu.Serialization;
 using UnityEngine;
 
@@ -10,55 +11,42 @@ namespace Neolithica.MonoBehaviours.Logistics {
 
         public int strategy = 1;
 
-        public int NodeCount {
-            get {
-                return nodes.Count;
-            }
-        }
+        public int NodeCount => nodes.Count;
 
         [SerializeField]
-        private double _foodbuffer = 6.0;
-        public double foodbuffer {
+        private double foodbuffer = 6.0;
+        public double Foodbuffer {
             get {
-                return _foodbuffer;
+                return foodbuffer;
             }
             set {
-                _foodbuffer = value;
+                foodbuffer = value;
             }
         }
 
-        private LogisticsManager _manager;
+        private LogisticsManager logisticsManager;
         [Inject]
-        public LogisticsManager logisticsManager {
+        public LogisticsManager LogisticsManager {
             set {
-                if (_manager && _manager != value) {
-                    _manager.UnregisterNetwork(this);
-                    _manager = null;
+                if (logisticsManager && logisticsManager != value) {
+                    logisticsManager.UnregisterNetwork(this);
+                    logisticsManager = null;
                 }
-                if (_manager == null && value != null) {
-                    _manager = value;
-                    _manager.RegisterNetwork(this);
+                if (logisticsManager == null && value != null) {
+                    logisticsManager = value;
+                    logisticsManager.RegisterNetwork(this);
                 }
             }
             get {
-                return _manager;
+                return logisticsManager;
             }
         }
 
-        private GameController _gameController;
         [Inject]
-        public GameController gameController {
-            get {
-                if (_gameController == null) {
-                    _gameController = GameController.Instance;
-                }
-                return _gameController;
-            }
-            set { _gameController = value; }
-        }
+        public GameController GameController { get; set; }
 
         public void Start() {
-            InvokeRepeating("KeepFoodBufferFilled", 1.0f, 0.5f);
+            InvokeRepeating(nameof(KeepFoodBufferFilled), 1.0f, 0.5f);
         }
 
         public void AttachNode(LogisticsNode node) {
@@ -75,20 +63,7 @@ namespace Neolithica.MonoBehaviours.Logistics {
         }
 
         public T[] FindComponents<T>() {
-            //I don't recall why I did this....
-            if (strategy==1) {
-                return GetComponentsInChildren<T>();
-            } else if (strategy==2) {
-                var components = new List<T>();
-
-                components.AddRange(GetComponents<T>());
-                foreach (var n in nodes) {
-                    components.AddRange(n.GetComponents<T>());
-                }
-                return components.ToArray();
-            } else {
-                throw new Exception("Invalid strategy");
-            }
+            return GetComponentsInChildren<T>();
         }
 
         public void OnDestroy() {
@@ -103,35 +78,35 @@ namespace Neolithica.MonoBehaviours.Logistics {
         /// food from any source to keep the food buffer filled
         /// </summary>
         /// <todo>Rework to use a logistics system</todo>
-        void KeepFoodBufferFilled() {
-            if (foodbuffer < 3.0) {
-                var warehouses = FindComponents<Warehouse>();
-                var types = new List<ResourceKind> { ResourceKind.Meat, ResourceKind.Vegetables, ResourceKind.Fish};
-                var typesToRemove = new List<ResourceKind>();
-                var resources = new List<ResourceProfile>();
+        private void KeepFoodBufferFilled() {
+            if (Foodbuffer >= 3.0) return;
 
-                foreach (var w in warehouses) {
-                    foreach (var t in types) {
-                        if (!(w.GetAvailableContents(t) >= 1)) continue;
-                        typesToRemove.Add(t);
-                        w.WithdrawContents(t, 1);
-                        resources.Add(new ResourceProfile(t, 1));
+            var warehouses = FindComponents<Warehouse>();
+            var foodKinds = new List<ResourceKind> { ResourceKind.Meat, ResourceKind.Vegetables, ResourceKind.Fish};
+            var typesToRemove = new List<ResourceKind>();
+            var resources = new List<ResourceProfile>();
 
-                        gameController.MakeToast(w.transform.position, "Food Consumed");
-                    }
-                    foreach (var t in typesToRemove) {
-                        types.Remove(t);
-                    }
-                    typesToRemove.Clear();
+            foreach (Warehouse w in warehouses) {
+                foreach (ResourceKind t in foodKinds) {
+                    if (!(w.GetAvailableContents(t) >= 1)) continue;
+                    typesToRemove.Add(t);
+                    w.WithdrawContents(t, 1);
+                    resources.Add(new ResourceProfile(t, 1));
 
-                    if (types.Count == 0) {
-                        break;
-                    }
+                    GameController.MakeToast(w.transform.position, "Food Consumed");
                 }
-
-                if (resources.Count > 0) {
-                    foodbuffer += CalcFoodValue(resources);
+                foreach (var t in typesToRemove) {
+                    foodKinds.Remove(t);
                 }
+                typesToRemove.Clear();
+
+                if (foodKinds.Count == 0) {
+                    break;
+                }
+            }
+
+            if (resources.Count > 0) {
+                Foodbuffer += CalcFoodValue(resources);
             }
         }
 

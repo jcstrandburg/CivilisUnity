@@ -48,7 +48,7 @@ namespace Neolithica.Test.Editor {
             var logisticsManager = MakeTestComponent<LogisticsManager>();
             var logisticsnode = MakeTestComponent<LogisticsNode>();
             Factory.InjectObject(logisticsnode);
-            Assert.AreSame(logisticsManager, logisticsnode.LogisticsLogisticsManager);
+            Assert.AreSame(logisticsManager, logisticsnode.LogisticsManager);
         }
 
         private class InjectBehaviour : MonoBehaviour {

@@ -9,9 +9,9 @@ namespace Neolithica.MonoBehaviours.Logistics {
     public class LogisticsManager : MonoBehaviour {
 
         [SerializeField]
-        private List<LogisticsNetwork> networks = new List<LogisticsNetwork>();
+        private readonly List<LogisticsNetwork> networks = new List<LogisticsNetwork>();
         [SerializeField]
-        private List<LogisticsNode> nodes = new List<LogisticsNode>();
+        private readonly List<LogisticsNode> nodes = new List<LogisticsNode>();
 
         /// <summary>
         /// Adds a LogisticsNetwork to the logistics system
@@ -57,7 +57,7 @@ namespace Neolithica.MonoBehaviours.Logistics {
         /// Reassigns all logistics nodes to the nearest network
         /// </summary>
         public void RebuildNetworks() {
-            foreach (var node in nodes.Where(n => n != null)) {
+            foreach (LogisticsNode node in nodes.Where(n => n != null)) {
                 node.LogisticsNetwork = FindNearestNetwork(node.transform.position);
             }
         }

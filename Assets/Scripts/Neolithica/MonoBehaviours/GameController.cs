@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Neolithica.DependencyInjection;
+using Neolithica.Extensions;
 using Neolithica.MonoBehaviours.Logistics;
 using Neolithica.MonoBehaviours.Reservations;
 using Neolithica.Orders.Simple;
@@ -32,15 +33,9 @@ namespace Neolithica.MonoBehaviours {
         public List<CommandType> ForbiddenActions;
 
         private static GameController _instance = null;
+
         /// <summary>"Singleton" instance getter. Only one of these objects is expected to exists in any scene.</summary>
-        public static GameController Instance {
-            get {
-                if (_instance == null) {
-                    _instance = FindObjectOfType<GameController>();
-                }
-                return _instance;
-            }
-        }
+        public static GameController Instance => UnityExtensions.CacheComponent(ref _instance, () => FindObjectsOfType<GameController>().Single());
 
         [Inject] public GameUIController GuiController { get; set; }
         [Inject] public GroundController GroundController { get; set; }
@@ -55,15 +50,9 @@ namespace Neolithica.MonoBehaviours {
         // TODO this should probably just be an injected auto-property but I don't want to test it right now
         [Inject]
         public BuildingBlueprint buildingPlacer;
+
         /// <summary>Manages the BuildingPlueprint object. If no other placer is provided one will be found in the scene.</summary>
-        private BuildingBlueprint BuildingPlacer {
-            get {
-                if (buildingPlacer == null) {
-                    buildingPlacer = FindObjectsOfType<BuildingBlueprint>().Single();
-                }
-                return buildingPlacer;
-            }
-        }
+        private BuildingBlueprint BuildingPlacer => this.CacheComponent(ref buildingPlacer, () => FindObjectsOfType<BuildingBlueprint>().Single());
 
         // Handles Awake event
         public void Awake() {

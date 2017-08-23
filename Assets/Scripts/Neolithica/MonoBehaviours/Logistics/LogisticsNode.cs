@@ -24,7 +24,7 @@ namespace Neolithica.MonoBehaviours.Logistics {
 
         private LogisticsManager logisticsManager;
         [Inject]
-        public LogisticsManager LogisticsLogisticsManager {
+        public LogisticsManager LogisticsManager {
             set {
                 if (logisticsManager && logisticsManager != value) {
                     logisticsManager.UnregisterNode(this);
@@ -36,11 +36,6 @@ namespace Neolithica.MonoBehaviours.Logistics {
                 }
             }
             get {
-                if (logisticsManager == null) {
-                    if (logisticsManager) {
-                        logisticsManager = GetComponentInParent<LogisticsManager>();
-                    }
-                }
                 return logisticsManager;
             }
         }
