@@ -14,9 +14,9 @@ namespace Neolithica.DependencyInjection {
         public GameFactoryBase Factory => this;
 
         /// <summary>Injectable fields by object type</summary>
-        private readonly Dictionary<Type, FieldInfo[]> fieldInfoCache = new Dictionary<Type, FieldInfo[]>();
+        private readonly Dictionary<Type, List<FieldInfo>> fieldInfoCache = new Dictionary<Type, List<FieldInfo>>();
         /// <summary>Injectable properties by object type</summary>
-        private readonly Dictionary<Type, PropertyInfo[]> propInfoCache = new Dictionary<Type, PropertyInfo[]>();
+        private readonly Dictionary<Type, List<PropertyInfo>> propInfoCache = new Dictionary<Type, List<PropertyInfo>>();
 
         private readonly Dictionary<Type, IDependencyResolver> m_dependencyResolvers;
 
@@ -39,9 +39,8 @@ namespace Neolithica.DependencyInjection {
             if (position.HasValue)
                 instance.transform.position = position.Value;
 
-            instance.BroadcastMessage("BeforeInject", SendMessageOptions.DontRequireReceiver);
             InjectGameobject(instance);
-            instance.BroadcastMessage("AfterInject", SendMessageOptions.DontRequireReceiver);
+            instance.BroadcastMessage(nameof(IOnComponentWasInjected.OnComponentWasInjected), SendMessageOptions.DontRequireReceiver);
 
             return instance;
         }
@@ -51,14 +50,14 @@ namespace Neolithica.DependencyInjection {
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        private FieldInfo[] GetInjectableFields(Type t) {
+        private List<FieldInfo> GetInjectableFields(Type t) {
             const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic;
 
             if (!fieldInfoCache.ContainsKey(t)) {
                 fieldInfoCache[t] = t
                     .GetFields(flags)
                     .Where(field => field.IsDefined(typeof(Inject), false))
-                    .ToArray();
+                    .ToList();
             }
             return fieldInfoCache[t];
         }
@@ -68,14 +67,14 @@ namespace Neolithica.DependencyInjection {
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        private PropertyInfo[] GetInjectableProps(Type t) {
+        private List<PropertyInfo> GetInjectableProps(Type t) {
             const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic;
 
             if (!propInfoCache.ContainsKey(t)) {
                 propInfoCache[t] = t
                     .GetProperties(flags)
                     .Where(prop => prop.IsDefined(typeof(Inject), false))
-                    .ToArray();
+                    .ToList();
             }
             return propInfoCache[t];
         }
@@ -89,17 +88,19 @@ namespace Neolithica.DependencyInjection {
             if (injectme == null) {
                 throw new ArgumentNullException(nameof(injectme), "Cannot inject null object");
             }
-            var compType = injectme.GetType();
+            Type compType = injectme.GetType();
 
             //get fields and properties to be injected
-            var compFields = GetInjectableFields(compType);
-            var compProperties = GetInjectableProps(compType);
+            List<FieldInfo> compFields = GetInjectableFields(compType);
+            List<PropertyInfo> compProperties = GetInjectableProps(compType);
 
-            foreach (var compField in compFields)
+            foreach (var compField in compFields) {
                 compField.SetValue(injectme, Resolve(compField.FieldType));
+            }
 
-            foreach (var compProp in compProperties)
+            foreach (var compProp in compProperties) {
                 compProp.SetValue(injectme, Resolve(compProp.PropertyType), null);
+            }
 
             return injectme;
         }

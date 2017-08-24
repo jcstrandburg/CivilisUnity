@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
     [SavableMonobehaviour(26)]
-    public class NeolithicObject : MonoBehaviour {
+    public class NeolithicObject : MonoBehaviour, IOnComponentWasInjected {
 
         public enum Selectability { Unselectable, Selectable, Multiselectable };
 
@@ -25,11 +25,6 @@ namespace Neolithica.MonoBehaviours {
         // Handles Start event
         public virtual void Start() {
             halo = GetComponentInChildren<SelectHalo>();
-        }
-
-        // Handles AfterInject event
-        public virtual void AfterInject() {
-            SnapToGround();
         }
 
         // Handles OnDeserialize event
@@ -89,6 +84,10 @@ namespace Neolithica.MonoBehaviours {
                 Vector3 snappedPos = GameController.SnapToGround(transform.position);
                 transform.position = snappedPos;
             }
+        }
+
+        public void OnComponentWasInjected() {
+            SnapToGround();
         }
     }
 }

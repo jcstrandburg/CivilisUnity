@@ -17,7 +17,7 @@ namespace Neolithica {
                 new SingletonMonoBehaviourResolver<GroundController>(rootObject),
                 new SingletonMonoBehaviourResolver<StatManager>(rootObject),
                 new SingletonMonoBehaviourResolver<SaverLoader>(),
-                new SingletonMonoBehaviourResolver<MenuManager>(rootObject),
+                new SingletonMonoBehaviourResolver<MenuManager>(),
                 new SingletonMonoBehaviourResolver<LogisticsManager>(rootObject),
                 new SingletonMonoBehaviourResolver<DayCycleController>(rootObject),
             };

@@ -53,7 +53,7 @@ namespace Neolithica.MonoBehaviours {
         // Handles Awake event
         public void Awake() {
             Factory = new MainGameFactory(gameObject);
-            var techs = Resources.LoadAll("Techs", typeof(Technology)).Select(t => (Technology)t).ToArray();
+            var techs = Resources.LoadAll("Techs", typeof(Technology)).Select(t => (Technology)t).ToList();
             TechManager = new TechManager();
             TechManager.LoadTechs(techs);
 
@@ -66,19 +66,14 @@ namespace Neolithica.MonoBehaviours {
         }
 
         public void InjectAllObjects() {
-            var gameObjects = FindObjectsOfType<GameObject>().Where(x => x.activeInHierarchy && x.transform.parent == null).ToArray();
-            foreach (var go in gameObjects) {
-                go.BroadcastMessage("BeforeInject", SendMessageOptions.DontRequireReceiver);
-            }
+            var gameObjects = FindObjectsOfType<GameObject>().Where(x => x.activeInHierarchy && x.transform.parent == null).ToList();
 
             var monoBehaviors = FindObjectsOfType<MonoBehaviour>();
-            foreach (var b in monoBehaviors) {
+            foreach (var b in monoBehaviors)
                 Factory.InjectObject(b);
-            }
 
-            foreach (var go in gameObjects) {
-                go.BroadcastMessage("AfterInject", SendMessageOptions.DontRequireReceiver);
-            }
+            foreach (var go in gameObjects)
+                go.BroadcastMessage(nameof(IOnComponentWasInjected.OnComponentWasInjected), SendMessageOptions.DontRequireReceiver);
         }
 
         // Handles FixedUpdate event

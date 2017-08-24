@@ -47,6 +47,9 @@ namespace Neolithica.DependencyInjection {
                 throw new InvalidOperationException($"Multiple instances of type {typeof(T).Name} found in scene");
             }
 
+            if (!instances.Any())
+                Debug.Log($"No instances found when resolving type {typeof(T).Name}");
+
             return m_value = instances.SingleOrDefault();
         }
 
