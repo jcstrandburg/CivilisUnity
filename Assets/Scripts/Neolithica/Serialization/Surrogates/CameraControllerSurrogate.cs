@@ -9,7 +9,6 @@ namespace Neolithica.Serialization.Surrogates {
         [SerializableMember(1)] public MonoBehaviourResolver Resolver { get; set; }
         [SerializableMember(2)] public float ZoomLevel { get; set; }
         [SerializableMember(3)] public float XRotateLevel { get; set; }
-        [SerializableMember(4)] public float StrategicRotation { get; set; }
 
         public static implicit operator CameraControllerSurrogate(CameraController value) {
             if (value == null)
@@ -17,9 +16,8 @@ namespace Neolithica.Serialization.Surrogates {
 
             return new CameraControllerSurrogate {
                 Resolver = MonoBehaviourResolver.Make(value),
-                ZoomLevel = value.zoomLevel,
-                XRotateLevel = value.xRotateLevel,
-                StrategicRotation = value.strategicRotation,
+                ZoomLevel = SurrogateHelper.GetFieldValue<CameraController, float>(value, "zoomLevel"),
+                XRotateLevel = SurrogateHelper.GetFieldValue<CameraController, float>(value, "xRotateLevel"),
             };
         }
 
@@ -28,9 +26,8 @@ namespace Neolithica.Serialization.Surrogates {
                 return null;
 
             CameraController x = surrogate.Resolver.Resolve<CameraController>();
-            x.zoomLevel = surrogate.ZoomLevel;
-            x.xRotateLevel = surrogate.XRotateLevel;
-            x.strategicRotation = surrogate.StrategicRotation;
+            SurrogateHelper.SetFieldValue(x, "zoomLevel", surrogate.ZoomLevel);
+            SurrogateHelper.SetFieldValue(x, "xRotateLevel", surrogate.XRotateLevel);
 
             return x;
         }
