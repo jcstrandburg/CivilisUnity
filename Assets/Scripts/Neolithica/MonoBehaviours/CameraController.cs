@@ -18,7 +18,7 @@ namespace Neolithica.MonoBehaviours {
         public Camera cam; 
 
         //screen edge/mouse based scrolling controls
-        public float screenMargin;    
+        public float screenMargin;
         public float minScrollRatio;
         public bool edgeScrolling = false;
 
@@ -42,10 +42,8 @@ namespace Neolithica.MonoBehaviours {
         //helper variables to serialize camera settings
         private Quaternion cameraRotation;
 
-        [Inject]
-        public GameController GameController { get; set; }
-        [Inject]
-        public GroundController GroundController { get; set; }
+        [Inject] public GameController GameController { get; set; }
+        [Inject] public GroundController GroundController { get; set; }
 
         public void Start() {
             targetPos = transform.position;
@@ -60,7 +58,6 @@ namespace Neolithica.MonoBehaviours {
             cam.transform.rotation = cameraRotation;
         }
 
-        // Use this for initialization
         void FixedUpdate() {
             float tranSpeed = transformSpeed * (2.0f - zoomLevel);
 
@@ -101,6 +98,10 @@ namespace Neolithica.MonoBehaviours {
 
         // Update is called once per frame
         void Update() {
+            if (GameController.Paused) {
+                return;
+            }
+
             if (Input.GetMouseButtonDown(2)) {
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;

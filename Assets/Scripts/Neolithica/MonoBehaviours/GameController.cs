@@ -46,6 +46,9 @@ namespace Neolithica.MonoBehaviours {
 
         public float Spirit { get; set; }
 
+        public bool Paused => isPaused;
+        [SerializeField] private bool isPaused;
+
         /// <summary>Manages the BuildingPlueprint object. If no other placer is provided one will be found in the scene.</summary>
         private BuildingBlueprint BuildingPlacer => this.CacheComponent(ref buildingPlacer, () => FindObjectsOfType<BuildingBlueprint>().Single());
         [Inject] public BuildingBlueprint buildingPlacer;
