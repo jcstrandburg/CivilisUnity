@@ -21,7 +21,7 @@ namespace Neolithica.Orders.Simple {
                 res.warehouse.DepositReservation(res);
                 Object.Destroy(actor.GetCarriedResource(res.resourceResourceKind).gameObject);
                 res.Released = true;
-                this.Completed = true;
+                Completed = true;
             }
         }
     }

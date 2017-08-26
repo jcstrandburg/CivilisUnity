@@ -47,7 +47,7 @@ namespace Neolithica.Orders.Super {
                     info.CompleteState(actor);
                 }
                 else {
-                    this.Failed = true;
+                    Failed = true;
                     Debug.Log($"No complete transition available for state: {currentState}");
                 }
             }
@@ -56,7 +56,7 @@ namespace Neolithica.Orders.Super {
                     info.FailState(actor);
                 }
                 else {
-                    this.Failed = true;
+                    Failed = true;
                     Debug.Log($"No failure transition available for state: {currentState}");
                 }
             }

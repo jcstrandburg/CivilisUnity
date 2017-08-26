@@ -21,7 +21,7 @@ namespace Neolithica.Orders.Simple {
                 if (herd.KillAnimal()) {
                     var res = actor.GameController.CreateResourcePile(ResourceKind.Meat, 1);
                     actor.PickupResource(res);
-                    this.Completed = true;
+                    Completed = true;
                 }
                 else {
                     progress /= 2.0f;

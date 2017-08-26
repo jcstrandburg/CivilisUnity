@@ -9,9 +9,10 @@ namespace Neolithica {
         public Comparison comparison = Comparison.GreaterOrEqual;
 
         public object Clone() {
-            var br = new BuildingRequirement();
-            br.name = this.name;
-            br.amount = this.amount;
+            var br = new BuildingRequirement {
+                name = this.name,
+                amount = this.amount
+            };
             return br;
         }
 

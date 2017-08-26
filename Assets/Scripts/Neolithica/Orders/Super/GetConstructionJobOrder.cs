@@ -26,7 +26,7 @@ namespace Neolithica.Orders.Super {
                 Debug.Log("Trying to get job reservation");
                 if (manager.GetJobReservation(actor)) {
                     Debug.Log("Got job reservation");
-                    this.Completed = true;
+                    Completed = true;
                     return;
                 }
                 float r = 5.0f;

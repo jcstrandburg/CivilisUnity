@@ -26,7 +26,7 @@ namespace Neolithica.Serialization.Surrogates {
                 GrassThreshold = value.grassThreshold,
                 WaterLevel = value.waterLevel,
                 GameController = value.GameController,
-                Settings = value.settings,
+                Settings = value.newGameSettings,
                 TerrainSettings = value.terrainSettings,
             };
         }
@@ -41,7 +41,7 @@ namespace Neolithica.Serialization.Surrogates {
             x.grassThreshold = surrogate.GrassThreshold;
             x.waterLevel = surrogate.WaterLevel;
             x.GameController = surrogate.GameController;
-            x.settings = surrogate.Settings;
+            x.newGameSettings = surrogate.Settings;
             x.terrainSettings = surrogate.TerrainSettings;
 
             return x;

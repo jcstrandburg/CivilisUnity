@@ -239,7 +239,7 @@ namespace Neolithica.MonoBehaviours {
             if (!res.Ready) {
                 throw new Exception("Reservation is not ready");
             }
-            if (res.source != this.gameObject) {
+            if (res.source != gameObject) {
                 throw new Exception ("Attempting to withdraw reservation for another warehouse!");
             }
             if (res.Released) {
@@ -275,7 +275,7 @@ namespace Neolithica.MonoBehaviours {
             r.amount = amount;
             r.resourceKind = resourceKind;
             r.Ready = true;
-            r.source = this.gameObject;
+            r.source = gameObject;
             resourceReservations.Add(r);
             return true;
         }

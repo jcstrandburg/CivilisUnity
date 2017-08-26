@@ -21,7 +21,7 @@ namespace Neolithica.Orders.Super {
                 });
             CreateState(cDump,
                 actor => new DumpCarriedResourceOrder(actor),
-                actor => this.Completed = true,
+                actor => Completed = true,
                 null);
             CreateState(cSeekStorage,
                 actor => new SimpleMoveOrder(actor, actor.storageReservation.warehouse.transform.position, 2.0f),
@@ -33,7 +33,7 @@ namespace Neolithica.Orders.Super {
                 null);
             CreateState(cDeposit,
                 actor => new StoreReservationOrder(actor, actor.storageReservation),
-                actor => this.Completed = true,
+                actor => Completed = true,
                 null);
         }
 

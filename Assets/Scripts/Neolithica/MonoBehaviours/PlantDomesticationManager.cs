@@ -18,7 +18,7 @@ namespace Neolithica.MonoBehaviours {
         public void Start() {
             var stat = Stats.Stat("vegetables-harvested");
             if (stat != null) {
-                stat.OnChange += this.OnVegetablesHarvestedChange;
+                stat.OnChange += OnVegetablesHarvestedChange;
             }
         }
 

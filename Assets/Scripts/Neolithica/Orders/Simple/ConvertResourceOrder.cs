@@ -15,7 +15,7 @@ namespace Neolithica.Orders.Simple {
             Resource r = a.GetCarriedResource();
             if (r.resourceKind != fromResourceKind) {
                 Debug.Log($"Actor does not have resource {fromResourceKind} to convert");
-                this.Failed = true;
+                Failed = true;
             }
             sourceResource = r;
             this.toResourceKind = toResourceKind;
@@ -26,8 +26,8 @@ namespace Neolithica.Orders.Simple {
             newResource.amount = sourceResource.amount;
             actor.PickupResource(newResource);
             sourceResource.transform.SetParent(null);
-            UnityEngine.Object.Destroy(sourceResource.gameObject);
-            this.Completed = true;
+            Object.Destroy(sourceResource.gameObject);
+            Completed = true;
         }
     }
 }

@@ -59,9 +59,9 @@ namespace Neolithica {
         public decimal PersistantValue => persistantValue;
 
         public GameStat(string name, bool persist, bool monotonic) {
-            this.Name = name;
-            this.Persist = persist;
-            this.Monotonic = monotonic;
+            Name = name;
+            Persist = persist;
+            Monotonic = monotonic;
         }
 
         public void SetPersistor(StatPersistor p) {

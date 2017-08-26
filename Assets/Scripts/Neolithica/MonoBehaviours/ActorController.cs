@@ -160,7 +160,7 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         /// <param name="res"></param>
         public void PickupResource(Resource res) {
-            res.transform.SetParent(this.transform);
+            res.transform.SetParent(transform);
             res.transform.localPosition = new Vector3(0, 4.0f, 0);
             res.Pickup();
         }

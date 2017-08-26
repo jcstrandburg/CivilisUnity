@@ -20,7 +20,7 @@ namespace Neolithica.Orders.Simple {
             if (actor.MoveTowards(target.transform.position)) {
                 target.gameObject.SendMessage("OnTearDown");
                 Object.Destroy(target.gameObject);
-                this.Completed = true;
+                Completed = true;
             }
         }
     }

@@ -16,12 +16,12 @@ namespace Neolithica.Orders.Simple {
                 w.WithdrawReservation(actor.resourceReservation);            
                 Resource r = actor.GameController.CreateResourcePile(resourceType, 1);
                 actor.PickupResource(r);
-                this.Completed = true;
+                Completed = true;
             }
             catch (Exception e) {
                 Debug.Log("SimpleWithdrawOrder failed to withdraw with exception");
                 Debug.Log(e);
-                this.Failed = true;
+                Failed = true;
             }
         }
     }

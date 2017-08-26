@@ -23,7 +23,7 @@ namespace Neolithica.Orders.Super {
             Resource r = actor.GetCarriedResource();
             if (r != null) {
                 if (r.resourceKind == resourceResourceKind) {
-                    this.Completed = true;
+                    Completed = true;
                 } else {
                     actor.DropCarriedResource();
                 }
@@ -41,7 +41,7 @@ namespace Neolithica.Orders.Super {
                 null);
             CreateState(cWithdraw,
                 actor => new SimpleWithdrawOrder(actor),
-                actor => this.Completed = true,
+                actor => Completed = true,
                 null);
         }
 

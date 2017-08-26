@@ -20,10 +20,10 @@ namespace Neolithica.Orders.Simple {
         }
 
         public override void DoStep(ActorController actor) {
-            this.Completed = actor.MoveTowards(targetPosition);
+            Completed = actor.MoveTowards(targetPosition);
             Vector3 diff = targetPosition - actor.transform.position;
             if (diff.magnitude < proximity) {
-                this.Completed = true;
+                Completed = true;
             }
         }
     }

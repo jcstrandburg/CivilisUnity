@@ -28,7 +28,7 @@ namespace Neolithica.Orders.Super {
                 actor => new GetConstructionJobOrder(actor, manager),
                 actor => {
                     if (manager.ConstructionFinished())
-                        this.Completed = true;
+                        Completed = true;
                     else
                         GoToState(cFetchResource, actor);
                 },
@@ -46,7 +46,7 @@ namespace Neolithica.Orders.Super {
                     if (!manager.ConstructionFinished()) {
                         GoToState(cGetConstructionJob, actor);
                     } else {
-                        this.Completed = true;
+                        Completed = true;
                     }
                 },
                 null);

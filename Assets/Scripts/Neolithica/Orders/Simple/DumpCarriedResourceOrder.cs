@@ -29,13 +29,13 @@ namespace Neolithica.Orders.Simple {
             try {
                 if (actor.MoveTowards(target)) {
                     actor.DropCarriedResource();
-                    this.Completed = true;
+                    Completed = true;
                 }
             }
             catch (Exception e) {
                 Debug.Log("Exception in DumpCarriedResourceOrder");
                 Debug.Log(e);
-                this.Failed = true;
+                Failed = true;
             }
         }
     }

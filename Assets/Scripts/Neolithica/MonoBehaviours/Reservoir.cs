@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using AqlaSerializer;
 using Neolithica.DependencyInjection;
 using Neolithica.MonoBehaviours.Reservations;
 using Tofu.Serialization;
@@ -77,7 +76,7 @@ namespace Neolithica.MonoBehaviours {
         /// <exception cref="System.ArgumentException">Thrown when an invalid reservation is passed</exception>
         /// <returns>True on success, false if the reservation is not fulfillable</returns>
         public bool WithdrawReservation(ResourceReservation res) {
-            if (res.source != this.gameObject) {
+            if (res.source != gameObject) {
                 Debug.Log(res);
                 throw new ArgumentException("Reservation not for this Reservoir", nameof(res));
             }
@@ -114,9 +113,9 @@ namespace Neolithica.MonoBehaviours {
         /// <returns>The reservation</returns>
         public ResourceReservation NewReservation(GameObject go, double amount) {
             var r = FactoryBase.AddComponent<ResourceReservation>(go);
-            r.resourceKind = this.resourceResourceKind;
+            r.resourceKind = resourceResourceKind;
             r.amount = amount;
-            r.source = this.gameObject;
+            r.source = gameObject;
             reservations.Add(r);
             return r;
         }

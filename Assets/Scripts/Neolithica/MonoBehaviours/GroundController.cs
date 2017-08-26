@@ -13,7 +13,7 @@ namespace Neolithica.MonoBehaviours {
     public class GroundController : MonoBehaviour, IPointerDownHandler {
         public TerrainSettings terrainSettings;
         public EroderSettings eroderSettings;
-        public NewGameSettings settings;
+        public NewGameSettings newGameSettings;
 
         // TODO: Fix this junk
         public float snowThreshold = 150.0f;
@@ -28,7 +28,7 @@ namespace Neolithica.MonoBehaviours {
         public GameController GameController { get; set; }
 
         public void ApplySettings(NewGameSettings settings) {
-            this.settings = settings;
+            newGameSettings = settings;
         }
 
         /// <summary>
@@ -44,8 +44,8 @@ namespace Neolithica.MonoBehaviours {
             if (y < 0 || y > 1)
                 throw new ArgumentException($"Invalid value for y {y}", nameof(y));
 
-            float xOffset = settings.seed * 1.2f;
-            float yOffset = settings.seed * 0.9f;
+            float xOffset = newGameSettings.seed * 1.2f;
+            float yOffset = newGameSettings.seed * 0.9f;
             float dist = Mathf.Min(1.0f, Mathf.Sqrt((x - 0.5f) * (x - 0.5f) + (y - 0.5f) * (y - 0.5f))); //normalized distance from center in range 0..1.414
 
             float hHeight = (terrainSettings.hillBaseOffset + Mathf.PerlinNoise(xOffset + x * terrainSettings.hillFrequency, yOffset + y * terrainSettings.hillFrequency)) * terrainSettings.hillHeight;
@@ -85,7 +85,7 @@ namespace Neolithica.MonoBehaviours {
         /// Clears current resources (and doodads) and regenerates new ones
         /// </summary>
         public void GenerateResourcesAndDoodads() {
-            mRandom = new Random(settings.seed.GetHashCode());
+            mRandom = new Random(newGameSettings.seed.GetHashCode());
             SpawnResourcesAndDoodads();
         }
 
@@ -150,8 +150,8 @@ namespace Neolithica.MonoBehaviours {
 
         // todo this can use unity's random unit circle function
         private Vector3 RandomizePosition(float x, float y, TerrainData terrainData) {
-            float angle = Mathf.PerlinNoise(settings.seed + 65 * x, settings.seed + 65 * y);
-            float amplitutue = Mathf.PerlinNoise(settings.seed + 25 * x, settings.seed + 25 * y);
+            float angle = Mathf.PerlinNoise(newGameSettings.seed + 65 * x, newGameSettings.seed + 65 * y);
+            float amplitutue = Mathf.PerlinNoise(newGameSettings.seed + 25 * x, newGameSettings.seed + 25 * y);
             return transform.position
                 + new Vector3(x * terrainData.size.x, 0.0f, y * terrainData.size.z)
                 + Quaternion.Euler(0, 720 * angle, 0) * new Vector3(0, 0, amplitutue * 24);
@@ -203,7 +203,7 @@ namespace Neolithica.MonoBehaviours {
             float waterLevel = water.transform.position.y;
             float waterHeight = waterLevel / terrainData.size.y;
 
-            ResourcePlacer placer = new ResourcePlacer(terrainData, waterHeight, settings, settings.ResourceSettings);
+            ResourcePlacer placer = new ResourcePlacer(terrainData, waterHeight, newGameSettings, newGameSettings.ResourceSettings);
             List<GameObject> trees = new List<GameObject>();
             List<GameObject> berries = new List<GameObject>();
 
@@ -349,7 +349,7 @@ namespace Neolithica.MonoBehaviours {
         }
 
         public void Randomize() {
-            settings.seed = (float) mRandom.NextDouble()*1000.0f;
+            newGameSettings.seed = (float) mRandom.NextDouble()*1000.0f;
         }
     }
 }

@@ -1,17 +1,17 @@
 ﻿using System.IO;
 
 namespace Neolithica {
-    public class StreamStatPersistor : StatPersistor {
-        private Stream sourceStream;
+    public sealed class StreamStatPersistor : StatPersistor {
+        private Stream mSourceStream;
 
         public StreamStatPersistor(Stream source) {
-            sourceStream = source;
+            mSourceStream = source;
             ImportValues();
         }
 
         public override void ImportValues() {
-            sourceStream.Seek(0, SeekOrigin.Begin);
-            var r = new StreamReader(sourceStream);
+            mSourceStream.Seek(0, SeekOrigin.Begin);
+            var r = new StreamReader(mSourceStream);
 
             values.Clear();
             while (!r.EndOfStream) {
@@ -22,8 +22,8 @@ namespace Neolithica {
         }
 
         public override void ExportValues() {
-            sourceStream.Seek(0, SeekOrigin.Begin);
-            var w = new StreamWriter(sourceStream);        
+            mSourceStream.Seek(0, SeekOrigin.Begin);
+            var w = new StreamWriter(mSourceStream);
             foreach (var kvp in values) {
                 w.WriteLine(kvp.Key);
                 w.WriteLine(kvp.Value);
@@ -32,8 +32,8 @@ namespace Neolithica {
         }
 
         public override void Destroy() {
-            sourceStream.Close();
-            sourceStream.Dispose();
+            mSourceStream.Close();
+            mSourceStream.Dispose();
         }
     }
 }

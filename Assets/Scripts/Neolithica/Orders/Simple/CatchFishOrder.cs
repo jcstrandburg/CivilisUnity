@@ -15,7 +15,7 @@ namespace Neolithica.Orders.Simple {
             if (progress >= 1.25f) {
                 Resource res = actor.GameController.CreateResourcePile(ResourceKind.Fish, 1.0);
                 actor.PickupResource(res);
-                this.Completed = true;
+                Completed = true;
             }
         }
     }

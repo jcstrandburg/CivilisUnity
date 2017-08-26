@@ -143,7 +143,7 @@ namespace Neolithica.UI {
                 t.text = Convert.ToString(f, CultureInfo.InvariantCulture);
             }
 
-            GroundController.settings.seed = f;
+            GroundController.newGameSettings.seed = f;
             GroundController.GenerateMap();
 
             var objects = FindObjectsOfType<NeolithicObject>();

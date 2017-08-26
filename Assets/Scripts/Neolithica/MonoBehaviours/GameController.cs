@@ -140,7 +140,7 @@ namespace Neolithica.MonoBehaviours {
         public void BuyTech(Technology t) {
             Debug.Log($"Researching tech: {t.techName}");
             if (t.cost <= Spirit) {
-                this.Spirit -= t.cost;
+                Spirit -= t.cost;
                 TechManager.Research(t);
             }
             GuiController.subMenu.ClearMenu();
