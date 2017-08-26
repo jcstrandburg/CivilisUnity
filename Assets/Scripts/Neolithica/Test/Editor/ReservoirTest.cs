@@ -10,7 +10,7 @@ namespace Neolithica.Test.Editor {
         [Test]
         public void TestReservationsAndWithdrawals() {
             var reservoir = MakeTestComponent<Reservoir>();
-            reservoir.resourceResourceKind = ResourceKind.Vegetables;
+            reservoir.resourceKind = ResourceKind.Vegetables;
             reservoir.amount = 0;
             reservoir.regenRate = 1;
             reservoir.max = 2;
@@ -39,13 +39,13 @@ namespace Neolithica.Test.Editor {
             sm.SetStats(new StatProfile[] { StatProfile.Make("harvested", false, false) });
 
             var reservoir = MakeTestComponent<Reservoir>();
-            reservoir.resourceResourceKind = ResourceKind.Vegetables;
+            reservoir.resourceKind = ResourceKind.Vegetables;
             reservoir.amount = 10.0;
             reservoir.statManager = sm;
             reservoir.harvestStat = "harvested";
 
             var reservoir2 = MakeTestComponent<Reservoir>();
-            reservoir2.resourceResourceKind = ResourceKind.Vegetables;
+            reservoir2.resourceKind = ResourceKind.Vegetables;
             reservoir.amount = 10.0;
             reservoir.statManager = sm;
 

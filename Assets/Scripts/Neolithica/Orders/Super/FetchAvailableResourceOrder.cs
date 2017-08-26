@@ -9,12 +9,12 @@ namespace Neolithica.Orders.Super {
     [SerializableType]
     public class FetchAvailableResourceOrder : StatefulSuperOrder {
         [SerializableMember(1)]
-        private ResourceKind resourceResourceKind;
+        private ResourceKind resourceKind;
         [SerializableMember(2)]
         private double amount;
 
-        public FetchAvailableResourceOrder(ActorController actor, ResourceKind resourceResourceKind, double amount) {
-            this.resourceResourceKind = resourceResourceKind;
+        public FetchAvailableResourceOrder(ActorController actor, ResourceKind resourceKind, double amount) {
+            this.resourceKind = resourceKind;
             this.amount = amount;
             GoToState(cGetReservation, actor);
         }
@@ -22,7 +22,7 @@ namespace Neolithica.Orders.Super {
         public override void Initialize(ActorController actor) {
             Resource r = actor.GetCarriedResource();
             if (r != null) {
-                if (r.resourceKind == resourceResourceKind) {
+                if (r.resourceKind == resourceKind) {
                     Completed = true;
                 } else {
                     actor.DropCarriedResource();
@@ -32,7 +32,7 @@ namespace Neolithica.Orders.Super {
 
         protected override void CreateStates() {
             CreateState(cGetReservation,
-                actor => new ReserveWarehouseContentsOrder(actor, resourceResourceKind, amount),
+                actor => new ReserveWarehouseContentsOrder(actor, resourceKind, amount),
                 actor => GoToState(cGotoWarehouse, actor),
                 null);
             CreateState(cGotoWarehouse,

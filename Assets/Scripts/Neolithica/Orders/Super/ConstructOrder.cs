@@ -36,7 +36,7 @@ namespace Neolithica.Orders.Super {
             CreateState(cFetchResource,
                 actor => {
                     var res = actor.GetComponent<ConstructionReservation>();
-                    return new FetchAvailableResourceOrder(actor, res.resourceResourceKind, 1);
+                    return new FetchAvailableResourceOrder(actor, res.resourceKind, 1);
                 },
                 actor => GoToState(cDepositResource, actor),
                 null);

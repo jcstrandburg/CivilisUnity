@@ -31,7 +31,7 @@ namespace Neolithica.MonoBehaviours {
                 throw new Exception("Reservation is not ready");
             }
             foreach (ResourceProfile rp in resourceContents) {
-                if (rp.ResourceKind == res.resourceResourceKind) {
+                if (rp.ResourceKind == res.resourceKind) {
                     res.Released = true;
                     rp.Amount += res.amount;
                     storageReservations.Remove(res);
@@ -294,7 +294,7 @@ namespace Neolithica.MonoBehaviours {
             StorageReservation r = Factory.AddComponent<StorageReservation>(reserver);
             r.warehouse = this;
             r.amount = amount;
-            r.resourceResourceKind = resourceKind;
+            r.resourceKind = resourceKind;
             r.Ready = true;
             storageReservations.Add(r);
             return true;

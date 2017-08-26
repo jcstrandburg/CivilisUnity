@@ -9,7 +9,7 @@ namespace Neolithica.Serialization.Surrogates {
 
         [SerializableMember(1)] public MonoBehaviourResolver Resolver { get; set; }
         [SerializableMember(2)] public double Amount { get; set; }
-        [SerializableMember(3)] public ResourceKind ResourceResourceKind { get; set; }
+        [SerializableMember(3)] public ResourceKind ResourceKind { get; set; }
         [SerializableMember(4)] public Warehouse Warehouse { get; set; }
 
         public static implicit operator StorageReservationSurrogate(StorageReservation value) {
@@ -19,7 +19,7 @@ namespace Neolithica.Serialization.Surrogates {
             return new StorageReservationSurrogate {
                 Resolver = MonoBehaviourResolver.Make(value),
                 Amount = value.amount,
-                ResourceResourceKind = value.resourceResourceKind,
+                ResourceKind = value.resourceKind,
                 Warehouse = value.warehouse,
             };
         }
@@ -30,7 +30,7 @@ namespace Neolithica.Serialization.Surrogates {
 
             StorageReservation x = surrogate.Resolver.Resolve<StorageReservation>();
             x.amount = surrogate.Amount;
-            x.resourceResourceKind = surrogate.ResourceResourceKind;
+            x.resourceKind = surrogate.ResourceKind;
             x.warehouse = surrogate.Warehouse;
 
             return x;

@@ -19,7 +19,7 @@ namespace Neolithica.Orders.Simple {
         public override void DoStep(ActorController actor) {
             if (actor.MoveTowards(res.warehouse.transform.position)) {
                 res.warehouse.DepositReservation(res);
-                Object.Destroy(actor.GetCarriedResource(res.resourceResourceKind).gameObject);
+                Object.Destroy(actor.GetCarriedResource(res.resourceKind).gameObject);
                 res.Released = true;
                 Completed = true;
             }

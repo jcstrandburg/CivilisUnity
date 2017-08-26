@@ -24,7 +24,7 @@ namespace Neolithica.Orders.Super {
 
         public override void Initialize(ActorController actor) {
             Resource r = actor.GetCarriedResource();
-            if (r != null && r.resourceKind == reservoir.resourceResourceKind) {
+            if (r != null && r.resourceKind == reservoir.resourceKind) {
                 GoToState(cStoreContents, actor);
             } else {
                 actor.DropCarriedResource();

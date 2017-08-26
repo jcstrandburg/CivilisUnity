@@ -25,7 +25,7 @@ namespace Neolithica.MonoBehaviours {
         // Handles Start event
         public void Start() {
             var cloneList = new List<BuildingRequirement>();
-            foreach (var req in resourceRequirements) {
+            foreach (BuildingRequirement req in resourceRequirements) {
                 cloneList.Add((BuildingRequirement)req.Clone());
             }
             unfilledResourceReqs = cloneList.ToArray();
@@ -33,9 +33,7 @@ namespace Neolithica.MonoBehaviours {
 
         // Handles FixedUpdate event
         public void FixedUpdate() {
-            reservations.RemoveAll((r) => {
-                return r.Released || r.Cancelled;
-            });
+            reservations.RemoveAll((r) => r.Released || r.Cancelled);
         }
 
         /// <summary>
@@ -43,7 +41,7 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         public void GhostGood() {
             var r = GetComponentsInChildren<MeshRenderer>();
-            foreach (var q in r) {
+            foreach (MeshRenderer q in r) {
                 q.material.shader = Shader.Find("Custom/BuildingGhost");
                 q.material.SetColor("_GhostColor", Color.green);
             }
@@ -54,7 +52,7 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         public void GhostBad() {
             var r = GetComponentsInChildren<MeshRenderer>();
-            foreach (var q in r) {
+            foreach (MeshRenderer q in r) {
                 q.material.shader = Shader.Find("Custom/BuildingGhost");
                 q.material.SetColor("_GhostColor", Color.red);
             }
@@ -65,7 +63,7 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         public void GhostNeutral() {
             var r = GetComponentsInChildren<MeshRenderer>();
-            foreach (var q in r) {
+            foreach (MeshRenderer q in r) {
                 q.material.shader = Shader.Find("Custom/BuildingGhost");
                 q.material.SetColor("_GhostColor", Color.white);
             }
@@ -76,7 +74,7 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         public void UnGhost() {
             var r = GetComponentsInChildren<MeshRenderer>();
-            foreach (var q in r) {
+            foreach (MeshRenderer q in r) {
                 q.material.shader = Shader.Find("Standard");
             }
         }
@@ -86,11 +84,7 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         /// <returns>True if finished, else false</returns>
         public bool ConstructionFinished() {
-            double neededResources = 0;
-            foreach (BuildingRequirement req in unfilledResourceReqs) {
-                neededResources += req.amount;
-            }
-            return neededResources <= 0;
+            return unfilledResourceReqs.Sum(req => req.amount) <= 0;
         }
 
         /// <summary>
@@ -106,8 +100,7 @@ namespace Neolithica.MonoBehaviours {
                 var availResources = GameController.GetAllAvailableResources();
                 foreach (var r in resourceRequirements) {
                     var type = (ResourceKind) Enum.Parse(typeof(ResourceKind), r.name);
-                    if (  !availResources.ContainsKey(type) 
-                          || availResources[type] < r.amount) 
+                    if (!availResources.ContainsKey(type) || availResources[type] < r.amount) 
                     {
                         return false;
                     }
@@ -127,11 +120,11 @@ namespace Neolithica.MonoBehaviours {
             no.actionProfile = (ActionProfile)Resources.Load("ActionProfiles/Empty");
 
             cachedComponents = new List<MonoBehaviour>();
-            foreach (var r in GetComponents<Reservoir>()) {
+            foreach (Reservoir r in GetComponents<Reservoir>()) {
                 r.enabled = false;
                 cachedComponents.Add(r);
             }
-            foreach (var r in GetComponents<Warehouse>()) {
+            foreach (Warehouse r in GetComponents<Warehouse>()) {
                 r.enabled = false;
                 cachedComponents.Add(r);
             }
@@ -144,7 +137,7 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         public void StartConstruction() {
             if (instabuild) {
-                foreach (var r in resourceRequirements) {
+                foreach (BuildingRequirement r in resourceRequirements) {
                     var resourceType = (ResourceKind)Enum.Parse(typeof(ResourceKind), r.name);
                     var rp = new ResourceProfile(resourceType, r.amount);
                     if (!GameController.WithdrawFromAnyWarehouse(rp)) {
@@ -154,8 +147,8 @@ namespace Neolithica.MonoBehaviours {
 
                 FinishContruction();
             } else {
-                NeolithicObject no = GetComponent<NeolithicObject>();
-                no.actionProfile = (ActionProfile)Resources.Load("ActionProfiles/Constructable");
+                var neolithicObject = GetComponent<NeolithicObject>();
+                neolithicObject.actionProfile = (ActionProfile) Resources.Load("ActionProfiles/Constructable");
                 GhostNeutral();
             }
         }
@@ -164,10 +157,10 @@ namespace Neolithica.MonoBehaviours {
         /// Finalizes construction, re-enabling cached compenents and some other prep stuff
         /// </summary>
         public void FinishContruction() {
-            NeolithicObject no = GetComponent<NeolithicObject>();
+            var no = GetComponent<NeolithicObject>();
             no.selectable = true;
             no.actionProfile = cachedActionProfile;
-            foreach (var r in cachedComponents) {
+            foreach (MonoBehaviour r in cachedComponents) {
                 r.enabled = true;
             }
             UnGhost();
@@ -180,9 +173,9 @@ namespace Neolithica.MonoBehaviours {
         /// <param name="actor"></param>
         /// <returns>True on success, false on failure</returns>
         public bool GetJobReservation(ActorController actor) {
-            var avails = GameController.GetAllAvailableResources();
+            Dictionary<ResourceKind, double> avails = GameController.GetAllAvailableResources();
             foreach (var kvp in avails) {
-                var resourceType = kvp.Key;
+                ResourceKind resourceType = kvp.Key;
                 double amount = kvp.Value;
                 Debug.Log($"Checking if I need {amount} {resourceType}");
                 double needed = GetNeededResource(resourceType);
@@ -191,7 +184,7 @@ namespace Neolithica.MonoBehaviours {
                     Debug.Log("Making a ConstructionReservation");
                     var res = actor.gameObject.AddComponent<ConstructionReservation>();
                     reservations.Add(res);
-                    res.resourceResourceKind = resourceType;
+                    res.resourceKind = resourceType;
                     res.amount = 1;
                     return true;
                 }
@@ -202,19 +195,17 @@ namespace Neolithica.MonoBehaviours {
         /// <summary>
         /// Gets the total resources still needed to complete construction
         /// </summary>
-        /// <param name="resourceResourceKind"></param>
+        /// <param name="resourceKind"></param>
         /// <returns>Resources needed to complete construction</returns>
-        public double GetNeededResource(ResourceKind resourceResourceKind) {
+        public double GetNeededResource(ResourceKind resourceKind) {
             double needed = 0;
             foreach (var requirement in unfilledResourceReqs) {
-                if (requirement.name == resourceResourceKind.ToString()) {
+                if (requirement.name == resourceKind.ToString()) {
                     needed += requirement.amount;
                 }
             }
             foreach (var res in reservations) {
-                if (    res.resourceResourceKind == resourceResourceKind 
-                        && !res.Released 
-                        && !res.Cancelled)
+                if (res.resourceKind == resourceKind && !res.Released && !res.Cancelled)
                 {
                     needed -= res.amount;
                 }
@@ -231,19 +222,10 @@ namespace Neolithica.MonoBehaviours {
                 throw new ArgumentException("Reservation does not belong to this construction object", nameof(res));
             }
 
-            var requirement = unfilledResourceReqs.Single(r => r.name == res.resourceResourceKind.ToString());
+            BuildingRequirement requirement = unfilledResourceReqs.Single(r => r.name == res.resourceKind.ToString());
             res.Released = true;
             requirement.amount -= res.amount;
             reservations.Remove(res);
-
-            //foreach (var requirement in unfilledResourceReqs) {
-            //    if (requirement.name == res.resourceType.ToString()) {
-            //        res.Released = true;
-            //        requirement.amount -= res.amount;
-            //        reservations.Remove(res);
-            //        break;
-            //    }
-            //}
 
             if (ConstructionFinished()) {
                 FinishContruction();

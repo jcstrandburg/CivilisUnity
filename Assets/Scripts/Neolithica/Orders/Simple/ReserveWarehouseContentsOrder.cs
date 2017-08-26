@@ -8,17 +8,17 @@ namespace Neolithica.Orders.Simple {
     [SerializableType]
     public class ReserveWarehouseContentsOrder : BaseOrder {
         [SerializableMember(1)]
-        private ResourceKind resourceResourceKind;
+        private ResourceKind resourceKind;
         [SerializableMember(2)]
         private double amount;
 
-        public ReserveWarehouseContentsOrder(ActorController a, ResourceKind resourceResourceKind, double amount) : base() {
-            this.resourceResourceKind = resourceResourceKind;
+        public ReserveWarehouseContentsOrder(ActorController a, ResourceKind resourceKind, double amount) : base() {
+            this.resourceKind = resourceKind;
             this.amount = amount;
         }
 
         public override void DoStep(ActorController actor) {
-            if (actor.GameController.ReserveWarehouseResources(actor, resourceResourceKind, amount)) {
+            if (actor.GameController.ReserveWarehouseResources(actor, resourceKind, amount)) {
                 Completed = true;
             }
         }

@@ -19,7 +19,7 @@ namespace Neolithica.Serialization.Surrogates {
         [SerializableMember(5)]
         public List<Reservation> Reservations { get; set; }
         [SerializableMember(6)]
-        public ResourceKind ResourceResourceKind { get; set; }
+        public ResourceKind ResourceKind { get; set; }
         [SerializableMember(7)]
         public string HarvestStat { get; set; }
 
@@ -33,7 +33,7 @@ namespace Neolithica.Serialization.Surrogates {
                 Max = value.max,
                 RegenRate = value.regenRate,
                 Reservations = value.reservations,
-                ResourceResourceKind = value.resourceResourceKind,
+                ResourceKind = value.resourceKind,
                 HarvestStat = value.harvestStat,
             };
         }
@@ -47,7 +47,7 @@ namespace Neolithica.Serialization.Surrogates {
             x.max = surrogate.Max;
             x.regenRate = surrogate.RegenRate;
             x.reservations = surrogate.Reservations;
-            x.resourceResourceKind = surrogate.ResourceResourceKind;
+            x.resourceKind = surrogate.ResourceKind;
             x.harvestStat = surrogate.HarvestStat;
 
             return x;

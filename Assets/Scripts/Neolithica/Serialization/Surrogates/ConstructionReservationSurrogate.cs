@@ -14,7 +14,7 @@ namespace Neolithica.Serialization.Surrogates {
         [SerializableMember(5)] public bool Enabled { get; set; }
         [SerializableMember(6)] public bool Ready { get; set; }
         [SerializableMember(7)] public bool Released { get; set; }
-        [SerializableMember(8)] public ResourceKind ResourceResourceKind { get; set; }
+        [SerializableMember(8)] public ResourceKind ResourceKind { get; set; }
 
         public static implicit operator ConstructionReservationSurrogate(ConstructionReservation value) {
             if (value == null)
@@ -28,7 +28,7 @@ namespace Neolithica.Serialization.Surrogates {
                 Enabled = value.enabled,
                 Ready = value.Ready,
                 Released = value.Released,
-                ResourceResourceKind = value.resourceResourceKind,
+                ResourceKind = value.resourceKind,
             };
         }
 
@@ -43,7 +43,7 @@ namespace Neolithica.Serialization.Surrogates {
             x.enabled = surrogate.Enabled;
             x.Ready = surrogate.Ready;
             x.Released = surrogate.Released;
-            x.resourceResourceKind = surrogate.ResourceResourceKind;
+            x.resourceKind = surrogate.ResourceKind;
 
             return x;
         }

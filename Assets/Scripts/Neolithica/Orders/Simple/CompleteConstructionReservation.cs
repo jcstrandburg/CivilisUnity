@@ -15,7 +15,7 @@ namespace Neolithica.Orders.Simple {
         public override void DoStep(ActorController actor) {
             if (actor.MoveTowards(manager.transform.position)) {
                 ConstructionReservation res = actor.GetComponent<ConstructionReservation>();
-                UnityEngine.Object.Destroy(actor.GetCarriedResource(res.resourceResourceKind).gameObject);
+                UnityEngine.Object.Destroy(actor.GetCarriedResource(res.resourceKind).gameObject);
                 manager.FillReservation(res);
                 Completed = true;
             }

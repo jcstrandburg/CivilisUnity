@@ -24,7 +24,7 @@ namespace Neolithica.Orders.Simple {
             if (progress >= 1.0f) {
                 Reservoir reservoir = reservation.source.GetComponent<Reservoir>();
                 reservoir.WithdrawReservation(reservation);
-                Resource res = actor.GameController.CreateResourcePile(reservoir.resourceResourceKind, 1);
+                Resource res = actor.GameController.CreateResourcePile(reservoir.resourceKind, 1);
                 actor.PickupResource(res);
                 Completed = true;
             }

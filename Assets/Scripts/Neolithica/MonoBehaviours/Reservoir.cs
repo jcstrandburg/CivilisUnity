@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Neolithica.MonoBehaviours {
     [SavableMonobehaviour(7)]
     public class Reservoir : MonoBehaviour {
-        public ResourceKind resourceResourceKind;
+        public ResourceKind resourceKind;
         public double amount;
         public float regenRate;
         public double max;
@@ -18,13 +18,13 @@ namespace Neolithica.MonoBehaviours {
         [Inject, DontSave] public StatManager statManager;
         [Inject, DontSave] private GameFactoryBase FactoryBase;
 
-        // Handles Start event
-        void Start() {
+        // ReSharper disable once UnusedMember.Local (Unity method)
+        private void Start() {
             GetComponent<NeolithicObject>();
         }
 
-        // Handles FixedUpdate event
-        void FixedUpdate() {
+        // ReSharper disable once UnusedMember.Local (Unity method)
+        private void FixedUpdate() {
             Regen(Time.fixedDeltaTime);
             UpdateReservations();
         }
@@ -113,7 +113,7 @@ namespace Neolithica.MonoBehaviours {
         /// <returns>The reservation</returns>
         public ResourceReservation NewReservation(GameObject go, double amount) {
             var r = FactoryBase.AddComponent<ResourceReservation>(go);
-            r.resourceKind = resourceResourceKind;
+            r.resourceKind = resourceKind;
             r.amount = amount;
             r.source = gameObject;
             reservations.Add(r);

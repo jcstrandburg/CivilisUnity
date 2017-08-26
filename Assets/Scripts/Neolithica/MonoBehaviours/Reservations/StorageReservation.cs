@@ -4,7 +4,7 @@ namespace Neolithica.MonoBehaviours.Reservations {
     [SavableMonobehaviour(28)]
     public class StorageReservation : Reservation {
         public Warehouse warehouse;
-        public ResourceKind resourceResourceKind;
+        public ResourceKind resourceKind;
         public double amount;
     }
 }
