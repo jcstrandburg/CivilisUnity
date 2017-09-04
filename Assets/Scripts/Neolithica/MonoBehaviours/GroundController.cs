@@ -70,8 +70,8 @@ namespace Neolithica.MonoBehaviours {
 
             for (int i = 0; i < terrain.terrainData.heightmapWidth; i++) { 
                 for (int k = 0; k < terrain.terrainData.heightmapHeight; k++) {
-                    float x = (float)i / (float)terrain.terrainData.heightmapWidth;
-                    float y = (float)k / (float)terrain.terrainData.heightmapHeight;
+                    float x = (float)i / terrain.terrainData.heightmapWidth;
+                    float y = (float)k / terrain.terrainData.heightmapHeight;
 
                     heights[i, k] = GetHeight(x, y);
                 }
@@ -216,35 +216,36 @@ namespace Neolithica.MonoBehaviours {
                     ResourcePlacementType type = placer.GetPlacementType(u, v);
 
                     switch (type) {
-                        case ResourcePlacementType.None:
+                    case ResourcePlacementType.None:
+                        break;
+                    default:
+                        int index = mRandom.Next(0, prefabs[type].Count);
+                        GameObject prefab = prefabs[type][index];
+
+                        GameObject instance = GameController.Factory.Instantiate(prefab);
+                        instance.transform.position = RandomizePosition(u, v, terrainData);
+
+                        if (type == ResourcePlacementType.Fish) {
+                            instance.transform.position = new Vector3(
+                                instance.transform.position.x,
+                                waterLevel,
+                                instance.transform.position.z);
+                        }
+                        else {
+                            instance.GetComponent<NeolithicObject>().SnapToGround();
+                        }
+
+                        switch (type) {
+                        case ResourcePlacementType.Trees:
+                            trees.Add(instance);
                             break;
-                        default:
-                            int index = mRandom.Next(0, prefabs[type].Count);
-                            GameObject prefab = prefabs[type][index];
-
-                            GameObject instance = GameController.Factory.Instantiate(prefab);
-                            instance.transform.position = RandomizePosition(u, v, terrainData);
-
-                            if (type == ResourcePlacementType.Fish)
-                                instance.transform.position = new Vector3(
-                                    instance.transform.position.x,
-                                    waterLevel,
-                                    instance.transform.position.z);
-                            else
-                                instance.GetComponent<NeolithicObject>().SnapToGround();
-
-                            switch (type)
-                            {
-                                case ResourcePlacementType.Trees:
-                                    trees.Add(instance);
-                                    break;
-                                case ResourcePlacementType.Berries:
-                                    berries.Add(instance);
-                                    break;
-                            }
-
-                            instance.transform.SetParent(type == ResourcePlacementType.Doodad ? doodads : resources);
+                        case ResourcePlacementType.Berries:
+                            berries.Add(instance);
                             break;
+                        }
+
+                        instance.transform.SetParent(type == ResourcePlacementType.Doodad ? doodads : resources);
+                        break;
                     }
                 }
             }

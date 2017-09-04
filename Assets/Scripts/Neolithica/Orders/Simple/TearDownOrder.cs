@@ -12,7 +12,7 @@ namespace Neolithica.Orders.Simple {
         private NeolithicObject target;
 
         public TearDownOrder(ActorController a, NeolithicObject target) : base() {
-            a.GetComponent<NeolithicObject>().statusString = "Tearing down "+target.name;
+            a.GetComponent<NeolithicObject>().statusString = $"Tearing down {target.name}";
             this.target = target;
         }
 

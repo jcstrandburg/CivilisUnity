@@ -24,20 +24,21 @@ namespace Neolithica.UI {
         [Inject]
         public GroundController GroundController { get; set; }
 
-        // Handles Start event
-        void Start() {
+        
+        // ReSharper disable once UnusedMember.Local (magic Unity method)
+        private void Start() {
             contextMenu = transform.Find("ContextMenu").gameObject;
             contextMenu.SetActive(false);
             selectionMenu.Hide();
 
-            Text t = transform.Find("VersionLabel").GetComponent<Text>();
+            var t = transform.Find("VersionLabel").GetComponent<Text>();
             t.text = $"v{Assembly.GetExecutingAssembly().GetName().Version}";
 
             MakeDataBindings();
         }
 
-        // Handles Update event
-        void Update() {
+        // ReSharper disable once UnusedMember.Local (magic Unity method)
+        private void Update() {
             if (Input.GetKeyDown(KeyCode.Pause)) {
                 paused = !paused;
                 Time.timeScale = paused ? 0.0f : 1.0f;
@@ -50,8 +51,8 @@ namespace Neolithica.UI {
             }
         }
 
-        // Handles OnGUI Event
-        void OnGUI() {
+        // ReSharper disable once UnusedMember.Local (magic Unity method)
+        private void OnGUI() {
             if (paused) {
                 GUI.Label(new Rect(200, 200, 200, 200), "paused");
             }
@@ -134,13 +135,12 @@ namespace Neolithica.UI {
         /// Regenerates the map based on the seed provided in the text box
         /// </summary>
         public void RegenerateMap() {
-            GameObject x = GameObject.Find("SeedFieldText");
-            Text t = x.GetComponent<Text>();
+            var seedText = GameObject.Find("SeedFieldText").GetComponent<Text>();
 
             float f;
-            if (!float.TryParse(t.text, out f)) {
+            if (!float.TryParse(seedText.text, out f)) {
                 f = UnityEngine.Random.value * 1000.0f;
-                t.text = Convert.ToString(f, CultureInfo.InvariantCulture);
+                seedText.text = Convert.ToString(f, CultureInfo.InvariantCulture);
             }
 
             GroundController.newGameSettings.seed = f;

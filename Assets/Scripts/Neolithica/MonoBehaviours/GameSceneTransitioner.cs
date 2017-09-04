@@ -15,7 +15,7 @@ namespace Neolithica.MonoBehaviours {
         [Inject]
         public GameController GameController { get; set; }
         [Inject]
-        public GameController GroundController { get; set; }
+        public GroundController GroundController { get; set; }
 
         // Handles Start event
         public void Start() {
@@ -53,15 +53,14 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         /// <param name="scene">The scene to transition to</param>
         /// <param name="mode">Unused, necessary to fit signature of <c>SceneManager.sceneLoaded</c></param>
-        void DoSceneTransition(Scene scene, LoadSceneMode mode) {
+        private void DoSceneTransition(Scene scene, LoadSceneMode mode) {
             if (loadGameName != null) {
                 GameController.Instance.SaverLoader.LoadGame(loadGameName);
             }
             else {
-                var groundController = GameController.Instance.GroundController;
-                groundController.ApplySettings(newGameSettings);
-                groundController.GenerateMap();
-                groundController.GenerateResourcesAndDoodads();
+                GroundController.ApplySettings(newGameSettings);
+                GroundController.GenerateMap();
+                GroundController.GenerateResourcesAndDoodads();
             }
             Destroy(gameObject);
         }

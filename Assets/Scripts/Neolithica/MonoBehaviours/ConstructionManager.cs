@@ -141,7 +141,7 @@ namespace Neolithica.MonoBehaviours {
                     var resourceType = (ResourceKind)Enum.Parse(typeof(ResourceKind), r.name);
                     var rp = new ResourceProfile(resourceType, r.amount);
                     if (!GameController.WithdrawFromAnyWarehouse(rp)) {
-                        throw new InvalidOperationException("Failed to build building, unable to withdraw "+r.name);
+                        throw new InvalidOperationException($"Failed to build building, unable to withdraw {r.name}");
                     }
                 }
 
