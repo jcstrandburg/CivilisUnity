@@ -18,7 +18,7 @@ namespace Neolithica.Orders.Simple {
 
         public override void DoStep(ActorController actor) {
             if (actor.MoveTowards(target.transform.position)) {
-                target.gameObject.SendMessage("OnTearDown");
+                target.gameObject.SendMessage(nameof(IOnTearDown.OnTearDown));
                 Object.Destroy(target.gameObject);
                 Completed = true;
             }

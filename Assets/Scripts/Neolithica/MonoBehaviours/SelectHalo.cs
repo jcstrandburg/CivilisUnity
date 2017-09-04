@@ -4,7 +4,7 @@ namespace Neolithica.MonoBehaviours {
     /// <summary>
     /// Handles toggling the selection halo for selectable units
     /// </summary>
-    public class SelectHalo : MonoBehaviour {
+    public class SelectHalo : MonoBehaviour, ISelectable {
 
         private Projector projector;
 
@@ -21,7 +21,7 @@ namespace Neolithica.MonoBehaviours {
             }
         }
 
-        // Handles Awake event
+        // ReSharper disable UnusedMember.Local (magic Unity method)
         void Awake() {
             projector = GetComponent<Projector>();
             if (projector) {
@@ -29,13 +29,11 @@ namespace Neolithica.MonoBehaviours {
             }
         }
 
-        // Handles OnSelect event
-        void OnSelect() {
+        public void OnSelect() {
             Highlighted = true;
         }
 
-        // Handles OnDeselect event
-        void OnDeselect() {
+        public void OnDeselect() {
             Highlighted = false;
         }
     }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
     [SavableMonobehaviour(26)]
-    public class NeolithicObject : MonoBehaviour, IOnComponentWasInjected {
+    public class NeolithicObject : MonoBehaviour, IOnComponentWasInjected, IHoverable, IClickable {
 
         public enum Selectability { Unselectable, Selectable, Multiselectable };
 
@@ -34,12 +34,13 @@ namespace Neolithica.MonoBehaviours {
 
         // Handles SelectClick event
         public void SelectClick() {
-            if (selectability != Selectability.Unselectable) {
-                if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift)) {
-                    GameController.DeselectAll();
-                }
-                Select();
+            if (selectability == Selectability.Unselectable)
+                return;
+
+            if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift)) {
+                GameController.DeselectAll();
             }
+            Select();
         }
 
         // Handles ContextClick event
@@ -56,14 +57,14 @@ namespace Neolithica.MonoBehaviours {
         // Handles Select event
         public virtual void Select() {
             selected = true;
-            BroadcastMessage("OnSelect", null, SendMessageOptions.DontRequireReceiver);
+            BroadcastMessage(nameof(ISelectable.OnSelect), null, SendMessageOptions.DontRequireReceiver);
             GameController.AddSelected(this);
         }
 
         // Handles Deselect event
         public virtual void Deselect() {
             selected = false;
-            BroadcastMessage("OnDeselect", null, SendMessageOptions.DontRequireReceiver);
+            BroadcastMessage(nameof(ISelectable.OnDeselect), null, SendMessageOptions.DontRequireReceiver);
         }
 
 

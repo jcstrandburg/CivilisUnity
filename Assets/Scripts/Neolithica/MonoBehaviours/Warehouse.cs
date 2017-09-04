@@ -10,7 +10,7 @@ namespace Neolithica.MonoBehaviours {
     // TODO: Remove finished reservations
     // TODO: Check to make sure reservations are for this warehouse before fulfilling them
     [SavableMonobehaviour(2)]
-    public class Warehouse : MonoBehaviour {
+    public class Warehouse : MonoBehaviour, IOnTearDown {
         public double totalCapacity;
         public ResourceProfile[] resourceLimits = new ResourceProfile[] { };
         public ResourceProfile[] resourceContents = new ResourceProfile[] { };
@@ -312,11 +312,11 @@ namespace Neolithica.MonoBehaviours {
 
         public void OnTearDown() {
             Debug.Log("Tearing down");
-            foreach (var rc in resourceContents) {
+            foreach (ResourceProfile rc in resourceContents) {
                 while (rc.Amount > 0) {
                     rc.Amount -= 1;
 
-                    var resource = GameController.CreateResourcePile(rc.ResourceKind, Math.Min(rc.Amount, 1.0));
+                    Resource resource = GameController.CreateResourcePile(rc.ResourceKind, Math.Min(rc.Amount, 1.0));
                     resource.transform.position = transform.position;
                     resource.GetComponent<Resource>().SetDown();
                 }
