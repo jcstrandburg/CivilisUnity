@@ -145,6 +145,7 @@ namespace Neolithica.UI {
 
             GroundController.newGameSettings.seed = f;
             GroundController.GenerateMap();
+            GroundController.GenerateResourcesAndDoodads();
 
             var objects = FindObjectsOfType<NeolithicObject>();
             foreach (NeolithicObject obj in objects) {

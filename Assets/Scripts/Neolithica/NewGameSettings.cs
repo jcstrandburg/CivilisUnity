@@ -26,14 +26,8 @@ namespace Neolithica {
     [Serializable, SerializableType]
     public class NewGameSettings {
         [SerializableMember(1)] public float seed;
-        [SerializableMember(2)] public float treeThinning = 150.0f;
-        [SerializableMember(3)] public float treeMultiplier = 1/100.0f;
-        [SerializableMember(4)] public float berryMultiplier = 1/150.0f;
-        [SerializableMember(5)] public float stoneRate = 0.17f;
-        [SerializableMember(6)] public float fishRate = 0.2f;
-        [SerializableMember(7)] public float doodadRate = 0.35f;
 
-        [SerializableMember(8)] public List<ResourceSettings> ResourceSettings = new List<ResourceSettings> {
+        [SerializableMember(2)] public List<ResourceSettings> ResourceSettings = new List<ResourceSettings> {
             new ResourceSettings {Type = ResourcePlacementType.Berries, Frequency = 4.0f, Abundance = 0.3f},
             new ResourceSettings {Type = ResourcePlacementType.Trees, Frequency = 1.5f, Abundance = 0.5f},
             new ResourceSettings {Type = ResourcePlacementType.Fish, Frequency = 5.0f, Abundance = 0.2f},

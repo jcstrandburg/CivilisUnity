@@ -180,32 +180,28 @@ namespace Neolithica.MonoBehaviours {
             // TODO: get rid of this water junk
             GameObject water = GameObject.Find("Water4Simple");
 
-            GameObject[] doodadPrefabs = {
-                (GameObject)Resources.Load("Doodads/DeadTree6"),
-                (GameObject)Resources.Load("Doodads/DeadTree7"),
-                (GameObject)Resources.Load("Doodads/Smallbush4"),
-                (GameObject)Resources.Load("Doodads/SmallRock4"),
-                (GameObject)Resources.Load("Doodads/SmallRock7"),
-            };
+            List<GameObject> doodadPrefabs = ListUtility.From(
+                (GameObject) Resources.Load("Doodads/DeadTree6"),
+                (GameObject) Resources.Load("Doodads/DeadTree7"),
+                (GameObject) Resources.Load("Doodads/Smallbush4"),
+                (GameObject) Resources.Load("Doodads/SmallRock4"),
+                (GameObject) Resources.Load("Doodads/SmallRock7"));
 
-
-            var prefabs = new Dictionary<ResourcePlacementType, List<GameObject>>
-            {
+            var prefabs = new Dictionary<ResourcePlacementType, IReadOnlyList<GameObject>> {
                 [ResourcePlacementType.Trees]   = ListUtility.From(Resources.Load<GameObject>("Buildings/WoodSource")),
                 [ResourcePlacementType.Stone]   = ListUtility.From(Resources.Load<GameObject>("Buildings/StoneRocks")),
                 [ResourcePlacementType.Gold]    = ListUtility.From(Resources.Load<GameObject>("Buildings/GoldRocks")),
                 [ResourcePlacementType.Fish]    = ListUtility.From(Resources.Load<GameObject>("Prefabs/FishingHole")),
                 [ResourcePlacementType.Berries] = ListUtility.From(Resources.Load<GameObject>("Buildings/ForagingGround")),
-                [ResourcePlacementType.Doodad]  = doodadPrefabs.ToList(),
+                [ResourcePlacementType.Doodad]  = doodadPrefabs,
             };
 
             TerrainData terrainData = GetComponent<Terrain>().terrainData;
-            float waterLevel = water.transform.position.y;
-            float waterHeight = waterLevel / terrainData.size.y;
+            float waterHeight = (water.transform.position.y - transform.position.y) / terrainData.size.y;
 
-            ResourcePlacer placer = new ResourcePlacer(terrainData, waterHeight, newGameSettings, newGameSettings.ResourceSettings);
-            List<GameObject> trees = new List<GameObject>();
-            List<GameObject> berries = new List<GameObject>();
+            ResourcePlacer placer = new ResourcePlacer(terrainData, waterHeight, newGameSettings.seed, newGameSettings.ResourceSettings);
+            Dictionary<ResourcePlacementType, List<GameObject>> placedResources = ((ResourcePlacementType[]) Enum.GetValues(typeof(ResourcePlacementType)))
+                .ToDictionary(it => it, _ => new List<GameObject>());
 
             const int resolution = 45;
             for (int x = 0; x < resolution; ++x) {
@@ -215,43 +211,31 @@ namespace Neolithica.MonoBehaviours {
 
                     ResourcePlacementType type = placer.GetPlacementType(u, v);
 
-                    switch (type) {
-                    case ResourcePlacementType.None:
-                        break;
-                    default:
-                        int index = mRandom.Next(0, prefabs[type].Count);
-                        GameObject prefab = prefabs[type][index];
+                    if (type == ResourcePlacementType.None)
+                        continue;
 
-                        GameObject instance = GameController.Factory.Instantiate(prefab);
-                        instance.transform.position = RandomizePosition(u, v, terrainData);
+                    int index = mRandom.Next(0, prefabs[type].Count);
+                    GameObject prefab = prefabs[type][index];
+                    GameObject instance = GameController.Factory.Instantiate(prefab);
 
-                        if (type == ResourcePlacementType.Fish) {
-                            instance.transform.position = new Vector3(
-                                instance.transform.position.x,
-                                waterLevel,
-                                instance.transform.position.z);
-                        }
-                        else {
-                            instance.GetComponent<NeolithicObject>().SnapToGround();
-                        }
+                    placedResources[type].Add(instance);
+                    instance.transform.position = RandomizePosition(u, v, terrainData);
+                    instance.transform.SetParent(type == ResourcePlacementType.Doodad ? doodads : resources);
 
-                        switch (type) {
-                        case ResourcePlacementType.Trees:
-                            trees.Add(instance);
-                            break;
-                        case ResourcePlacementType.Berries:
-                            berries.Add(instance);
-                            break;
-                        }
-
-                        instance.transform.SetParent(type == ResourcePlacementType.Doodad ? doodads : resources);
-                        break;
+                    if (type == ResourcePlacementType.Fish) {
+                        instance.transform.position = new Vector3(
+                            instance.transform.position.x,
+                            water.transform.position.y,
+                            instance.transform.position.z);
+                    }
+                    else {
+                        instance.GetComponent<NeolithicObject>().SnapToGround();
                     }
                 }
             }
 
-            ClusterResources(trees, 200.0f, 3.0f);
-            ClusterResources(berries, 400.0f, 12.0f);
+            ClusterResources(placedResources[ResourcePlacementType.Trees], 200.0f, 3.0f);
+            ClusterResources(placedResources[ResourcePlacementType.Berries], 400.0f, 12.0f);
         }
 
         private void GenerateSplatMap() {
