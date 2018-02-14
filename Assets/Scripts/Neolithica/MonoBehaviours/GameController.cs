@@ -27,8 +27,11 @@ namespace Neolithica.MonoBehaviours {
         public List<Resource> resourcePrefabs;
         /// <summary>Manages technology tree</summary>
         public TechManager TechManager;
+
         /// <summary>Manages creation of objects, dependency injection, etc</summary>
-        public GameFactoryBase Factory;
+        public GameFactoryBase Factory => this.CacheComponent(ref factoryInstance, () => new MainGameFactory(gameObject));
+        private GameFactoryBase factoryInstance = null;
+
         /// <summary>Actions that no actor can currently take</summary>
         public List<CommandType> ForbiddenActions;
 
@@ -55,7 +58,7 @@ namespace Neolithica.MonoBehaviours {
 
         // Handles Awake event
         public void Awake() {
-            Factory = new MainGameFactory(gameObject);
+            factoryInstance = new MainGameFactory(gameObject);
             var techs = Resources.LoadAll("Techs", typeof(Technology)).Select(t => (Technology)t).ToList();
             TechManager = new TechManager();
             TechManager.LoadTechs(techs);

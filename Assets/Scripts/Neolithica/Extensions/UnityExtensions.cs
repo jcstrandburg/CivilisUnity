@@ -26,7 +26,6 @@ namespace Neolithica.Extensions {
         /// return this.CacheComponent(ref cachedComponent, FindObjectOfType<ComponentType>);
         /// </summary>
         public static T CacheComponent<T>(this Component source, ref T data, Func<T> locator)
-            where T: Component
         {
             // ReSharper disable once ConvertIfStatementToNullCoalescingExpression (Unity fake null)
             if (data == null) {
@@ -48,7 +47,6 @@ namespace Neolithica.Extensions {
         /// return UnityExtensions.CacheComponent(ref cachedComponent, FindObjectOfType<ComponentType>);
         /// </summary>
         public static T CacheComponent<T>(ref T data, Func<T> locator)
-            where T : Component
         {
             // ReSharper disable once ConvertIfStatementToNullCoalescingExpression (Unity fake null)
             if (data == null)

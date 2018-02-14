@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Tofu.Serialization;
 using UnityEngine;
 
@@ -21,10 +22,6 @@ namespace Neolithica.MonoBehaviours {
         [Inject]
         public GameController GameController { get; set; }
 
-        // Handles Awake event
-        void Awake() {        
-        }
-
         // Handles Start event
         void Start() {
             RandomizePath();
@@ -40,14 +37,14 @@ namespace Neolithica.MonoBehaviours {
         }
 
         public bool KillAnimal() {
-            foreach (AnimalController a in animals) {
-                if (a.IsAdult) {
-                    Destroy(a.gameObject);
-                    animals.Remove(a);
-                    return true;
-                }
-            }
-            return false;
+            AnimalController firstAdult = animals.FirstOrDefault(a => a.IsAdult);
+
+            if (firstAdult == null)
+                return false;
+
+            Destroy(firstAdult);
+            animals.Remove(firstAdult);
+            return true;
         }
 
         public void RandomizePath() {

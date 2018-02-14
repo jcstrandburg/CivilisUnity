@@ -8,21 +8,33 @@ namespace Neolithica.TerrainGeneration {
         public ResourcePlacer(TerrainData terrainData, float waterHeight, float seed, IEnumerable<ResourceSettings> resourceSettings) {
             mTerrainData = terrainData;
             mSeed = seed;
-            mWaterHeight = waterHeight;
             mResourceSettings = resourceSettings.ToDictionary(rs => rs.Type);
+
+            //Func<float, float> fertility = height => FitnessHelpers.PivotGradient(height, waterHeight, waterHeight + 0.025f, waterHeight + 0.2f);
+            Func<float, float> fertility = height => FitnessHelpers.Gradient(height, waterHeight + 0.5f, waterHeight);
+            Func<float, float> stoneAndMetal = height => FitnessHelpers.PivotGradient(height, waterHeight, waterHeight + 0.1f, waterHeight + 0.25f);
+                
+            mFitnessHelpers = new Dictionary<ResourcePlacementType, Func<float, float>> {
+                [ResourcePlacementType.Berries] = fertility,
+                [ResourcePlacementType.Trees] = fertility,
+                [ResourcePlacementType.Fish] = (height) => FitnessHelpers.Water(height, waterHeight),
+                [ResourcePlacementType.Gold] = stoneAndMetal,
+                [ResourcePlacementType.Stone] = stoneAndMetal,
+                [ResourcePlacementType.Doodad] = (height) => FitnessHelpers.DryLand(height, waterHeight),
+            };
         }
 
         public ResourcePlacementType GetPlacementType(float x, float y) {
             float height = mTerrainData.GetInterpolatedHeight(x, y) / mTerrainData.size.y;
 
-            var matches = sPlacementTypes
+            var matches = mFitnessHelpers.Keys
                 .Select(type => new
                 {
                     Fitness = GetFitness(
                         x: x,
                         y: y,
                         height: height,
-                        fitnessHelper: sFitnessHelpers[type],
+                        fitnessHelper: mFitnessHelpers[type],
                         resourceSetting: mResourceSettings[type],
                         offset: sResourceGenOffsets[type]),
                     Type = type
@@ -39,7 +51,7 @@ namespace Neolithica.TerrainGeneration {
             float x,
             float y,
             float height,
-            Func<float, float, float> fitnessHelper,
+            Func<float, float> fitnessHelper,
             ResourceSettings resourceSetting,
             float offset)
         {
@@ -47,27 +59,17 @@ namespace Neolithica.TerrainGeneration {
                 mSeed + resourceSetting.Frequency * x + offset,
                 mSeed + resourceSetting.Frequency * y + offset);
 
-            float fitness = fitnessHelper(height, mWaterHeight) * noise;
+            float fitness = fitnessHelper(height) * noise;
 
             if (fitness > 1.0f || fitness < 0.0f) {
                 Debug.Log($"Fitness value out of bounds: {fitness}");
             }
 
-            if (fitness > 1 - resourceSetting.Abundance)
+            if (fitness > 1 - resourceSetting.Abundance * sAbundanceModifiers[resourceSetting.Type])
                 return fitness;
 
             return -1.0f;
         }
-
-        private static readonly IReadOnlyList<ResourcePlacementType> sPlacementTypes = 
-            new List<ResourcePlacementType> {
-                ResourcePlacementType.Berries,
-                ResourcePlacementType.Trees,
-                ResourcePlacementType.Fish,
-                ResourcePlacementType.Stone,
-                ResourcePlacementType.Gold,
-                ResourcePlacementType.Doodad,
-            };
 
         private static readonly IReadOnlyDictionary<ResourcePlacementType, float> sResourceGenOffsets =
             new Dictionary<ResourcePlacementType, float> {
@@ -79,35 +81,19 @@ namespace Neolithica.TerrainGeneration {
                 [ResourcePlacementType.Doodad] = 10.0f,
             };
 
-        private static float FishFitness(float height, float waterHeight) {
-            return height < waterHeight ? 1.0f : 0.0f;
-        }
-
-        private static float FertilityFitness(float height, float waterHeight) {
-            return height > waterHeight ? Mathf.Pow((1.0f - height) / (1.0f - waterHeight), 2) : 0.0f;
-        }
-
-        private static float MountainFitness(float height, float waterHeight) {
-            return height > waterHeight ? Mathf.Pow(height / (0.3f - waterHeight), 1.5f) : 0.0f;
-        }
-
-        private static float DryLandFitness(float height, float waterHeight) {
-            return height > waterHeight ? 1.0f : 0.0f;
-        }
-
-        private static readonly IReadOnlyDictionary<ResourcePlacementType, Func<float, float, float>> sFitnessHelpers =
-            new Dictionary<ResourcePlacementType, Func<float, float, float>> {
-                [ResourcePlacementType.Berries] = FertilityFitness,
-                [ResourcePlacementType.Trees] = FertilityFitness,
-                [ResourcePlacementType.Fish] = FishFitness,
-                [ResourcePlacementType.Gold] = MountainFitness,
-                [ResourcePlacementType.Stone] = MountainFitness,
-                [ResourcePlacementType.Doodad] = DryLandFitness,
+        private static readonly IReadOnlyDictionary<ResourcePlacementType, float> sAbundanceModifiers =
+            new Dictionary<ResourcePlacementType, float> {
+                [ResourcePlacementType.Berries] = 1.0f,
+                [ResourcePlacementType.Trees] = 1.0f,
+                [ResourcePlacementType.Fish] = 1.0f,
+                [ResourcePlacementType.Gold] = 1.0f,
+                [ResourcePlacementType.Stone] = 1.0f,
+                [ResourcePlacementType.Doodad] = 1.0f,
             };
 
         private readonly TerrainData mTerrainData;
         private readonly IReadOnlyDictionary<ResourcePlacementType, ResourceSettings> mResourceSettings;
+        private readonly IReadOnlyDictionary<ResourcePlacementType, Func<float, float>> mFitnessHelpers;
         private readonly float mSeed;
-        private readonly float mWaterHeight;
     }
 }

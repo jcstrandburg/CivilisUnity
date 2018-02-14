@@ -28,11 +28,11 @@ namespace Neolithica {
         [SerializableMember(1)] public float seed;
 
         [SerializableMember(2)] public List<ResourceSettings> ResourceSettings = new List<ResourceSettings> {
-            new ResourceSettings {Type = ResourcePlacementType.Berries, Frequency = 4.0f, Abundance = 0.3f},
-            new ResourceSettings {Type = ResourcePlacementType.Trees, Frequency = 1.5f, Abundance = 0.5f},
-            new ResourceSettings {Type = ResourcePlacementType.Fish, Frequency = 5.0f, Abundance = 0.2f},
-            new ResourceSettings {Type = ResourcePlacementType.Gold, Frequency = 2.0f, Abundance = 0.2f},
-            new ResourceSettings {Type = ResourcePlacementType.Stone, Frequency = 2.0f, Abundance = 0.2f},
+            new ResourceSettings {Type = ResourcePlacementType.Berries, Frequency = 20.0f, Abundance = 0.6f},
+            new ResourceSettings {Type = ResourcePlacementType.Trees, Frequency = 10.0f, Abundance = 0.5f},
+            new ResourceSettings {Type = ResourcePlacementType.Fish, Frequency = 20.0f, Abundance = 0.2f},
+            new ResourceSettings {Type = ResourcePlacementType.Gold, Frequency = 25.0f, Abundance = 0.25f},
+            new ResourceSettings {Type = ResourcePlacementType.Stone, Frequency = 25.0f, Abundance = 0.25f},
             new ResourceSettings {Type = ResourcePlacementType.Doodad, Frequency = 10.0f, Abundance = 0.15f},
         };
     }
