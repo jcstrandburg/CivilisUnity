@@ -73,13 +73,7 @@ namespace Neolithica.MonoBehaviours {
 
         public void InjectAllObjects() {
             var gameObjects = FindObjectsOfType<GameObject>().Where(x => x.activeInHierarchy && x.transform.parent == null).ToList();
-
-            var monoBehaviors = FindObjectsOfType<MonoBehaviour>();
-            foreach (var b in monoBehaviors)
-                Factory.InjectObject(b);
-
-            foreach (var go in gameObjects)
-                go.BroadcastMessage(nameof(IOnComponentWasInjected.OnComponentWasInjected), SendMessageOptions.DontRequireReceiver);
+            Factory.InjectGameObjects(gameObjects);
         }
 
         // Handles FixedUpdate event

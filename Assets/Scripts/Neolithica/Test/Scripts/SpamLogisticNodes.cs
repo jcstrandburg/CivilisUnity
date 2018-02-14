@@ -26,7 +26,7 @@ namespace Neolithica.Test.Scripts {
             var factory = GameController.Factory;
             foreach (var obj in spawned) {
                 obj.GetComponent<Resource>().SetDown();
-                factory.InjectGameobject(obj);
+                factory.InjectGameObject(obj);
                 obj.transform.position = this.transform.position;
                 var offset = Random.insideUnitCircle*10;
                 obj.transform.position += new Vector3(offset.x, 0, offset.y);

@@ -11,18 +11,22 @@ namespace Neolithica.MonoBehaviours.Editors {
             GroundController groundController = (GroundController)target;
 
             if (GUILayout.Button("Randomize Terrain")) {
+                GameController.Instance.InjectAllObjects();
                 groundController.Randomize();
                 groundController.GenerateMap();
             }
 
             if (GUILayout.Button("Erode Terrain")) {
+                GameController.Instance.InjectAllObjects();
                 foreach (int i in Enumerable.Range(0, 3))
                     groundController.ErodeMap();
             }
-                
 
-            if (GUILayout.Button("Generate Resources"))
+
+            if (GUILayout.Button("Generate Resources")) {
+                GameController.Instance.InjectAllObjects();
                 groundController.GenerateResourcesAndDoodads();
+            }
         }
     }
 }

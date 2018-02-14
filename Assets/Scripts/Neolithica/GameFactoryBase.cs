@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Neolithica.MonoBehaviours;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Neolithica.DependencyInjection {
     /// <summary>
@@ -33,14 +34,13 @@ namespace Neolithica.DependencyInjection {
         /// <param name="position">Optional, the position at which to instatiate the prefab</param>
         /// <returns>The instantiated object</returns>
         public GameObject Instantiate(GameObject prefab, Vector3? position = null) {
-            var instance = GameObject.Instantiate(prefab);
+            var instance = Object.Instantiate(prefab);
             instance.transform.SetParent(GameController.Instance.transform);
 
             if (position.HasValue)
                 instance.transform.position = position.Value;
 
-            InjectGameobject(instance);
-            instance.BroadcastMessage(nameof(IOnComponentWasInjected.OnComponentWasInjected), SendMessageOptions.DontRequireReceiver);
+            InjectGameObject(instance);
 
             return instance;
         }
@@ -105,17 +105,26 @@ namespace Neolithica.DependencyInjection {
             return injectme;
         }
 
+        public void InjectGameObjects(IReadOnlyList<GameObject> objects) {
+            DoInjectComponents(objects.SelectMany(x => x.GetComponentsInChildren<Component>()).ToList());
+        }
+
         /// <summary>
         /// Injects all fields marked with the "inject" attribute in all components in the
         /// given object and all of its children. The injected value is taken from fields
         /// or properties on this object with the "injectable" attribute
         /// </summary>
         /// <param name="obj">The object to be injected</param>
-        public void InjectGameobject(GameObject obj) {
-            var components = obj.GetComponentsInChildren<Component>();
-            foreach (var component in components) {
+        public void InjectGameObject(GameObject obj) {
+            DoInjectComponents(obj.GetComponentsInChildren<Component>());
+        }
+
+        private void DoInjectComponents(IReadOnlyList<Component> components) {
+            foreach (var component in components)
                 InjectObject(component);
-            }
+
+            foreach (var injectable in components.OfType<IOnComponentWasInjected>())
+                injectable.OnComponentWasInjected();
         }
 
         /// <summary>
@@ -128,13 +137,6 @@ namespace Neolithica.DependencyInjection {
             var t = go.AddComponent<T>();
             InjectObject(t);
             return t;
-        }
-
-        private T Resolve<T>() {
-            if (!m_dependencyResolvers.ContainsKey(typeof(T)))
-                throw new InvalidOperationException($"Unable to resolve type {typeof(T).Name}");
-
-            return (T)m_dependencyResolvers[typeof(T)].Resolve();
         }
 
         private object Resolve(Type type) {
