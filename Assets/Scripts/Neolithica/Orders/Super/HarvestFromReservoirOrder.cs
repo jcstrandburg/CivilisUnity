@@ -2,6 +2,7 @@
 using Neolithica.MonoBehaviours;
 using Neolithica.MonoBehaviours.Reservations;
 using Neolithica.Orders.Simple;
+using UnityEngine;
 
 namespace Neolithica.Orders.Super {
     /// <summary>
@@ -9,14 +10,11 @@ namespace Neolithica.Orders.Super {
     /// </summary>
     [SerializableType]
     public class HarvestFromReservoirOrder : StatefulSuperOrder {
-        [SerializableMember(1)]
-        private NeolithicObject targetObj;
-        [SerializableMember(2)]
-        private Reservoir reservoir;
-        [SerializableMember(3)]
-        private ResourceReservation resourceReservation;
+        [SerializableMember(1)] private readonly GameObject targetObj;
+        [SerializableMember(2)] private readonly Reservoir reservoir;
+        [SerializableMember(3)] private ResourceReservation resourceReservation;
 
-        public HarvestFromReservoirOrder(ActorController actor, NeolithicObject target) {
+        public HarvestFromReservoirOrder(ActorController actor, GameObject target) {
             targetObj = target;
             reservoir = target.GetComponent<Reservoir>();
             GoToState(cSeekTarget, actor);

@@ -7,7 +7,7 @@ namespace Neolithica.Test.Mono {
     public class PlantDomesticationTestRunner : MonoBehaviour {
 
         public ActorController testActor;
-        public NeolithicObject testReservoir;
+        public GameObject testReservoir;
 
         [Inject]
         public StatManager stats;

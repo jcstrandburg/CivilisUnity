@@ -8,8 +8,8 @@ namespace Neolithica.Orders.Simple {
     /// </summary>
     [SerializableType]
     public class ConvertResourceOrder : BaseOrder {
-        [SerializableMember(1)] private Resource sourceResource;
-        [SerializableMember(2)] private ResourceKind toResourceKind;
+        [SerializableMember(1)] private readonly Resource sourceResource;
+        [SerializableMember(2)] private readonly ResourceKind toResourceKind;
 
         public ConvertResourceOrder(ActorController a, ResourceKind fromResourceKind, ResourceKind toResourceKind) : base() {
             Resource r = a.GetCarriedResource();

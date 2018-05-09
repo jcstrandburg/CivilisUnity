@@ -8,10 +8,9 @@ namespace Neolithica.Orders.Simple {
     /// </summary>
     [SerializableType]
     public class TearDownOrder : BaseOrder {
-        [SerializableMember(1)]
-        private NeolithicObject target;
+        [SerializableMember(1)] private readonly GameObject target;
 
-        public TearDownOrder(ActorController a, NeolithicObject target) : base() {
+        public TearDownOrder(ActorController a, GameObject target) {
             a.GetComponent<NeolithicObject>().statusString = $"Tearing down {target.name}";
             this.target = target;
         }

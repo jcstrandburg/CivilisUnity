@@ -6,15 +6,11 @@ using UnityEngine;
 namespace Neolithica.Orders.Super {
     [SerializableType]
     public class GetConstructionJobOrder : BaseOrder {
-        [SerializableMember(1)]
-        private ConstructionManager manager;
-        [SerializableMember(2)]
-        private Vector3 center;
-        [SerializableMember(3)]
-        private Vector3 targetPosition;
+        [SerializableMember(1)] private readonly ConstructionManager manager;
+        [SerializableMember(2)] private readonly Vector3 center;
+        [SerializableMember(3)] private Vector3 targetPosition;
 
-        public GetConstructionJobOrder(ActorController a, ConstructionManager manager): base() 
-        {
+        public GetConstructionJobOrder(ActorController a, ConstructionManager manager) {
             center = a.transform.position;
             targetPosition = center;
             this.manager = manager;
@@ -30,7 +26,7 @@ namespace Neolithica.Orders.Super {
                     return;
                 }
                 float r = 5.0f;
-                targetPosition = center + new Vector3(UnityEngine.Random.Range(-r, r), 0, UnityEngine.Random.Range(-r, r));
+                targetPosition = center + new Vector3(Random.Range(-r, r), 0, Random.Range(-r, r));
                 targetPosition = actor.GameController.SnapToGround(targetPosition);
                 diff = targetPosition - actor.transform.position;
             }

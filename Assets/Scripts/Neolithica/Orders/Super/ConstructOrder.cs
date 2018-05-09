@@ -2,6 +2,7 @@
 using Neolithica.MonoBehaviours;
 using Neolithica.MonoBehaviours.Reservations;
 using Neolithica.Orders.Simple;
+using UnityEngine;
 
 namespace Neolithica.Orders.Super {
     /// <summary>
@@ -9,10 +10,9 @@ namespace Neolithica.Orders.Super {
     /// </summary>
     [SerializableType]
     public class ConstructOrder : StatefulSuperOrder {
-        [SerializableMember(1)]
-        private ConstructionManager manager;
+        [SerializableMember(1)] private readonly ConstructionManager manager;
 
-        public ConstructOrder(ActorController actor, NeolithicObject target) {
+        public ConstructOrder(ActorController actor, GameObject target) {
             manager = target.GetComponent<ConstructionManager>();
             GoToState(cGetConstructionJob, actor);
         }
@@ -41,7 +41,7 @@ namespace Neolithica.Orders.Super {
                 actor => GoToState(cDepositResource, actor),
                 null);
             CreateState(cDepositResource,
-                actor => new CompleteConstructionReservation(actor, manager),
+                actor => new CompleteConstructionReservation(manager),
                 actor => {
                     if (!manager.ConstructionFinished()) {
                         GoToState(cGetConstructionJob, actor);

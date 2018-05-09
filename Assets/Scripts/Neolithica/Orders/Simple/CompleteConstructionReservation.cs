@@ -5,9 +5,9 @@ using Neolithica.MonoBehaviours.Reservations;
 namespace Neolithica.Orders.Simple {
     [SerializableType]
     public class CompleteConstructionReservation : BaseOrder {
-        [SerializableMember(1)] private ConstructionManager manager;
+        [SerializableMember(1)] private readonly ConstructionManager manager;
 
-        public CompleteConstructionReservation(ActorController actor, ConstructionManager manager) : base()
+        public CompleteConstructionReservation(ConstructionManager manager)
         {
             this.manager = manager;
         }

@@ -9,10 +9,9 @@ namespace Neolithica.Orders.Simple {
     /// </summary>
     [SerializableType]
     public class StoreReservationOrder : BaseOrder {
-        [SerializableMember(1)]
-        private StorageReservation res;
+        [SerializableMember(1)] private readonly StorageReservation res;
 
-        public StoreReservationOrder(ActorController a, StorageReservation r) : base() {
+        public StoreReservationOrder(StorageReservation r) {
             res = r;
         }
 

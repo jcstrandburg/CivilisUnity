@@ -9,12 +9,10 @@ namespace Neolithica.Orders.Super {
     /// </summary>
     [SerializableType]
     public class UpgradeReservoirOrder : StatefulSuperOrder {
-        [SerializableMember(1)]
-        private NeolithicObject targetObj;
-        [SerializableMember(2)]
-        private GameObject myPrefab;
+        [SerializableMember(1)] private readonly GameObject targetObj;
+        [SerializableMember(2)] private readonly GameObject myPrefab;
 
-        public UpgradeReservoirOrder(ActorController actor, NeolithicObject target, GameObject prefab) {
+        public UpgradeReservoirOrder(ActorController actor, GameObject target, GameObject prefab) {
             targetObj = target;
             myPrefab = prefab;
             GoToState(cSeekTarget, actor);
@@ -26,7 +24,7 @@ namespace Neolithica.Orders.Super {
                 actor => GoToState(cDoUpgrade, actor),
                 null);
             CreateState(cDoUpgrade,
-                actor => new DoBuildingUpgrade(actor, targetObj, myPrefab),
+                actor => new DoBuildingUpgrade(targetObj, myPrefab),
                 actor => Completed = true,
                 null);
         }

@@ -6,7 +6,7 @@ namespace Neolithica.Test.Mono {
     public class ReservoirHarvestStatTest : MonoBehaviour {
 
         public ActorController testActor;
-        public NeolithicObject testReservoir;
+        public GameObject testReservoir;
         public float vegetablesHarvested;
 
         [Inject]

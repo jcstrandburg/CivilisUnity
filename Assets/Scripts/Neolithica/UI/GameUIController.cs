@@ -62,14 +62,14 @@ namespace Neolithica.UI {
         /// Exports databindings
         /// </summary>
         private void MakeDataBindings() {
-            var dbs = GetComponent<DataBindingSource>();
+            //var dbs = GetComponent<DataBindingSource>();
 
-            dbs.AddBinding("spirit",
-                () => GameController.Spirit,
-                (object val) => GameController.Spirit = Convert.ToSingle(val));
-            dbs.AddBinding("dayfactor",
-                () => GameController.DayCycleController.daytime,
-                (object val) => GameController.DayCycleController.daytime = Convert.ToSingle(val));
+            //dbs.AddBinding("spirit",
+            //    () => GameController.Spirit,
+            //    (object val) => GameController.Spirit = Convert.ToSingle(val));
+            //dbs.AddBinding("dayfactor",
+            //    () => GameController.DayCycleController.daytime,
+            //    (object val) => GameController.DayCycleController.daytime = Convert.ToSingle(val));
         }
 
         /// <summary>
@@ -90,10 +90,11 @@ namespace Neolithica.UI {
 
             var prefab = Resources.Load("ContextTextButton") as GameObject;
             foreach (CommandType option in options) {
-                var contextButton = GameController.Factory.Instantiate(prefab);
+                GameObject contextButton = GameController.Factory.Instantiate(prefab);
                 var button = contextButton.GetComponent<Button>();
-                var command = option;
-                button.onClick.AddListener( () => ExecuteContextAction(command, target));
+                CommandType command = option;
+
+                button.onClick.AddListener( () => ExecuteContextAction(command, target.gameObject));
                 contextButton.GetComponent<Text>().text = option.ToString() ;
                 contextButton.transform.SetParent (contextMenu.transform);
             }
@@ -111,7 +112,16 @@ namespace Neolithica.UI {
         /// Shows a selection menu for the given selected NeolithicObject
         /// </summary>
         /// <param name="selected"></param>
+        [Obsolete]
         public void ShowSelectionMenu(NeolithicObject selected) {
+            selectionMenu.ShowPrimative(selected);
+        }
+
+        /// <summary>
+        /// Shows a selection menu for the given selected NeolithicObject
+        /// </summary>
+        /// <param name="selected"></param>
+        public void ShowSelectionMenu(Interactible selected) {
             selectionMenu.ShowPrimative(selected);
         }
 
@@ -126,7 +136,7 @@ namespace Neolithica.UI {
         /// Forwards a command to the game controller to issue the given order to the current 
         /// selected units against the target, and then hides the context menu
         /// </summary>
-        public void ExecuteContextAction(CommandType action, NeolithicObject target) {
+        public void ExecuteContextAction(CommandType action, GameObject target) {
             GameController.IssueOrder(action, target);
             HideContextMenu();
         }
@@ -157,12 +167,10 @@ namespace Neolithica.UI {
         /// Finds available techs and shows the technology menu
         /// </summary>
         public void ShowResearchMenu() {
-            Technology[] techs = GameController.GetAvailableTechs();
             subMenu.ClearMenu();
-            foreach (Technology t in techs) {
-                Technology tech = t;
-                Button b = subMenu.AddButton(t.displayName, () => GameController.BuyTech(tech));
-                b.interactable = (GameController.Spirit >= t.cost);
+            foreach (Technology tech in GameController.GetAvailableTechs()) {
+                Button b = subMenu.AddButton(tech.displayName, () => GameController.BuyTech(tech));
+                b.interactable = GameController.Spirit >= tech.cost;
             }
         }
 
@@ -172,7 +180,7 @@ namespace Neolithica.UI {
         public void ShowBuildMenu() {
             var buildings = GameController.GetBuildableBuildings();
             subMenu.ClearMenu();
-            foreach (var building in buildings) {
+            foreach (GameObject building in buildings) {
                 GameObject prefab = building;
                 subMenu.AddButton(building.name,
                     () => GameController.StartBuildingPlacement(prefab));

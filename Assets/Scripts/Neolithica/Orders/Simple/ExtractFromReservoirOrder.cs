@@ -9,12 +9,10 @@ namespace Neolithica.Orders.Simple {
     /// </summary>
     [SerializableType]
     public class ExtractFromReservoirOrder : BaseOrder {
-        [SerializableMember(1)]
-        private float progress;
-        [SerializableMember(2)]
-        private readonly ResourceReservation reservation;
+        [SerializableMember(1)] private float progress;
+        [SerializableMember(2)] private readonly ResourceReservation reservation;
 
-        public ExtractFromReservoirOrder(ActorController a, ResourceReservation res) : base() {
+        public ExtractFromReservoirOrder(ActorController a, ResourceReservation res) {
             a.GetComponent<NeolithicObject>().statusString = "Extracting resource";
             reservation = res;
         }

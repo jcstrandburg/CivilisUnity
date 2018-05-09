@@ -8,12 +8,10 @@ namespace Neolithica.Orders.Simple {
     /// </summary>
     [SerializableType]
     public class SimpleMoveOrder : BaseOrder {
-        [SerializableMember(1)]
-        private Vector3 targetPosition;
-        [SerializableMember(2)]
-        private float proximity;
+        [SerializableMember(1)] private readonly Vector3 targetPosition;
+        [SerializableMember(2)] private readonly float proximity;
 
-        public SimpleMoveOrder(ActorController a, Vector3 position, float proximity = 0.0f) : base() {
+        public SimpleMoveOrder(ActorController a, Vector3 position, float proximity = 0.0f) {
             a.GetComponent<NeolithicObject>().statusString = "Moving to position";
             this.proximity = proximity;
             targetPosition = position;

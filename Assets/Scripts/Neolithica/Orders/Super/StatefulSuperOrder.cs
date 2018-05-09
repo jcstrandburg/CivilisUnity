@@ -19,8 +19,8 @@ namespace Neolithica.Orders.Super {
     [SerializeDerivedType(16, typeof(TransmuteOrder))]
     [SerializeDerivedType(17, typeof(UpgradeReservoirOrder))]
     public abstract class StatefulSuperOrder : BaseOrder {
-        [SerializableMember(1)] public BaseOrder currentOrder = null;
-        [SerializableMember(2)] public string currentState;
+        [SerializableMember(1)] public BaseOrder CurrentOrder;
+        [SerializableMember(2)] public string CurrentState;
 
         protected abstract void CreateStates();
 
@@ -30,37 +30,37 @@ namespace Neolithica.Orders.Super {
         }
 
         public override void DoStep(ActorController actor) {
-            if (currentOrder == null) {
-                Debug.Log($"{nameof(currentOrder)} is null");
+            if (CurrentOrder == null) {
+                Debug.Log($"{nameof(CurrentOrder)} is null");
                 Failed = true;
                 return;
             }
 
-            currentOrder.DoStep(actor);
+            CurrentOrder.DoStep(actor);
 
-            if (!currentOrder.Done)
+            if (!CurrentOrder.Done)
                 return;
 
-            OrderStateInfo info = States[currentState];
-            if (currentOrder.Completed) {
+            OrderStateInfo info = States[CurrentState];
+            if (CurrentOrder.Completed) {
                 if (info.CompleteState != null) {
                     info.CompleteState(actor);
                 }
                 else {
                     Failed = true;
-                    Debug.Log($"No complete transition available for state: {currentState}");
+                    Debug.Log($"No complete transition available for state: {CurrentState}");
                 }
             }
-            else if (currentOrder.Failed) {
+            else if (CurrentOrder.Failed) {
                 if (info.FailState != null) {
                     info.FailState(actor);
                 }
                 else {
                     Failed = true;
-                    Debug.Log($"No failure transition available for state: {currentState}");
+                    Debug.Log($"No failure transition available for state: {CurrentState}");
                 }
             }
-            else if (currentOrder.Cancelled) {
+            else if (CurrentOrder.Cancelled) {
                 throw new InvalidOperationException("Order exectution cannot continue when sub order is cancelled!");
             }
         }
@@ -71,8 +71,8 @@ namespace Neolithica.Orders.Super {
                 throw new ArgumentOutOfRangeException(nameof(state), $"Nonexistant order state: {state}");
 
             OrderStateInfo info = States[state];
-            currentState = state;
-            currentOrder = info.StartState(actor);
+            CurrentState = state;
+            CurrentOrder = info.StartState(actor);
         }
 
         protected Dictionary<string, OrderStateInfo> States {

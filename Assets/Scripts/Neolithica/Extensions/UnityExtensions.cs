@@ -28,9 +28,9 @@ namespace Neolithica.Extensions {
         public static T CacheComponent<T>(this Component source, ref T data, Func<T> locator)
         {
             // ReSharper disable once ConvertIfStatementToNullCoalescingExpression (Unity fake null)
-            if (data == null) {
+            if (data == null)
                 data = locator();
-            }
+
             return data;
         }
 
@@ -50,9 +50,8 @@ namespace Neolithica.Extensions {
         {
             // ReSharper disable once ConvertIfStatementToNullCoalescingExpression (Unity fake null)
             if (data == null)
-            {
                 data = locator();
-            }
+
             return data;
         }
 
@@ -62,13 +61,10 @@ namespace Neolithica.Extensions {
         /// </summary>
         public static TReturn Elvis<TReturn, TComponent>(this TComponent source, Func<TComponent, TReturn> fnGet)
             where TReturn: class
-            where TComponent: Component
-        {
-            // ReSharper disable once ConvertIfStatementToNullCoalescingExpression (Unity fake null)
-            if (source == null)
-                return null;
+            where TComponent: Component  =>
+            source == null ? null : fnGet(source);
 
-            return fnGet(source);
-        }
+        public static Vector3 Copy(this Vector3 src, float? x = null, float? y = null, float? z = null) =>
+            new Vector3(x ?? src.x, y ?? src.y, z ?? src.z);
     }
 }

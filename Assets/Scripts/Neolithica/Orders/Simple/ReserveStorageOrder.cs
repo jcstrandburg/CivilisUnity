@@ -8,10 +8,9 @@ namespace Neolithica.Orders.Simple {
     /// </summary>
     [SerializableType]
     public class ReserveStorageOrder : BaseOrder {
-        [SerializableMember(1)]
-        private Resource resource;
+        [SerializableMember(1)] private readonly Resource resource;
 
-        public ReserveStorageOrder(ActorController a) : base() {
+        public ReserveStorageOrder(ActorController a) {
             resource = a.GetCarriedResource();
             if (!resource) {
                 Failed = true;
@@ -22,13 +21,10 @@ namespace Neolithica.Orders.Simple {
             ResourceKind resourceKind = resource.resourceKind;
             double amount = resource.amount;
 
-            if (actor.GameController.ReserveStorage(actor, resourceKind, amount)) {
-                Debug.Log("Reserved storage");
+            if (actor.GameController.ReserveStorage(actor, resourceKind, amount))
                 Completed = true;
-            }
-            else {
+            else
                 Failed = true;
-            }
         }
     }
 }

@@ -3,7 +3,7 @@ using Neolithica.MonoBehaviours.Reservations;
 
 namespace Neolithica.Orders.Simple {
     public class WaitForReservationOrder : IdleOrder {
-        private Reservation reservation;
+        private readonly Reservation reservation;
 
         public WaitForReservationOrder(ActorController actor, Reservation r) : base(actor) {
             actor.GetComponent<NeolithicObject>().statusString = "Waiting for reservation";
@@ -16,7 +16,5 @@ namespace Neolithica.Orders.Simple {
                 Completed = true;
             }
         }
-
-
     }
 }

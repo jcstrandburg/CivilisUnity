@@ -9,13 +9,10 @@ namespace Neolithica.Orders.Simple {
     /// </summary>
     [SerializableType]
     public class DumpCarriedResourceOrder : BaseOrder {
-        [SerializableMember(1)]
-        private GameObject dump;
-        [SerializableMember(2)]
-        private Vector3 target;
+        [SerializableMember(2)] private readonly Vector3 target;
 
-        public DumpCarriedResourceOrder(ActorController actor) : base() {
-            dump = GameObject.Find("DumpingGround");
+        public DumpCarriedResourceOrder(ActorController actor) {
+            GameObject dump = GameObject.Find("DumpingGround");
             if (dump) {
                 target = actor.GameController.SnapToGround(dump.transform.position);
             } else {

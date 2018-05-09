@@ -5,12 +5,10 @@ using UnityEngine;
 namespace Neolithica.Orders.Simple {
     [SerializableType]
     public class DoBuildingUpgrade : BaseOrder {
-        [SerializableMember(1)]
-        private NeolithicObject myTargetObj;
-        [SerializableMember(2)]
-        private GameObject myPrefab;
+        [SerializableMember(1)] private readonly GameObject myTargetObj;
+        [SerializableMember(2)] private readonly GameObject myPrefab;
 
-        public DoBuildingUpgrade(ActorController a, NeolithicObject target, GameObject prefab) : base() {
+        public DoBuildingUpgrade(GameObject target, GameObject prefab) {
             myTargetObj = target;
             myPrefab = prefab;
         }

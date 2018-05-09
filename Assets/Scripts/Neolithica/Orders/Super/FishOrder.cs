@@ -1,14 +1,14 @@
 ﻿using AqlaSerializer;
 using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
+using UnityEngine;
 
 namespace Neolithica.Orders.Super {
     [SerializableType]
     public class FishOrder : StatefulSuperOrder {
-        [SerializableMember(1)]
-        private NeolithicObject target;
+        [SerializableMember(1)] private readonly GameObject target;
 
-        public FishOrder(ActorController actor, NeolithicObject target) {
+        public FishOrder(ActorController actor, GameObject target) {
             this.target = target;
             GoToState(cSeekTarget, actor);
         }
@@ -25,7 +25,7 @@ namespace Neolithica.Orders.Super {
                 null);
             CreateState(
                 cGetResource,
-                actor => new CatchFishOrder(actor, target),
+                actor => new CatchFishOrder(),
                 actor => GoToState(cStoreResource, actor),
                 null);
             CreateState(

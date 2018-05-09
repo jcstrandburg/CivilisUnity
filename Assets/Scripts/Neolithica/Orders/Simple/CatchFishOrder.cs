@@ -5,10 +5,7 @@ using UnityEngine;
 namespace Neolithica.Orders.Simple {
     [SerializableType]
     public class CatchFishOrder : BaseOrder {
-        [SerializableMember(1)] float progress = 0.0f;
-
-        public CatchFishOrder(ActorController a, NeolithicObject fishingHole) : base() {
-        }
+        [SerializableMember(1)] float progress;
 
         public override void DoStep(ActorController actor) {
             progress += Time.fixedDeltaTime;

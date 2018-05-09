@@ -5,8 +5,7 @@ using Neolithica.Orders.Simple;
 namespace Neolithica.Orders.Super {
     [SerializableType]
     public class HuntOrder : StatefulSuperOrder {
-        [SerializableMember(1)]
-        private Herd herd;
+        [SerializableMember(1)] private readonly Herd herd;
 
         public HuntOrder(ActorController actor, Herd herd) {
             this.herd = herd;

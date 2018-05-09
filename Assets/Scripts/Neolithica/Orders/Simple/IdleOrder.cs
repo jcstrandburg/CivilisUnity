@@ -3,10 +3,12 @@ using UnityEngine;
 
 namespace Neolithica.Orders.Simple {
     public class IdleOrder : BaseOrder {
-        private Vector3 center;
+        private readonly Vector3 center;
         private Vector3 targetPosition;
 
-        public IdleOrder(ActorController actor) : base() {
+        private const float range = 5.0f;
+
+        public IdleOrder(ActorController actor) {
             actor.GetComponent<NeolithicObject>().statusString = "Idling";
             center = targetPosition = actor.transform.position;
         }
@@ -14,8 +16,7 @@ namespace Neolithica.Orders.Simple {
         public override void DoStep(ActorController actor) {
             Vector3 diff = targetPosition - actor.transform.position;
             if (diff.magnitude <= actor.moveSpeed) {
-                float r = 5.0f;
-                targetPosition = center + new Vector3(UnityEngine.Random.Range(-r, r), 0, UnityEngine.Random.Range(-r, r));
+                targetPosition = center + new Vector3(Random.Range(-range, range), 0, Random.Range(-range, range));
                 targetPosition = actor.GameController.SnapToGround(targetPosition);
                 diff = targetPosition - actor.transform.position;
             }

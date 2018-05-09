@@ -1,6 +1,7 @@
 ﻿using AqlaSerializer;
 using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
+using UnityEngine;
 
 namespace Neolithica.Orders.Super {
     /// <summary>
@@ -8,14 +9,11 @@ namespace Neolithica.Orders.Super {
     /// </summary>
     [SerializableType]
     public class TransmuteOrder : StatefulSuperOrder {
-        [SerializableMember(1)]
-        private ResourceKind fromResourceKind;
-        [SerializableMember(2)]
-        private ResourceKind toResourceKind;
-        [SerializableMember(3)]
-        private NeolithicObject target;
+        [SerializableMember(1)] private readonly ResourceKind fromResourceKind;
+        [SerializableMember(2)] private readonly ResourceKind toResourceKind;
+        [SerializableMember(3)] private readonly GameObject target;
 
-        public TransmuteOrder(ActorController actor, NeolithicObject target, ResourceKind fromResourceKind, ResourceKind toResourceKind) {
+        public TransmuteOrder(ActorController actor, GameObject target, ResourceKind fromResourceKind, ResourceKind toResourceKind) {
             this.fromResourceKind = fromResourceKind;
             this.toResourceKind = toResourceKind;
             this.target = target;

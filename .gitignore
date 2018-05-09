@@ -32,3 +32,11 @@ Thumbs.db
 Assets/UnityTestTools/Examples/
 Assets/UnityTestTools/Examples.meta
 Graveyard/
+
+\.vs/CivilisUnity/v15/Server/sqlite3/db\.lock
+
+\.vs/CivilisUnity/v15/Server/sqlite3/storage\.ide
+
+\.vs/CivilisUnity/v15/Server/sqlite3/storage\.ide-shm
+
+\.vs/CivilisUnity/v15/Server/sqlite3/storage\.ide-wal

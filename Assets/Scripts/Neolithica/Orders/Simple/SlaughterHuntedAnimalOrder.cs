@@ -5,10 +5,8 @@ using UnityEngine;
 namespace Neolithica.Orders.Simple {
     [SerializableType]
     public class SlaughterHuntedAnimalOrder : BaseOrder {
-        [SerializableMember(1)]
-        private float progress = 0;
-        [SerializableMember(2)]
-        private Herd herd;
+        [SerializableMember(1)] private float progress;
+        [SerializableMember(2)] private readonly Herd herd;
 
         public SlaughterHuntedAnimalOrder(ActorController a, Herd targetHerd) : base() {
             a.GetComponent<NeolithicObject>().statusString = "Killing snorgle";

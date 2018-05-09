@@ -6,14 +6,11 @@ using UnityEngine;
 namespace Neolithica.Orders.Simple {
     [SerializableType]
     public class SimpleWithdrawOrder : BaseOrder {
-        public SimpleWithdrawOrder(ActorController a) : base() {
-        }
-
         public override void DoStep(ActorController actor) {
-            Warehouse w = actor.resourceReservation.source.GetComponent<Warehouse>();
+            var w = actor.resourceReservation.source.GetComponent<Warehouse>();
             try {
-                var resourceType = actor.resourceReservation.resourceKind;
-                w.WithdrawReservation(actor.resourceReservation);            
+                ResourceKind resourceType = actor.resourceReservation.resourceKind;
+                w.WithdrawReservation(actor.resourceReservation);
                 Resource r = actor.GameController.CreateResourcePile(resourceType, 1);
                 actor.PickupResource(r);
                 Completed = true;

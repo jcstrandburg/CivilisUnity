@@ -32,7 +32,7 @@ namespace Neolithica.Orders.Super {
                 actor => GoToState(cDeposit, actor),
                 null);
             CreateState(cDeposit,
-                actor => new StoreReservationOrder(actor, actor.storageReservation),
+                actor => new StoreReservationOrder(actor.storageReservation),
                 actor => Completed = true,
                 null);
         }
