@@ -1,4 +1,5 @@
 ﻿using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
 
@@ -11,19 +12,19 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(1)] private readonly ResourceKind resourceKind;
         [SerializableMember(2)] private readonly double amount;
 
-        public FetchAvailableResourceOrder(ActorController actor, ResourceKind resourceKind, double amount) {
+        public FetchAvailableResourceOrder(IOrderable actor, ResourceKind resourceKind, double amount) {
             this.resourceKind = resourceKind;
             this.amount = amount;
             GoToState(cGetReservation, actor);
         }
 
-        public override void Initialize(ActorController actor) {
-            Resource r = actor.GetCarriedResource();
+        public override void Initialize(IOrderable orderable) {
+            Resource r = orderable.GetCarriedResource();
             if (r != null) {
                 if (r.resourceKind == resourceKind) {
                     Completed = true;
                 } else {
-                    actor.DropCarriedResource();
+                    orderable.DropCarriedResource();
                 }
             }
         }
@@ -34,7 +35,7 @@ namespace Neolithica.Orders.Super {
                 actor => GoToState(cGotoWarehouse, actor),
                 null);
             CreateState(cGotoWarehouse,
-                actor => new SimpleMoveOrder(actor, actor.resourceReservation.source.transform.position, 2.0f),
+                actor => new SimpleMoveOrder(actor, actor.ResourceReservation.source.transform.position, 2.0f),
                 actor => GoToState(cWithdraw, actor),
                 null);
             CreateState(cWithdraw,

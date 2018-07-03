@@ -1,4 +1,5 @@
 ﻿using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
 using UnityEngine;
@@ -6,31 +7,20 @@ using UnityEngine;
 namespace Neolithica.Orders.Super {
     [SerializableType]
     public class GetConstructionJobOrder : BaseOrder {
-        [SerializableMember(1)] private readonly ConstructionManager manager;
-        [SerializableMember(2)] private readonly Vector3 center;
-        [SerializableMember(3)] private Vector3 targetPosition;
+        [SerializableMember(1)] private readonly Vector3 center;
+        [SerializableMember(2)] private Vector3 targetPosition;
 
-        public GetConstructionJobOrder(ActorController a, ConstructionManager manager) {
-            center = a.transform.position;
+        public GetConstructionJobOrder(IOrderable a, ConstructionManager manager) {
+            center = a.Transform.position;
             targetPosition = center;
-            this.manager = manager;
         }
 
-        public override void DoStep(ActorController actor) {
-            Vector3 diff = targetPosition - actor.transform.position;
-            if (diff.magnitude <= actor.moveSpeed) {
-                Debug.Log("Trying to get job reservation");
-                if (manager.GetJobReservation(actor)) {
-                    Debug.Log("Got job reservation");
-                    Completed = true;
-                    return;
-                }
-                float r = 5.0f;
+        public override void DoStep(IOrderable orderable) {
+            if (orderable.MoveTowards(targetPosition)) {
+                const float r = 5.0f;
                 targetPosition = center + new Vector3(Random.Range(-r, r), 0, Random.Range(-r, r));
-                targetPosition = actor.GameController.SnapToGround(targetPosition);
-                diff = targetPosition - actor.transform.position;
+                targetPosition = orderable.GameController.SnapToGround(targetPosition);
             }
-            actor.transform.position += diff * 0.08f * (actor.moveSpeed / diff.magnitude);
         }
     }
 }

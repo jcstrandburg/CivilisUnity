@@ -1,4 +1,5 @@
 ﻿using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 
 namespace Neolithica.Orders.Simple {
@@ -8,8 +9,8 @@ namespace Neolithica.Orders.Simple {
     [SerializableType]
     public class MeditateOrder : BaseOrder {
 
-        public override void DoStep(ActorController actor) {
-            actor.GameController.Spirit += 0.03f;
+        public override void DoStep(IOrderable orderable) {
+            orderable.GameController.Spirit += 0.03f;
         }
     }
 }

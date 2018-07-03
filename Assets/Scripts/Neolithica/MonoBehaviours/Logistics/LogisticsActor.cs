@@ -1,4 +1,5 @@
-﻿using Tofu.Serialization;
+﻿using Neolithica.Extensions;
+using Tofu.Serialization;
 using UnityEngine;
 
 namespace Neolithica.MonoBehaviours.Logistics {
@@ -12,10 +13,7 @@ namespace Neolithica.MonoBehaviours.Logistics {
                 _logisticsManager = value;
             }
             get {
-                if (_logisticsManager == null) {
-                    _logisticsManager = GetComponentInParent<LogisticsManager>();
-                }
-                return _logisticsManager;
+                return this.CacheComponent(ref _logisticsManager, () => GetComponentInParent<LogisticsManager>());
             }
         }
     }

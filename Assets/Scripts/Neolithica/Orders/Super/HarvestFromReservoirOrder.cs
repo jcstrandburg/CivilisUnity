@@ -1,4 +1,5 @@
 ﻿using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 using Neolithica.MonoBehaviours.Reservations;
 using Neolithica.Orders.Simple;
@@ -14,18 +15,18 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(2)] private readonly Reservoir reservoir;
         [SerializableMember(3)] private ResourceReservation resourceReservation;
 
-        public HarvestFromReservoirOrder(ActorController actor, GameObject target) {
+        public HarvestFromReservoirOrder(IOrderable actor, GameObject target) {
             targetObj = target;
             reservoir = target.GetComponent<Reservoir>();
             GoToState(cSeekTarget, actor);
         }
 
-        public override void Initialize(ActorController actor) {
-            Resource r = actor.GetCarriedResource();
+        public override void Initialize(IOrderable orderable) {
+            Resource r = orderable.GetCarriedResource();
             if (r != null && r.resourceKind == reservoir.resourceKind) {
-                GoToState(cStoreContents, actor);
+                GoToState(cStoreContents, orderable);
             } else {
-                actor.DropCarriedResource();
+                orderable.DropCarriedResource();
             }
         }
 
@@ -38,7 +39,7 @@ namespace Neolithica.Orders.Super {
                 null);
             CreateState(cReservationWait,
                 actor => {
-                    resourceReservation = reservoir.NewReservation(actor.gameObject, 1);
+                    resourceReservation = reservoir.NewReservation(actor.GameObject, 1);
                     return new WaitForReservationOrder(actor, resourceReservation);
                 },
                 actor => GoToState(cGetResource, actor),

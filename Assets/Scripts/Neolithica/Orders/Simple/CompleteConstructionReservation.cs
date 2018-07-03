@@ -1,4 +1,5 @@
 ﻿using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 using Neolithica.MonoBehaviours.Reservations;
 
@@ -12,10 +13,10 @@ namespace Neolithica.Orders.Simple {
             this.manager = manager;
         }
 
-        public override void DoStep(ActorController actor) {
-            if (actor.MoveTowards(manager.transform.position)) {
-                ConstructionReservation res = actor.GetComponent<ConstructionReservation>();
-                UnityEngine.Object.Destroy(actor.GetCarriedResource(res.resourceKind).gameObject);
+        public override void DoStep(IOrderable orderable) {
+            if (orderable.MoveTowards(manager.transform.position)) {
+                ConstructionReservation res = orderable.GetComponent<ConstructionReservation>();
+                UnityEngine.Object.Destroy(orderable.GetCarriedResource(res.resourceKind).gameObject);
                 manager.FillReservation(res);
                 Completed = true;
             }

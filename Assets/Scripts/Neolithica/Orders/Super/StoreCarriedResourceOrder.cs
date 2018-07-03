@@ -1,5 +1,5 @@
 ﻿using AqlaSerializer;
-using Neolithica.MonoBehaviours;
+using Assets;
 using Neolithica.Orders.Simple;
 
 namespace Neolithica.Orders.Super {
@@ -8,7 +8,7 @@ namespace Neolithica.Orders.Super {
     /// </summary>
     [SerializableType]
     public class StoreCarriedResourceOrder : StatefulSuperOrder {
-        public StoreCarriedResourceOrder(ActorController actor) {
+        public StoreCarriedResourceOrder(IOrderable actor) {
             GoToState(cGetReservation, actor);
         }
 
@@ -24,15 +24,15 @@ namespace Neolithica.Orders.Super {
                 actor => Completed = true,
                 null);
             CreateState(cSeekStorage,
-                actor => new SimpleMoveOrder(actor, actor.storageReservation.warehouse.transform.position, 2.0f),
+                actor => new SimpleMoveOrder(actor, actor.StorageReservation.warehouse.transform.position, 2.0f),
                 actor => GoToState(cReservationWait, actor),
                 null);
             CreateState(cReservationWait,
-                actor => new WaitForReservationOrder(actor, actor.storageReservation),
+                actor => new WaitForReservationOrder(actor, actor.StorageReservation),
                 actor => GoToState(cDeposit, actor),
                 null);
             CreateState(cDeposit,
-                actor => new StoreReservationOrder(actor.storageReservation),
+                actor => new StoreReservationOrder(actor.StorageReservation),
                 actor => Completed = true,
                 null);
         }

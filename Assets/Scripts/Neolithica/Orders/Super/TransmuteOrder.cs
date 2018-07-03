@@ -1,4 +1,5 @@
 ﻿using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
 using UnityEngine;
@@ -20,17 +21,17 @@ namespace Neolithica.Orders.Super {
             GoToState(cGetSourceMaterial, actor);
         }
 
-        public override void Initialize(ActorController actor) {
-            Resource r = actor.GetCarriedResource();
+        public override void Initialize(IOrderable orderable) {
+            Resource r = orderable.GetCarriedResource();
             if (r == null) return;
             if (r.resourceKind == fromResourceKind) {
-                GoToState(cGotoWorkspace, actor);
+                GoToState(cGotoWorkspace, orderable);
             }
             else if (r.resourceKind == toResourceKind) {
-                GoToState(cStoreProduct, actor);
+                GoToState(cStoreProduct, orderable);
             }
             else {
-                actor.DropCarriedResource();
+                orderable.DropCarriedResource();
             }
         }
 

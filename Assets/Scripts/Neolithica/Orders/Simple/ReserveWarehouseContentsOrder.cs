@@ -1,4 +1,5 @@
 ﻿using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 
 namespace Neolithica.Orders.Simple {
@@ -15,8 +16,8 @@ namespace Neolithica.Orders.Simple {
             this.amount = amount;
         }
 
-        public override void DoStep(ActorController actor) {
-            if (actor.GameController.ReserveWarehouseResources(actor, resourceKind, amount)) {
+        public override void DoStep(IOrderable orderable) {
+            if (orderable.GameController.ReserveWarehouseResources(orderable, resourceKind, amount)) {
                 Completed = true;
             }
         }

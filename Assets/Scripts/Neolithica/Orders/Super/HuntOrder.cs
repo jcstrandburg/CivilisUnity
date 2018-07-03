@@ -1,4 +1,5 @@
 ﻿using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
 
@@ -7,13 +8,13 @@ namespace Neolithica.Orders.Super {
     public class HuntOrder : StatefulSuperOrder {
         [SerializableMember(1)] private readonly Herd herd;
 
-        public HuntOrder(ActorController actor, Herd herd) {
+        public HuntOrder(IOrderable actor, Herd herd) {
             this.herd = herd;
             GoToState(cSeekTarget, actor);
         }
 
-        public override void Initialize(ActorController actor) {
-            actor.DropCarriedResource();
+        public override void Initialize(IOrderable orderable) {
+            orderable.DropCarriedResource();
         }
 
         protected override void CreateStates() {

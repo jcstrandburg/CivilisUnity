@@ -1,5 +1,6 @@
 ﻿using System;
 using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 using UnityEngine;
 
@@ -11,21 +12,21 @@ namespace Neolithica.Orders.Simple {
     public class DumpCarriedResourceOrder : BaseOrder {
         [SerializableMember(2)] private readonly Vector3 target;
 
-        public DumpCarriedResourceOrder(ActorController actor) {
+        public DumpCarriedResourceOrder(IOrderable actor) {
             GameObject dump = GameObject.Find("DumpingGround");
             if (dump) {
                 target = actor.GameController.SnapToGround(dump.transform.position);
             } else {
                 Vector2 offset = 10.0f * UnityEngine.Random.insideUnitCircle;
                 target = actor.GameController
-                    .SnapToGround(actor.transform.position + new Vector3(offset.x, 0, offset.y));
+                    .SnapToGround(actor.Transform.position + new Vector3(offset.x, 0, offset.y));
             }
         }
 
-        public override void DoStep(ActorController actor) {
+        public override void DoStep(IOrderable orderable) {
             try {
-                if (actor.MoveTowards(target)) {
-                    actor.DropCarriedResource();
+                if (orderable.MoveTowards(target)) {
+                    orderable.DropCarriedResource();
                     Completed = true;
                 }
             }

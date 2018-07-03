@@ -1,17 +1,18 @@
-﻿using Neolithica.MonoBehaviours;
+﻿using Assets;
+using Neolithica.MonoBehaviours;
 using Neolithica.MonoBehaviours.Reservations;
 
 namespace Neolithica.Orders.Simple {
     public class WaitForReservationOrder : IdleOrder {
         private readonly Reservation reservation;
 
-        public WaitForReservationOrder(ActorController actor, Reservation r) : base(actor) {
+        public WaitForReservationOrder(IOrderable actor, Reservation r) : base(actor) {
             actor.GetComponent<NeolithicObject>().statusString = "Waiting for reservation";
             reservation = r;
         }
 
-        public override void DoStep(ActorController actor) {
-            base.DoStep(actor);
+        public override void DoStep(IOrderable orderable) {
+            base.DoStep(orderable);
             if (reservation.Ready) {
                 Completed = true;
             }

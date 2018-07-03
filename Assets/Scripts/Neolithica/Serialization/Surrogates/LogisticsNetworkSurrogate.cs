@@ -10,8 +10,7 @@ namespace Neolithica.Serialization.Surrogates {
         [SerializableMember(1)] public MonoBehaviourResolver Resolver { get; set; }
         [SerializableMember(2)] public double Foodbuffer { get; set; }
         [SerializableMember(3)] public GameController GameController { get; set; }
-        [SerializableMember(4)] public int Strategy { get; set; }
-        [SerializableMember(5)] public LogisticsManager LogisticsManager { get; set; }
+        [SerializableMember(4)] public LogisticsManager LogisticsManager { get; set; }
 
         public static implicit operator LogisticsNetworkSurrogate(LogisticsNetwork value) {
             if (value == null)
@@ -21,7 +20,6 @@ namespace Neolithica.Serialization.Surrogates {
                 Resolver = MonoBehaviourResolver.Make(value),
                 Foodbuffer = value.Foodbuffer,
                 GameController = value.GameController,
-                Strategy = value.strategy,
                 LogisticsManager = value.LogisticsManager,
             };
         }
@@ -33,7 +31,6 @@ namespace Neolithica.Serialization.Surrogates {
             LogisticsNetwork x = surrogate.Resolver.Resolve<LogisticsNetwork>();
             x.Foodbuffer = surrogate.Foodbuffer;
             x.GameController = surrogate.GameController;
-            x.strategy = surrogate.Strategy;
             x.LogisticsManager = surrogate.LogisticsManager;
 
             return x;

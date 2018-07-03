@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets;
 using Neolithica.MonoBehaviours.Reservations;
 using Neolithica.ScriptableObjects;
 using Tofu.Serialization;
@@ -172,7 +173,7 @@ namespace Neolithica.MonoBehaviours {
         /// </summary>
         /// <param name="actor"></param>
         /// <returns>True on success, false on failure</returns>
-        public bool GetJobReservation(ActorController actor) {
+        public bool GetJobReservation(IOrderable actor) {
             Dictionary<ResourceKind, double> avails = GameController.GetAllAvailableResources();
             foreach (var kvp in avails) {
                 ResourceKind resourceType = kvp.Key;
@@ -182,7 +183,7 @@ namespace Neolithica.MonoBehaviours {
                 Debug.Log($"I need {needed} {resourceType}");
                 if (needed > 0) {
                     Debug.Log("Making a ConstructionReservation");
-                    var res = actor.gameObject.AddComponent<ConstructionReservation>();
+                    var res = actor.GameObject.AddComponent<ConstructionReservation>();
                     reservations.Add(res);
                     res.resourceKind = resourceType;
                     res.amount = 1;

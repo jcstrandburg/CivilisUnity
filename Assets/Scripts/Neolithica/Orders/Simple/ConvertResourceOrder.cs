@@ -1,4 +1,5 @@
 ﻿using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ namespace Neolithica.Orders.Simple {
         [SerializableMember(1)] private readonly Resource sourceResource;
         [SerializableMember(2)] private readonly ResourceKind toResourceKind;
 
-        public ConvertResourceOrder(ActorController a, ResourceKind fromResourceKind, ResourceKind toResourceKind) : base() {
+        public ConvertResourceOrder(IOrderable a, ResourceKind fromResourceKind, ResourceKind toResourceKind) : base() {
             Resource r = a.GetCarriedResource();
             if (r.resourceKind != fromResourceKind) {
                 Debug.Log($"Actor does not have resource {fromResourceKind} to convert");
@@ -21,10 +22,10 @@ namespace Neolithica.Orders.Simple {
             this.toResourceKind = toResourceKind;
         }
 
-        public override void DoStep(ActorController actor) {
-            Resource newResource = actor.GameController.CreateResourcePile(toResourceKind, 1);
+        public override void DoStep(IOrderable orderable) {
+            Resource newResource = orderable.GameController.CreateResourcePile(toResourceKind, 1);
             newResource.amount = sourceResource.amount;
-            actor.PickupResource(newResource);
+            orderable.PickupResource(newResource);
             sourceResource.transform.SetParent(null);
             Object.Destroy(sourceResource.gameObject);
             Completed = true;

@@ -1,4 +1,5 @@
-﻿using Neolithica.MonoBehaviours;
+﻿using Assets;
+using Neolithica.MonoBehaviours;
 using UnityEngine;
 
 namespace Neolithica.Orders.Simple {
@@ -8,19 +9,16 @@ namespace Neolithica.Orders.Simple {
 
         private const float range = 5.0f;
 
-        public IdleOrder(ActorController actor) {
+        public IdleOrder(IOrderable actor) {
             actor.GetComponent<NeolithicObject>().statusString = "Idling";
-            center = targetPosition = actor.transform.position;
+            center = targetPosition = actor.Transform.position;
         }
 
-        public override void DoStep(ActorController actor) {
-            Vector3 diff = targetPosition - actor.transform.position;
-            if (diff.magnitude <= actor.moveSpeed) {
+        public override void DoStep(IOrderable orderable) {
+            if (orderable.MoveTowards(targetPosition, 0.08f)) {
                 targetPosition = center + new Vector3(Random.Range(-range, range), 0, Random.Range(-range, range));
-                targetPosition = actor.GameController.SnapToGround(targetPosition);
-                diff = targetPosition - actor.transform.position;
+                targetPosition = orderable.GameController.SnapToGround(targetPosition);
             }
-            actor.transform.position += diff * 0.08f * (actor.moveSpeed / diff.magnitude);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
 using UnityEngine;
@@ -24,19 +25,24 @@ namespace Neolithica.Orders.Super {
 
         protected abstract void CreateStates();
 
-        public void CreateState(string stateName, Func<ActorController, BaseOrder> startState, Action<ActorController> completeState, Action<ActorController> failState) {
+        public void CreateState(
+            string stateName,
+            Func<IOrderable, BaseOrder> startState,
+            Action<IOrderable> completeState,
+            Action<IOrderable> failState)
+        {
             var orderStateInfo = new OrderStateInfo(startState, completeState, failState);
             states.Add(stateName, orderStateInfo);
         }
 
-        public override void DoStep(ActorController actor) {
+        public override void DoStep(IOrderable orderable) {
             if (CurrentOrder == null) {
                 Debug.Log($"{nameof(CurrentOrder)} is null");
                 Failed = true;
                 return;
             }
 
-            CurrentOrder.DoStep(actor);
+            CurrentOrder.DoStep(orderable);
 
             if (!CurrentOrder.Done)
                 return;
@@ -44,7 +50,7 @@ namespace Neolithica.Orders.Super {
             OrderStateInfo info = States[CurrentState];
             if (CurrentOrder.Completed) {
                 if (info.CompleteState != null) {
-                    info.CompleteState(actor);
+                    info.CompleteState(orderable);
                 }
                 else {
                     Failed = true;
@@ -53,7 +59,7 @@ namespace Neolithica.Orders.Super {
             }
             else if (CurrentOrder.Failed) {
                 if (info.FailState != null) {
-                    info.FailState(actor);
+                    info.FailState(orderable);
                 }
                 else {
                     Failed = true;
@@ -66,13 +72,13 @@ namespace Neolithica.Orders.Super {
         }
 
         /// <summary>Changes to the given state</summary>
-        public void GoToState(string state, ActorController actor) {
+        public void GoToState(string state, IOrderable orderable) {
             if (!States.ContainsKey(state))
                 throw new ArgumentOutOfRangeException(nameof(state), $"Nonexistant order state: {state}");
 
             OrderStateInfo info = States[state];
             CurrentState = state;
-            CurrentOrder = info.StartState(actor);
+            CurrentOrder = info.StartState(orderable);
         }
 
         protected Dictionary<string, OrderStateInfo> States {

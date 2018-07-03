@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets;
 using Neolithica.DependencyInjection;
 using Neolithica.Extensions;
 using Neolithica.MonoBehaviours.Logistics;
@@ -475,14 +476,14 @@ namespace Neolithica.MonoBehaviours {
         /// <param name="resourceKind"></param>
         /// <param name="amount"></param>
         /// <returns>The reservation created, or null on failure</returns>
-        public ResourceReservation ReserveWarehouseResources(ActorController a, ResourceKind resourceKind, double amount) {
+        public ResourceReservation ReserveWarehouseResources(IOrderable a, ResourceKind resourceKind, double amount) {
             var la = a.GetComponent<LogisticsActor>();
-            var network = la.logisticsManager.FindNearestNetwork(a.transform.position);
+            var network = la.logisticsManager.FindNearestNetwork(a.Transform.position);
 
             Warehouse[] warehouses = network.FindComponents<Warehouse>();
             foreach (Warehouse w in warehouses) {
-                if (w.ReserveContents(a.gameObject, resourceKind, amount)) {
-                    return a.resourceReservation;
+                if (w.ReserveContents(a.GameObject, resourceKind, amount)) {
+                    return a.ResourceReservation;
                 }
             }
             return null;
@@ -495,14 +496,14 @@ namespace Neolithica.MonoBehaviours {
         /// <param name="resourceKind"></param>
         /// <param name="amount"></param>
         /// <returns>The reservaton created, or null on failure</returns>
-        public StorageReservation ReserveStorage(ActorController a, ResourceKind resourceKind, double amount) {
+        public StorageReservation ReserveStorage(IOrderable a, ResourceKind resourceKind, double amount) {
             var la = a.GetComponent<LogisticsActor>();
             var manager = la.logisticsManager;
-            var network = manager.FindNearestNetwork(a.transform.position);
+            var network = manager.FindNearestNetwork(a.Transform.position);
             if (network != null) {
                 Warehouse[] warehouses = network.FindComponents<Warehouse>();
                 foreach (Warehouse w in warehouses) {
-                    if (w.ReserveStorage(a.gameObject, resourceKind, amount)) {
+                    if (w.ReserveStorage(a.GameObject, resourceKind, amount)) {
                         return a.GetComponent<StorageReservation>();
                     }
                 }

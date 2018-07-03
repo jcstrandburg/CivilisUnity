@@ -1,5 +1,5 @@
 ﻿using System;
-using Neolithica.MonoBehaviours;
+using Assets;
 using Neolithica.Orders.Simple;
 
 namespace Neolithica.Orders.Super {
@@ -7,11 +7,11 @@ namespace Neolithica.Orders.Super {
     /// Utility struct for stateful super orders
     /// </summary>
     public struct OrderStateInfo {
-        public Func<ActorController, BaseOrder> StartState;
-        public Action<ActorController> CompleteState;
-        public Action<ActorController> FailState;
+        public Func<IOrderable, BaseOrder> StartState;
+        public Action<IOrderable> CompleteState;
+        public Action<IOrderable> FailState;
 
-        public OrderStateInfo(Func<ActorController, BaseOrder> start, Action<ActorController> complete, Action<ActorController> fail) {
+        public OrderStateInfo(Func<IOrderable, BaseOrder> start, Action<IOrderable> complete, Action<IOrderable> fail) {
             StartState = start;
             CompleteState = complete;
             FailState = fail;

@@ -1,5 +1,5 @@
 ﻿using AqlaSerializer;
-using Neolithica.MonoBehaviours;
+using Assets;
 using Neolithica.Orders.Simple;
 using UnityEngine;
 
@@ -8,13 +8,13 @@ namespace Neolithica.Orders.Super {
     public class FishOrder : StatefulSuperOrder {
         [SerializableMember(1)] private readonly GameObject target;
 
-        public FishOrder(ActorController actor, GameObject target) {
+        public FishOrder(IOrderable actor, GameObject target) {
             this.target = target;
             GoToState(cSeekTarget, actor);
         }
 
-        public override void Initialize(ActorController actor) {
-            actor.DropCarriedResource();
+        public override void Initialize(IOrderable orderable) {
+            orderable.DropCarriedResource();
         }
 
         protected override void CreateStates() {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Neolithica.Extensions;
 using Tofu.Serialization;
 using UnityEngine;
 
@@ -9,9 +8,10 @@ namespace Neolithica.MonoBehaviours.Logistics {
     [SavableMonobehaviour(22)]
     public class LogisticsNetwork : MonoBehaviour {
 
-        public int strategy = 1;
-
         public int NodeCount => nodes.Count;
+        private const float cPollingTime = 0.5f;
+
+        private List<LogisticsNode> nodes = new List<LogisticsNode>();
 
         [SerializeField]
         private double foodbuffer = 6.0;
@@ -128,7 +128,5 @@ namespace Neolithica.MonoBehaviours.Logistics {
             }
             return returnMe;
         }
-
-        private List<LogisticsNode> nodes = new List<LogisticsNode>();
     }
 }

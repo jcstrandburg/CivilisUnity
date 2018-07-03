@@ -1,4 +1,5 @@
 ﻿using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Super;
 namespace Neolithica.Orders.Simple {
@@ -35,24 +36,24 @@ namespace Neolithica.Orders.Simple {
             Completed = Cancelled = Failed = false;
         }
 
-        public void Update(ActorController actor) {
+        public void Update(IOrderable orderable) {
             if (!Initialized) {
-                Initialize(actor);
+                Initialize(orderable);
                 Initialized = true;
             }
             if (!Done) {
-                DoStep(actor);
+                DoStep(orderable);
             }
         }
 
-        public virtual void Initialize(ActorController actor) {
+        public virtual void Initialize(IOrderable orderable) {
         }
 
         /// <summary>
         /// Does a single step for this order
         /// </summary>
-        /// <param name="actor"></param>
-        public abstract void DoStep(ActorController actor);
+        /// <param name="orderable"></param>
+        public abstract void DoStep(IOrderable orderable);
 
         /// <summary>
         /// Cancels this order, freeing any resources as appropriate

@@ -56,10 +56,10 @@ namespace Neolithica.Extensions {
         }
 
         /// <summary>
-        /// Helper extension method to replace the elvis operator. This is necessary because Unity has a "fake null"
+        /// Helper extension method to replace the null conditional operator. This is necessary because Unity has a "fake null"
         /// for destroyed Components that is not caught by ?. and ?? operators.
         /// </summary>
-        public static TReturn Elvis<TReturn, TComponent>(this TComponent source, Func<TComponent, TReturn> fnGet)
+        public static TReturn IfNotNull<TReturn, TComponent>(this TComponent source, Func<TComponent, TReturn> fnGet)
             where TReturn: class
             where TComponent: Component  =>
             source == null ? null : fnGet(source);

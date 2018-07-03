@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Assets;
 using Neolithica.MonoBehaviours.Logistics;
 using Neolithica.MonoBehaviours.Reservations;
 using Neolithica.Orders.Simple;
@@ -7,7 +8,7 @@ using UnityEngine;
 
 namespace Neolithica.MonoBehaviours {
     [SavableMonobehaviour(17)]
-    public class ActorController : NeolithicObject {
+    public class ActorController : NeolithicObject, IOrderable {
         public float moveSpeed;
         public List<BaseOrder> orderQueue = new List<BaseOrder>();
         public BaseOrder currentOrder = null;
@@ -177,5 +178,10 @@ namespace Neolithica.MonoBehaviours {
             }
             currentOrder = response;
         }
+
+        Transform IOrderable.Transform => transform;
+        public GameObject GameObject => gameObject;
+        public ResourceReservation ResourceReservation => resourceReservation;
+        public StorageReservation StorageReservation => storageReservation;
     }
 }

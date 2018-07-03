@@ -1,5 +1,5 @@
 ﻿using AqlaSerializer;
-using Neolithica.MonoBehaviours;
+using Assets;
 using Neolithica.MonoBehaviours.Reservations;
 using UnityEngine;
 
@@ -15,10 +15,10 @@ namespace Neolithica.Orders.Simple {
             res = r;
         }
 
-        public override void DoStep(ActorController actor) {
-            if (actor.MoveTowards(res.warehouse.transform.position)) {
+        public override void DoStep(IOrderable orderable) {
+            if (orderable.MoveTowards(res.warehouse.transform.position)) {
                 res.warehouse.DepositReservation(res);
-                Object.Destroy(actor.GetCarriedResource(res.resourceKind).gameObject);
+                Object.Destroy(orderable.GetCarriedResource(res.resourceKind).gameObject);
                 res.Released = true;
                 Completed = true;
             }

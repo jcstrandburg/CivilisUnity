@@ -9,9 +9,9 @@ namespace Neolithica {
         /// <summary>A list containing all selected Interactibles</summary>
         private List<Interactible> selected = new List<Interactible>();
 
-        [SerializeField] private bool boxActive;
-        [SerializeField] private bool additiveSelect;
-        [SerializeField] private Vector3 boxStart, boxEnd;
+        private bool boxActive;
+        private bool additiveSelect;
+        private Vector3 boxStart, boxEnd;
 
         public void FixedUpdate() {
             selected.RemoveAll(x => x == null);
@@ -63,7 +63,6 @@ namespace Neolithica {
         }
 
         private void StartBoxSelect() {
-            //GuiController.HideContextMenu();
             boxEnd = boxStart = Input.mousePosition;
             boxActive = true;
         }

@@ -1,4 +1,5 @@
 ﻿using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 using UnityEngine;
 
@@ -13,12 +14,12 @@ namespace Neolithica.Orders.Simple {
             myPrefab = prefab;
         }
 
-        public override void DoStep(ActorController actor) {
+        public override void DoStep(IOrderable orderable) {
             var replacement = GameController.Instance.Factory.Instantiate(myPrefab);
             replacement.transform.position = myTargetObj.transform.position;
             replacement.transform.rotation = myTargetObj.transform.rotation;
             Object.Destroy(myTargetObj.gameObject);
-            actor.GameController.StatManager.Stat("forest-gardens").Add(1);
+            orderable.GameController.StatManager.Stat("forest-gardens").Add(1);
 
             Completed = true;
         }

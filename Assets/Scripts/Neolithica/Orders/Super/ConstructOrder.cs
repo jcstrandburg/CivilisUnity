@@ -1,4 +1,5 @@
 ﻿using AqlaSerializer;
+using Assets;
 using Neolithica.MonoBehaviours;
 using Neolithica.MonoBehaviours.Reservations;
 using Neolithica.Orders.Simple;
@@ -12,15 +13,15 @@ namespace Neolithica.Orders.Super {
     public class ConstructOrder : StatefulSuperOrder {
         [SerializableMember(1)] private readonly ConstructionManager manager;
 
-        public ConstructOrder(ActorController actor, GameObject target) {
+        public ConstructOrder(IOrderable actor, GameObject target) {
             manager = target.GetComponent<ConstructionManager>();
             GoToState(cGetConstructionJob, actor);
         }
 
-        public override void Initialize(ActorController actor) {
-            Resource r = actor.GetCarriedResource();
+        public override void Initialize(IOrderable orderable) {
+            Resource r = orderable.GetCarriedResource();
             if (r != null)
-                actor.DropCarriedResource();
+                orderable.DropCarriedResource();
         }
 
         protected override void CreateStates() {
