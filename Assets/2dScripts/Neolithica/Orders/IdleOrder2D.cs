@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using Neolithica.Orders.Simple;
+using UnityEngine;
 
-namespace Neolithica.Orders.Simple {
-    public class IdleOrder : BaseOrder {
+namespace Neolithica.Orders {
+    // TODO: Delete IdleOrder and rename this
+    public class IdleOrder2D : BaseOrder {
         private readonly Vector3 center;
         private Vector3 targetPosition;
 
@@ -9,14 +11,13 @@ namespace Neolithica.Orders.Simple {
 
         public override string StatusString => "Idling";
 
-        public IdleOrder(IOrderable actor) {
+        public IdleOrder2D(IOrderable actor) {
             center = targetPosition = actor.Transform.position;
         }
 
         public override void DoStep(IOrderable orderable) {
             if (orderable.MoveTowards(targetPosition, 0.08f)) {
-                targetPosition = center + new Vector3(Random.Range(-range, range), 0, Random.Range(-range, range));
-                targetPosition = orderable.GameController.SnapToGround(targetPosition);
+                targetPosition = center + new Vector3(UnityEngine.Random.Range(-range, range), UnityEngine.Random.Range(-range, range), 0);
             }
         }
     }

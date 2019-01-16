@@ -1,5 +1,4 @@
 ﻿using AqlaSerializer;
-using Assets;
 using Neolithica.MonoBehaviours;
 using UnityEngine;
 
@@ -12,8 +11,9 @@ namespace Neolithica.Orders.Simple {
         [SerializableMember(1)] private readonly Vector3 targetPosition;
         [SerializableMember(2)] private readonly float proximity;
 
+        public override string StatusString => "Moving to position";
+
         public SimpleMoveOrder(IOrderable a, Vector3 position, float proximity = 0.0f) {
-            a.GetComponent<NeolithicObject>().statusString = "Moving to position";
             this.proximity = proximity;
             targetPosition = position;
         }

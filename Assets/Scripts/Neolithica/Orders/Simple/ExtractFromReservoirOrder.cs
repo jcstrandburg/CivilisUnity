@@ -1,5 +1,4 @@
 ﻿using AqlaSerializer;
-using Assets;
 using Neolithica.MonoBehaviours;
 using Neolithica.MonoBehaviours.Reservations;
 using UnityEngine;
@@ -13,8 +12,9 @@ namespace Neolithica.Orders.Simple {
         [SerializableMember(1)] private float progress;
         [SerializableMember(2)] private readonly ResourceReservation reservation;
 
+        public override string StatusString => "Extracting resource";
+
         public ExtractFromReservoirOrder(IOrderable a, ResourceReservation res) {
-            a.GetComponent<NeolithicObject>().statusString = "Extracting resource";
             reservation = res;
         }
 

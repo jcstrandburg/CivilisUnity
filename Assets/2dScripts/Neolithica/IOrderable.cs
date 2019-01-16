@@ -2,7 +2,7 @@
 using Neolithica.MonoBehaviours.Reservations;
 using UnityEngine;
 
-namespace Assets {
+namespace Neolithica {
     public interface IOrderable {
         Transform Transform { get; }
         GameController GameController { get; }

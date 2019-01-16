@@ -1,5 +1,4 @@
 ﻿using AqlaSerializer;
-using Assets;
 using Neolithica.MonoBehaviours;
 using UnityEngine;
 
@@ -11,8 +10,9 @@ namespace Neolithica.Orders.Simple {
     public class TearDownOrder : BaseOrder {
         [SerializableMember(1)] private readonly GameObject target;
 
+        public override string StatusString => $"Tearing down {target.name}";
+
         public TearDownOrder(IOrderable a, GameObject target) {
-            a.GetComponent<NeolithicObject>().statusString = $"Tearing down {target.name}";
             this.target = target;
         }
 

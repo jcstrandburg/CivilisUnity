@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Assets;
 using Neolithica.MonoBehaviours.Logistics;
 using Neolithica.MonoBehaviours.Reservations;
 using Neolithica.Orders.Simple;
@@ -72,6 +71,7 @@ namespace Neolithica.MonoBehaviours {
             }
 
             currentOrder.Update(this);
+            statusString = currentOrder.StatusString;
             queueLength = orderQueue.Count;
         }
 

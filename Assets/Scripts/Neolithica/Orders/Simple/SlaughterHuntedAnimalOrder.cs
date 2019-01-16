@@ -1,5 +1,4 @@
 ﻿using AqlaSerializer;
-using Assets;
 using Neolithica.MonoBehaviours;
 using UnityEngine;
 
@@ -9,8 +8,9 @@ namespace Neolithica.Orders.Simple {
         [SerializableMember(1)] private float progress;
         [SerializableMember(2)] private readonly Herd herd;
 
+        public override string StatusString => "Killing snorgle";
+
         public SlaughterHuntedAnimalOrder(IOrderable a, Herd targetHerd) : base() {
-            a.GetComponent<NeolithicObject>().statusString = "Killing snorgle";
             herd = targetHerd;
         }
 

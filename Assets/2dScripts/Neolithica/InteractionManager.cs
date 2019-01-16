@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Neolithica.Orders.Simple;
+using Tofu.Serialization;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -10,12 +12,12 @@ namespace Neolithica {
         private List<Interactible> selected = new List<Interactible>();
 
         private bool boxActive;
-        private bool additiveSelect;
+        private bool isInAdditiveMode;
         private Vector3 boxStart, boxEnd;
 
         public void FixedUpdate() {
             selected.RemoveAll(x => x == null);
-            additiveSelect = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            isInAdditiveMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
         }
 
         public void Update() {
@@ -59,7 +61,16 @@ namespace Neolithica {
         }
 
         public void OnMapRightClick(PointerEventData eventData) {
-            throw new System.NotImplementedException();
+            Vector3 position = eventData.pointerCurrentRaycast.worldPosition;
+
+            foreach (Actor actor in selected.Select(it => it.GetComponent<Actor>()).WhereNotNull()) {
+                var order = new SimpleMoveOrder(actor, position);
+
+                if (isInAdditiveMode)
+                    actor.EnqueueOrder(order);
+                else
+                    actor.OverrideOrder(order);
+            }
         }
 
         private void StartBoxSelect() {
@@ -94,7 +105,7 @@ namespace Neolithica {
                 }
             }
 
-            if (selectables.Count > 1 || (additiveSelect && (selected.Count + selectables.Count) > 1))
+            if (selectables.Count > 1 || (isInAdditiveMode && (selected.Count + selectables.Count) > 1))
                 selectables.RemoveAll(obj => obj.Selectability != Selectability.Multiselectable);
 
             foreach (Interactible obj in selectables)
@@ -114,7 +125,7 @@ namespace Neolithica {
         }
 
         private void UpdateSelection(IEnumerable<Interactible> selectables) {
-            var newSelected = (additiveSelect ? selected : Enumerable.Empty<Interactible>())
+            var newSelected = (isInAdditiveMode ? selected : Enumerable.Empty<Interactible>())
                 .Concat(selectables)
                 .ToList();
 

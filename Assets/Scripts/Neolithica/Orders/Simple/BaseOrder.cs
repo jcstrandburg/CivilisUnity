@@ -1,5 +1,4 @@
 ﻿using AqlaSerializer;
-using Assets;
 using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Super;
 namespace Neolithica.Orders.Simple {
@@ -31,6 +30,8 @@ namespace Neolithica.Orders.Simple {
         public bool Initialized;
 
         public bool Done => Completed || Cancelled || Failed;
+
+        public virtual string StatusString => "";
 
         protected BaseOrder() {
             Completed = Cancelled = Failed = false;
