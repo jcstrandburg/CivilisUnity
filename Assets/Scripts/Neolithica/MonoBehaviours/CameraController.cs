@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Tofu.Serialization;
 using UnityEngine;
 
+#pragma warning disable 649
 namespace Neolithica.MonoBehaviours {
     [SavableMonobehaviour(15)]
     public class CameraController : MonoBehaviour {

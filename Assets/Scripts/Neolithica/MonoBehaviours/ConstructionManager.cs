@@ -7,6 +7,7 @@ using Neolithica.ScriptableObjects;
 using Tofu.Serialization;
 using UnityEngine;
 
+#pragma warning disable 649
 namespace Neolithica.MonoBehaviours {
     [SavableMonobehaviour(14)]
     public class ConstructionManager : MonoBehaviour {

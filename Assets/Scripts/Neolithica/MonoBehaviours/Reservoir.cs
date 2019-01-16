@@ -5,6 +5,7 @@ using Neolithica.MonoBehaviours.Reservations;
 using Tofu.Serialization;
 using UnityEngine;
 
+#pragma warning disable 649
 namespace Neolithica.MonoBehaviours {
     [SavableMonobehaviour(7)]
     public class Reservoir : MonoBehaviour {

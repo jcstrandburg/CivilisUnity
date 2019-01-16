@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+#pragma warning disable 649
 namespace Neolithica.UI {
     public class SelectList : MonoBehaviour {
         private GameObject selectedItem;

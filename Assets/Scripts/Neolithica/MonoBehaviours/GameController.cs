@@ -15,6 +15,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using Debug = UnityEngine.Debug;
 
+#pragma warning disable 649
 namespace Neolithica.MonoBehaviours {
     [SavableMonobehaviour(11)]
     public class GameController : MonoBehaviour {
