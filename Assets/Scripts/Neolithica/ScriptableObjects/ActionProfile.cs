@@ -7,7 +7,7 @@ namespace Neolithica.ScriptableObjects {
         public CommandType[] abilities;
 
         public static ActionProfile Make(CommandType[] targetActions, CommandType[] abilities) {
-            var ap = ScriptableObject.CreateInstance<ActionProfile>();
+            var ap = CreateInstance<ActionProfile>();
             ap.targetActions = targetActions;
             ap.abilities = abilities;
             return ap;

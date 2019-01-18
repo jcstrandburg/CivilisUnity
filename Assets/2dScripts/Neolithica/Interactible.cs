@@ -1,4 +1,8 @@
-﻿using Neolithica.Extensions;
+﻿using System.Linq;
+using Neolithica.Extensions;
+using Neolithica.Orders.Simple;
+using Neolithica.ScriptableObjects;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -8,6 +12,7 @@ namespace Neolithica {
         public bool IsSelectable => selectability != Selectability.Unselectable;
         public Selectability Selectability => selectability;
 
+        public ActionProfile actionProfile;
         [SerializeField] private Selectability selectability = Selectability.Unselectable;
 
         private SelectionHalo2D Halo => this.CacheComponent(ref halo, GetComponentInChildren<SelectionHalo2D>);

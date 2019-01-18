@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -77,6 +78,7 @@ namespace Neolithica.UI {
         /// </summary>
         /// <param name="options"></param>
         /// <param name="target"></param>
+        [Obsolete]
         public void ShowContextMenu(CommandType[] options, NeolithicObject target) {
             if (!options.Any()) {
                 contextMenu.SetActive(false);
@@ -95,6 +97,39 @@ namespace Neolithica.UI {
                 CommandType command = option;
 
                 button.onClick.AddListener( () => ExecuteContextAction(command, target.gameObject));
+                contextButton.GetComponent<Text>().text = option.ToString() ;
+                contextButton.transform.SetParent (contextMenu.transform);
+            }
+            contextMenu.transform.position = Input.mousePosition;
+        }
+
+        /// <summary>
+        /// Creates a context menu with the given opions and target object
+        /// </summary>
+        /// <param name="options">The commands to list in the context menu</param>
+        /// <param name="targets">The targets to whome orders should be issued on click.</param>
+        /// <param name="issueOrder">Callback that issues an order to a single target.</param>
+        /// TODO: Delete ShowContextMenu and rename this
+        public void ShowContextMenu2D(IReadOnlyList<CommandType> options, Action<CommandType> issueCommand) {
+            if (!options.Any()) {
+                HideContextMenu();
+                return;
+            }
+
+            contextMenu.SetActive(true);
+            foreach (Transform child in contextMenu.transform)
+                Destroy(child.gameObject);
+
+            var prefab = Resources.Load("ContextTextButton") as GameObject;
+            foreach (CommandType option in options) {
+                GameObject contextButton = GameController.Factory.Instantiate(prefab);
+                var button = contextButton.GetComponent<Button>();
+                CommandType command = option;
+
+                button.onClick.AddListener(() => {
+                    issueCommand(command);
+                    HideContextMenu();
+                });
                 contextButton.GetComponent<Text>().text = option.ToString() ;
                 contextButton.transform.SetParent (contextMenu.transform);
             }

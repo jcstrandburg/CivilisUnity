@@ -56,7 +56,7 @@ namespace Neolithica.DependencyInjection {
             if (!fieldInfoCache.ContainsKey(t)) {
                 fieldInfoCache[t] = t
                     .GetFields(flags)
-                    .Where(field => field.IsDefined(typeof(Inject), false))
+                    .Where(field => field.IsDefined(typeof(InjectAttribute), false))
                     .ToList();
             }
             return fieldInfoCache[t];
@@ -73,7 +73,7 @@ namespace Neolithica.DependencyInjection {
             if (!propInfoCache.ContainsKey(t)) {
                 propInfoCache[t] = t
                     .GetProperties(flags)
-                    .Where(prop => prop.IsDefined(typeof(Inject), false))
+                    .Where(prop => prop.IsDefined(typeof(InjectAttribute), false))
                     .ToList();
             }
             return propInfoCache[t];

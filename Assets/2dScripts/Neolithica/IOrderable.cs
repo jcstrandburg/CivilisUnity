@@ -1,5 +1,6 @@
 ﻿using Neolithica.MonoBehaviours;
 using Neolithica.MonoBehaviours.Reservations;
+using Neolithica.Orders.Simple;
 using UnityEngine;
 
 namespace Neolithica {
@@ -15,5 +16,7 @@ namespace Neolithica {
         T GetComponent<T>();
         bool MoveTowards(Vector3 transformPosition, float moveRatio=1.0f);
         void PickupResource(Resource res);
+        void EnqueueOrder(BaseOrder o);
+        void OverrideOrder(BaseOrder o);
     }
 }

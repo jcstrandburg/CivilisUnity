@@ -161,7 +161,9 @@ namespace Neolithica {
                 var actor = (Actor) target;
 
                 GUILayout.Label("Orders: ");
-                GUILayout.Label(actor.currentOrder.GetType().Name);
+
+                if (actor.currentOrder != null)
+                    GUILayout.Label(actor.currentOrder.GetType().Name ?? "");
 
                 foreach (BaseOrder order in actor.orderQueue)
                     GUILayout.Label(order.GetType().Name);

@@ -6,6 +6,6 @@ namespace Neolithica {
     /// </summary>
     /// <author>Justin Strandburg</author>
     [AttributeUsage(AttributeTargets.Field|AttributeTargets.Property)]
-    public class Inject : Attribute {
+    public class InjectAttribute : Attribute {
     }
 }

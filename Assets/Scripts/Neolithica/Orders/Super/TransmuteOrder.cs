@@ -13,7 +13,7 @@ namespace Neolithica.Orders.Super {
         [SerializableMember(2)] private readonly ResourceKind toResourceKind;
         [SerializableMember(3)] private readonly GameObject target;
 
-        public TransmuteOrder(ActorController actor, GameObject target, ResourceKind fromResourceKind, ResourceKind toResourceKind) {
+        public TransmuteOrder(IOrderable actor, GameObject target, ResourceKind fromResourceKind, ResourceKind toResourceKind) {
             this.fromResourceKind = fromResourceKind;
             this.toResourceKind = toResourceKind;
             this.target = target;

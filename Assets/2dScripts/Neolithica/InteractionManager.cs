@@ -1,12 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Neolithica.MonoBehaviours;
 using Neolithica.Orders.Simple;
+using Neolithica.Orders.Super;
+using Neolithica.UI;
 using Tofu.Serialization;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace Neolithica {
     public class InteractionManager : MonoBehaviour, IMapClickHandler, IInteractibleEventHandler {
+
+        [Inject] public GameUIController GameUIController;
 
         /// <summary>A list containing all selected Interactibles</summary>
         private List<Interactible> selected = new List<Interactible>();
@@ -49,18 +55,89 @@ namespace Neolithica {
         }
 
         public void OnSelectClick(InteractibleEventData data) {
+            GameUIController.HideContextMenu();
             UpdateSelection(new[] { data.Target });
         }
 
         public void OnContextClick(InteractibleEventData data) {
-            throw new System.NotImplementedException();
+            // TODO: forbidden actions
+            // var forbidden = new HashSet<CommandType>(ForbiddenActions);
+
+            var clickee = data.Target;
+
+            var selectedActions = GetSelectedAbilities();
+            var availableActions = selectedActions
+                .Intersect(clickee.actionProfile.targetActions)
+                .ToArray();
+            GameUIController.ShowContextMenu2D(availableActions, commandType => IssueOrderToSelected(commandType, clickee.gameObject));
+        }
+
+        private void IssueOrderToSelected(CommandType commandType, GameObject target) {
+            var actors = selected.Select(go => go.GetComponent<IOrderable>()).Where(a => a != null);
+            foreach (IOrderable actor in actors) {
+                BaseOrder newOrder;
+                switch (commandType) {
+                case CommandType.ChopWood:
+                case CommandType.MineGold:
+                case CommandType.MineStone:
+                case CommandType.Forage:
+                    newOrder = new HarvestFromReservoirOrder(actor, target);
+                    break;
+                case CommandType.ChuckWood:
+                    newOrder = new TransmuteOrder(actor, target, ResourceKind.Wood, ResourceKind.Gold);
+                    break;
+                case CommandType.Meditate:
+                    newOrder = new MeditateOrder();
+                    break;
+                case CommandType.Hunt:
+                    newOrder = new HuntOrder(actor, target.GetComponentInParent<Herd>());
+                    break;
+                case CommandType.Fish:
+                    newOrder = new FishOrder(actor, target);
+                    break;
+                case CommandType.Construct:
+                    newOrder = new ConstructOrder(actor, target);
+                    break;
+                case CommandType.TearDown:
+                    newOrder = new TearDownOrder(actor, target);
+                    break;
+                case CommandType.ForestGarden:
+                    var prefab = (GameObject)Resources.Load("Buildings/ForestGarden");
+                    if (prefab == null) {
+                        throw new InvalidOperationException("Can't find prefab");
+                    }
+                    newOrder = new UpgradeReservoirOrder(actor, target, prefab);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unrecognized {nameof(CommandType)} {commandType}");
+                }
+
+                if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+                    actor.EnqueueOrder(newOrder);
+                }
+                else {
+                    actor.OverrideOrder(newOrder);
+                }
+            }
+        }
+
+        private CommandType[] GetSelectedAbilities() {
+            if (!selected.Any()) {
+                return new CommandType[] {};
+            }
+
+            return selected
+                .Select(s => s.actionProfile.abilities)
+                .Aggregate((current, a) => a.Intersect(current).ToArray());
         }
 
         public void OnMapLeftClick(PointerEventData eventData) {
+            GameUIController.HideContextMenu();
             StartBoxSelect();
         }
 
         public void OnMapRightClick(PointerEventData eventData) {
+            GameUIController.HideContextMenu();
             Vector3 position = eventData.pointerCurrentRaycast.worldPosition;
 
             foreach (Actor actor in selected.Select(it => it.GetComponent<Actor>()).WhereNotNull()) {
